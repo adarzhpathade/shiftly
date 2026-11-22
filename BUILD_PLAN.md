@@ -22,7 +22,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | P1 | Tool check (node 24, npm 11, git, gh, agy) | Opus | Adarsh | done |
 | P2 | agy worker test (headless, permissions) | Opus | Adarsh | done, see Worker setup |
 | P3 | `git init`, `.gitignore`, first commit | Opus | Adarsh | done |
-| P4 | Create public GitHub repo, add Friend (GitHub `khushichouhan22`) as collaborator | Opus | Adarsh | todo (after Step 1) |
+| P4 | Create public GitHub repo, add Friend (GitHub `khushichouhan22`) as collaborator | Opus | Adarsh | done (github.com/adarzhpathade/shiftly, invite sent) |
 
 ## Step 1: Foundation (sequential, reviewed before Step 2)
 | ID | Task | Executor | Owner | Status |
