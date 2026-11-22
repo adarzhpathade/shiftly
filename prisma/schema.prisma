@@ -1,0 +1,367 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ChoiceRating {
+  BEST
+  OKAY
+  POOR
+}
+
+enum RoleplayStatus {
+  ACTIVE
+  WON
+  LOST
+  FALLBACK
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+}
+
+enum XpSource {
+  SCENARIO
+  BOSS
+  HABIT
+  QUEST
+  CHALLENGE
+  BADGE
+}
+
+model User {
+  id                  String             @id @default(cuid())
+  name                String
+  email               String             @unique
+  passwordHash        String
+  role                Role               @default(EMPLOYEE)
+  avatarKey           String
+  teamId              String?
+  xp                  Int                @default(0)
+  level               Int                @default(1)
+  currentStreak       Int                @default(0)
+  bestStreak          Int                @default(0)
+  lastActiveDate      DateTime?
+  createdAt           DateTime           @default(now())
+
+  team                Team?              @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
+  managedTeams        Team[]             @relation("TeamManager")
+  attempts            Attempt[]
+  roleplaySessions    RoleplaySession[]
+  habits              Habit[]
+  badges              UserBadge[]
+  dailyQuests         DailyQuest[]
+  assignedAssignments Assignment[]       @relation("AssignedByUser")
+  xpEvents            XpEvent[]
+  pushSubscriptions   PushSubscription[]
+
+  @@index([teamId])
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  managerId   String?
+  createdAt   DateTime     @default(now())
+
+  manager     User?        @relation("TeamManager", fields: [managerId], references: [id], onDelete: SetNull)
+  members     User[]       @relation("TeamMembers")
+  assignments Assignment[]
+
+  @@index([managerId])
+}
+
+model Category {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  colorToken  String        // Design token name e.g. "peach", NOT hex
+  objectKey   String
+  description String
+  order       Int
+  createdAt   DateTime      @default(now())
+
+  scenarios   Scenario[]
+  bossPersona BossPersona?
+}
+
+model Scenario {
+  id          String        @id @default(cuid())
+  categoryId  String
+  level       Int           // 1-4
+  title       String
+  situation   String
+  difficulty  Difficulty
+  xpReward    Int
+  isPublished Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+
+  category    Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  steps       ScenarioStep[]
+  attempts    Attempt[]
+  assignments Assignment[]
+
+  @@index([categoryId])
+}
+
+model ScenarioStep {
+  id              String          @id @default(cuid())
+  scenarioId      String
+  order           Int
+  customerMessage String
+
+  scenario        Scenario        @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  choices         Choice[]
+  attemptAnswers  AttemptAnswer[]
+
+  @@index([scenarioId])
+}
+
+model Choice {
+  id             String          @id @default(cuid())
+  stepId         String
+  text           String
+  rating         ChoiceRating
+  points         Int
+  feedback       String
+  nextStepId     String?         // Plain nullable string, no FK
+
+  step           ScenarioStep    @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  attemptAnswers AttemptAnswer[]
+
+  @@index([stepId])
+}
+
+model Attempt {
+  id          String          @id @default(cuid())
+  userId      String
+  scenarioId  String
+  score       Int
+  stars       Int
+  xpEarned    Int
+  completedAt DateTime        @default(now())
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario    Scenario        @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  answers     AttemptAnswer[]
+
+  @@index([userId])
+  @@index([scenarioId])
+}
+
+model AttemptAnswer {
+  id        String       @id @default(cuid())
+  attemptId String
+  stepId    String
+  choiceId  String
+
+  attempt   Attempt      @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  step      ScenarioStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  choice    Choice       @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
+  @@index([stepId])
+  @@index([choiceId])
+}
+
+model BossPersona {
+  id           String            @id @default(cuid())
+  categoryId   String            @unique
+  name         String
+  problem      String
+  startMood    Int
+  hiddenGoal   String
+  systemPrompt String
+  xpReward     Int
+  createdAt    DateTime          @default(now())
+
+  category     Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  sessions     RoleplaySession[]
+}
+
+model RoleplaySession {
+  id        String         @id @default(cuid())
+  userId    String
+  personaId String
+  status    RoleplayStatus
+  mood      Int
+  stars     Int?
+  xpEarned  Int?
+  startedAt DateTime       @default(now())
+  endedAt   DateTime?
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persona   BossPersona    @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  turns     RoleplayTurn[]
+
+  @@index([userId])
+  @@index([personaId])
+}
+
+model RoleplayTurn {
+  id            String          @id @default(cuid())
+  sessionId     String
+  order         Int
+  userMessage   String
+  customerReply String
+  moodAfter     Int
+  // 0-10 each; range is enforced in app code
+  empathy       Int
+  ownership     Int
+  clarity       Int
+  solution      Int
+  tone          Int
+  feedback      String
+  createdAt     DateTime        @default(now())
+
+  session       RoleplaySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model Habit {
+  id           String         @id @default(cuid())
+  userId       String
+  templateId   String?
+  title        String
+  icon         String
+  frequency    Frequency
+  daysOfWeek   Int[]
+  reminderTime String?
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template     HabitTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  logs         HabitLog[]
+
+  @@index([userId])
+  @@index([templateId])
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String
+  date      DateTime @db.Date
+  note      String?
+  createdAt DateTime @default(now())
+
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+}
+
+model HabitTemplate {
+  id          String   @id @default(cuid())
+  title       String
+  icon        String
+  description String
+  createdAt   DateTime @default(now())
+
+  habits      Habit[]
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  key         String      @unique
+  name        String
+  description String
+  objectKey   String
+  ruleType    String
+  ruleValue   Int
+  createdAt   DateTime    @default(now())
+
+  userBadges  UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
+}
+
+model DailyQuest {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  type      String
+  target    Int
+  progress  Int      @default(0)
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, date])
+}
+
+model Assignment {
+  id           String   @id @default(cuid())
+  teamId       String
+  scenarioId   String
+  dueDate      DateTime
+  assignedById String
+  createdAt    DateTime @default(now())
+
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  scenario     Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  assignedBy   User     @relation("AssignedByUser", fields: [assignedById], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([scenarioId])
+  @@index([assignedById])
+}
+
+model XpEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  source    XpSource
+  amount    Int
+  refId     String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
