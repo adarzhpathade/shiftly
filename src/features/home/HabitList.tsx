@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/components/ui/cn";
-import { GameObject, type GameObjectName } from "@/components/ui/GameObject";
+import { GameObject } from "@/components/ui/GameObject";
 import { AnimatedCheck } from "@/components/ui/Motion";
+import { habitObject } from "@/lib/habit-icons";
 import type { Habit } from "@/lib/types";
 import { SectionHead } from "./SectionHead";
 
@@ -20,14 +22,6 @@ export interface HabitListProps {
 }
 
 const TONES = ["bg-peach", "bg-sky", "bg-lav", "bg-lime"] as const;
-const ICONS: Record<string, GameObjectName> = {
-  clock: "calendar",
-  chat: "bubble",
-  phone: "headset",
-  smile: "sparkle",
-  book: "medal",
-  target: "target",
-};
 
 export function HabitList({ habits, onCheckIn }: HabitListProps) {
   const [checkedIds, setCheckedIds] = useState<Set<string>>(
@@ -95,12 +89,12 @@ export function HabitList({ habits, onCheckIn }: HabitListProps) {
           className="flex flex-col items-center gap-2 rounded-[18px] text-center"
         >
           <p className="text-sm text-ink-soft">No habits yet</p>
-          <a
+          <Link
             href="/habits"
             className="inline-flex min-h-11 items-center rounded-pill bg-ink px-5 text-sm font-bold text-cream"
           >
             View habits
-          </a>
+          </Link>
         </Card>
       ) : (
         <MotionConfig reducedMotion="user">
@@ -120,7 +114,7 @@ export function HabitList({ habits, onCheckIn }: HabitListProps) {
                       TONES[i % TONES.length],
                     )}
                   >
-                    <GameObject name={ICONS[habit.icon] ?? "sparkle"} size={30} />
+                    <GameObject name={habitObject(habit.icon)} size={30} />
                   </span>
                   <div className="min-w-0 flex-1">
                     <label

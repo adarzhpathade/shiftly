@@ -19,6 +19,7 @@ import {
   type SurfaceTone,
 } from "@/components/ui";
 import { cn } from "@/components/ui/cn";
+import { habitEmoji } from "@/lib/habit-icons";
 
 export type SetupTemplate = {
   key: string;
@@ -46,14 +47,6 @@ export type SetupFlowProps = {
 const MIN = 2;
 const MAX = 3;
 
-const ICON_EMOJI: Record<string, string> = {
-  clock: "⏰",
-  bubble: "💬",
-  check: "✅",
-  handshake: "🤝",
-  phone: "📞",
-  book: "📘",
-};
 
 const CARD_TONES: SurfaceTone[] = ["peach", "sky", "lav", "lime"];
 const CARD_BG: Record<SurfaceTone, string> = {
@@ -202,7 +195,7 @@ function HabitsStep({
                       CARD_BG[CARD_TONES[i % CARD_TONES.length] ?? "peach"],
                     )}
                   >
-                    {ICON_EMOJI[t.icon] ?? "✨"}
+                    {habitEmoji(t.icon)}
                   </span>
                   <span className="min-w-0 flex-1">
                     <b className="block text-[16px] leading-tight font-extrabold tracking-tight">
