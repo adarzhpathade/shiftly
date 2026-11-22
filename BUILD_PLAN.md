@@ -49,7 +49,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | UI6 | Leaderboard (Team / Company, weekly / all time, podium) | Sonnet | Adarsh | done |
 | UI7 | Profile (badges, progress charts) and Settings | Sonnet | Adarsh | todo |
 | UI8 | Celebration overlays: LEVEL UP, NEW BADGE, STREAK!, PERFECT | Sonnet | Adarsh | todo |
-| UI10 | Boss level: live call chat (streaming replies, typing indicator, mood meter, quick-reply chips) and boss result screen | Sonnet | Adarsh | todo |
+| UI10 | Boss level: live call chat (streaming replies, typing indicator, mood meter, quick-reply chips) and boss result screen | Sonnet | Adarsh | done |
 | UI9 | Offline and 404 pages | Haiku | Adarsh | todo |
 
 ### Backend (implements the F2 contract)
@@ -61,7 +61,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | B4 | **Leaderboard**: weekly / all-time XP, Team / Company, "your rank" | agy (run by Friend) | **Friend** | todo, waits on F2–F4 |
 | B5 | **Scenario content**: 16 guided scenarios (4 categories × 4) + 4 boss personas + seed script | agy worker (reassigned by Adarsh) | agy worker | done (wired into seed later) |
 | B6 | Web push: habit reminders, streak-at-risk, new assignment | agy under Sonnet | Adarsh | todo |
-| B7 | **AI roleplay engine**: provider chain Groq `gpt-oss-120b` (customer + judge in one structured call) → OpenRouter (ERNIE customer + Decider Flash judge) → multiple-choice fallback; `AI_MODE=mock|real`; free-model guard; daily request budget; customer persona, judge, mood meter, win / lose rules, daily limits, safety, fallback to multiple choice, streaming endpoint | agy under Sonnet | Adarsh | todo (keys in `.env`) |
+| B7 | **AI roleplay engine**: provider chain Groq `gpt-oss-120b` (customer + judge in one structured call) → OpenRouter (ERNIE customer + Decider Flash judge) → multiple-choice fallback; `AI_MODE=mock|real`; free-model guard; daily request budget; customer persona, judge, mood meter, win / lose rules, daily limits, safety, fallback to multiple choice, streaming endpoint | agy under Sonnet | Adarsh | done |
 
 ### Connection (swap mock → real, one feature at a time)
 | ID | Task | Executor | Owner | Status |

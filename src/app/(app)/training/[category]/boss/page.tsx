@@ -1,27 +1,60 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { trainingRepo } from "@/data";
+import { BOSS_PERSONAS } from "@/data/mock/data";
+import { BossExperience, goalHintFor } from "@/features/boss";
+import { MAX_BOSS_TURNS, MAX_REPLY_CHARS } from "@/lib/gamification";
+import { requireViewer } from "@/server/auth/session";
+import { finishBossAction, startBossAction } from "@/server/boss/actions";
 import { isCategoryKey } from "@/server/training/types";
 
 interface BossPageProps {
   params: Promise<{ category: string }>;
 }
 
-export default async function BossPage({ params }: BossPageProps) {
+async function BossContent({ params }: BossPageProps) {
   const { category: rawCategory } = await params;
-  if (!isCategoryKey(rawCategory)) {
-    notFound();
-  }
+  if (!isCategoryKey(rawCategory)) notFound();
+
+  const viewer = await requireViewer();
+  const [categories, levels] = await Promise.all([
+    trainingRepo.listCategories(viewer.id),
+    trainingRepo.getLevelPath(viewer.id, rawCategory),
+  ]);
+  const category = categories.find((c) => c.key === rawCategory);
+  const persona = BOSS_PERSONAS.find((p) => p.categoryKey === rawCategory);
+  if (!category || !persona) notFound();
+
+  const bossNode = levels.find((n) => n.level === 5);
+  const gate = bossNode?.locked ? "locked" : "ok";
 
   return (
-    <main className="mx-auto flex min-h-[70dvh] w-full max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
-      <h1 className="text-3xl font-extrabold tracking-tight">Boss level</h1>
-      <p className="text-ink-soft">Coming soon</p>
-      <Link
-        href={`/training/${rawCategory}`}
-        className="rounded-pill bg-ink px-6 py-3 font-extrabold text-cream active:scale-95 transition-transform"
-      >
-        Back to levels
-      </Link>
-    </main>
+    <BossExperience
+      categoryKey={rawCategory}
+      categoryName={category.name}
+      colorToken={category.colorToken}
+      persona={{
+        name: persona.name,
+        problem: persona.problem,
+        startMood: persona.startMood,
+        goalHint: goalHintFor(rawCategory),
+      }}
+      gate={gate}
+      lockedHref={`/training/${rawCategory}`}
+      backHref={`/training/${rawCategory}`}
+      fallbackHref={`/training/${rawCategory}/1`}
+      maxTurns={MAX_BOSS_TURNS}
+      maxChars={MAX_REPLY_CHARS}
+      onStart={startBossAction}
+      onFinish={finishBossAction}
+    />
+  );
+}
+
+export default function BossPage({ params }: BossPageProps) {
+  return (
+    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+      <BossContent params={params} />
+    </Suspense>
   );
 }
