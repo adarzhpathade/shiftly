@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/Card";
 import { cn } from "@/components/ui/cn";
 import { GameObject } from "@/components/ui/GameObject";
 import { AnimatedCheck } from "@/components/ui/Motion";
+import { useCelebrate } from "@/features/celebrations";
+import type { CelebrationEvent } from "@/lib/celebrations";
 import { habitObject } from "@/lib/habit-icons";
 import type { Habit } from "@/lib/types";
 import { SectionHead } from "./SectionHead";
@@ -16,7 +18,7 @@ export interface HabitListProps {
   onCheckIn: (
     habitId: string,
   ) => Promise<
-    | { ok: true; xpEarned: number; streak: number }
+    | { ok: true; xpEarned: number; streak: number; celebrations?: readonly CelebrationEvent[] }
     | { ok: false; error: string }
   >;
 }
@@ -24,6 +26,7 @@ export interface HabitListProps {
 const TONES = ["bg-peach", "bg-sky", "bg-lav", "bg-lime"] as const;
 
 export function HabitList({ habits, onCheckIn }: HabitListProps) {
+  const celebrate = useCelebrate();
   const [checkedIds, setCheckedIds] = useState<Set<string>>(
     () => new Set(habits.filter((h) => h.doneToday).map((h) => h.id)),
   );
@@ -56,6 +59,7 @@ export function HabitList({ habits, onCheckIn }: HabitListProps) {
         return;
       }
       setStreaks((s) => ({ ...s, [habitId]: res.streak }));
+      if (res.celebrations?.length) window.setTimeout(() => celebrate(res.celebrations ?? []), 900);
       setFloating({ id: habitId, text: `+${res.xpEarned} XP` });
       window.setTimeout(
         () => setFloating((f) => (f?.id === habitId ? null : f)),

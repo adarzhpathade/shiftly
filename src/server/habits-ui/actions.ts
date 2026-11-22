@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { habitRepo } from "@/data";
+import { buildCelebrations } from "@/lib/celebrations";
 import { requireViewer } from "@/server/auth/session";
 import { parseHabitForm } from "./validation";
 import type {
@@ -25,6 +26,7 @@ export async function checkInAction(
       xpEarned: result.xpEarned,
       streak: result.streak,
       ...(result.leveledUp ? { leveledUp: result.leveledUp.newLevel } : {}),
+      celebrations: buildCelebrations(result),
     };
   } catch (error) {
     return {

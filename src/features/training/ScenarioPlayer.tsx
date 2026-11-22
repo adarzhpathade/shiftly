@@ -17,6 +17,8 @@ import type {
   GuidedScenario,
   ScenarioResult,
 } from "@/lib/types";
+import { useCelebrate } from "@/features/celebrations";
+import type { CelebrationEvent } from "@/lib/celebrations";
 import { ResultScreen } from "./ResultScreen";
 import { TONE_BG } from "./tones";
 
@@ -31,7 +33,7 @@ export type AnswerFn = (
 ) => Promise<{ ok: true; result: AnswerResult } | Fail>;
 export type FinishFn = (
   attemptId: string,
-) => Promise<{ ok: true; result: ScenarioResult } | Fail>;
+) => Promise<{ ok: true; result: ScenarioResult; celebrations?: readonly CelebrationEvent[] } | Fail>;
 
 export type ScenarioPlayerProps = {
   scenario: GuidedScenario;
@@ -90,6 +92,7 @@ export function ScenarioPlayer({
   onAnswer,
   onFinish,
 }: ScenarioPlayerProps) {
+  const celebrate = useCelebrate();
   const [phase, setPhase] = useState<Phase>("loading");
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [stepId, setStepId] = useState<string | null>(null);
@@ -146,8 +149,9 @@ export function ScenarioPlayer({
       }
       setResult(res.result);
       setPhase("result");
+      if (res.celebrations?.length) window.setTimeout(() => celebrate(res.celebrations ?? []), 1600);
     },
-    [onFinish],
+    [onFinish, celebrate],
   );
 
   const pick = useCallback(

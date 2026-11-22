@@ -13,12 +13,14 @@ import {
   ThemeColor,
   cn,
 } from "@/components/ui";
+import { useCelebrate } from "@/features/celebrations";
+import type { CelebrationEvent } from "@/lib/celebrations";
 import { habitObject } from "@/lib/habit-icons";
 import type { Habit } from "@/lib/types";
 import { scheduleLabel, toneFor } from "./tones";
 
 export type CheckInResponse =
-  | { ok: true; xpEarned: number; streak: number }
+  | { ok: true; xpEarned: number; streak: number; celebrations?: readonly CelebrationEvent[] }
   | { ok: false; error: string };
 
 export interface HabitsScreenProps {
@@ -35,6 +37,7 @@ function Plus() {
 }
 
 export function HabitsScreen({ habits, onCheckIn }: HabitsScreenProps) {
+  const celebrate = useCelebrate();
   const [checked, setChecked] = useState<Set<string>>(
     () => new Set(habits.filter((h) => h.doneToday).map((h) => h.id)),
   );
@@ -68,6 +71,7 @@ export function HabitsScreen({ habits, onCheckIn }: HabitsScreenProps) {
       setStreaks((s) => ({ ...s, [id]: res.streak }));
       setFloating({ id, text: `+${res.xpEarned} XP` });
       window.setTimeout(() => setFloating((f) => (f?.id === id ? null : f)), 1400);
+      if (res.celebrations?.length) window.setTimeout(() => celebrate(res.celebrations ?? []), 900);
     } catch (err) {
       rollBack(id);
       setError(err instanceof Error ? err.message : "Failed to check in");

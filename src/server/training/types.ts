@@ -1,4 +1,5 @@
 import type { AnswerResult, CategoryKey, ScenarioResult } from "@/lib/types";
+import type { CelebrationEvent } from "@/lib/celebrations";
 
 export const CATEGORY_KEYS: readonly CategoryKey[] = [
   "handling-complaints",
@@ -36,6 +37,7 @@ export type FinishAttemptActionResult =
   | {
       readonly ok: true;
       readonly result: ScenarioResult;
+      readonly celebrations: CelebrationEvent[];
     }
   | {
       readonly ok: false;

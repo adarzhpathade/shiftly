@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { buildCelebrations } from "@/lib/celebrations";
 import { trainingRepo } from "@/data";
 import { requireViewer } from "@/server/auth/session";
 import type {
@@ -67,6 +68,7 @@ export async function finishAttemptAction(
     return {
       ok: true,
       result,
+      celebrations: buildCelebrations(result),
     };
   } catch (error) {
     return {

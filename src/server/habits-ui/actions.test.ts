@@ -208,6 +208,7 @@ describe("habits-ui server actions", () => {
       if (first.ok) {
         expect(first.xpEarned).toBeGreaterThan(0);
         expect(typeof first.streak).toBe("number");
+        expect(Array.isArray(first.celebrations)).toBe(true);
       }
       expect(revalidatePath).toHaveBeenCalledWith("/");
       expect(revalidatePath).toHaveBeenCalledWith("/habits");
@@ -217,6 +218,7 @@ describe("habits-ui server actions", () => {
       expect(second.ok).toBe(true);
       if (second.ok) {
         expect(second.xpEarned).toBe(0);
+        expect(Array.isArray(second.celebrations)).toBe(true);
       }
     });
 

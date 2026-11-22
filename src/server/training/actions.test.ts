@@ -135,6 +135,7 @@ describe("training server actions", () => {
         expect(finish.result.scenarioId).toBe("sc-late-delivery");
         expect(finish.result.stars).toBeGreaterThanOrEqual(0);
         expect(finish.result.perStep.length).toBe(1);
+        expect(Array.isArray(finish.celebrations)).toBe(true);
       }
 
       expect(revalidatePath).toHaveBeenCalledWith("/training");
