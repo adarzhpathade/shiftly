@@ -1,19 +1,32 @@
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/components/ui/cn";
-import type { Quest } from "@/lib/types";
+import { GameObject, type GameObjectName } from "@/components/ui/GameObject";
+import type { Quest, QuestType } from "@/lib/types";
+import { SectionHead } from "./SectionHead";
 
 export interface QuestListProps {
   quests: readonly Quest[];
 }
 
+const QUEST_ART: Record<QuestType, { object: GameObjectName; tile: string }> = {
+  scenario: { object: "target", tile: "bg-peach" },
+  habit: { object: "calendar", tile: "bg-sky" },
+  stars: { object: "medal", tile: "bg-lav" },
+};
+
 export function QuestList({ quests }: QuestListProps) {
+  const done = quests.filter((q) => q.completed).length;
   return (
-    <section aria-labelledby="quests-heading" className="flex flex-col gap-3">
-      <h2 id="quests-heading" className="text-lg font-extrabold">
-        Daily Quests
-      </h2>
+    <section aria-label="Daily quests">
+      <SectionHead
+        title="Daily [quests]"
+        note={quests.length ? `${done} / ${quests.length}` : undefined}
+      />
       {quests.length === 0 ? (
-        <Card tone="paper" className="text-center text-sm text-ink-soft">
+        <Card
+          tone="paper"
+          className="rounded-[18px] text-center text-sm text-ink-soft"
+        >
           No quests today
         </Card>
       ) : (
@@ -23,26 +36,27 @@ export function QuestList({ quests }: QuestListProps) {
               100,
               Math.round((quest.progress / Math.max(1, quest.target)) * 100),
             );
+            const art = QUEST_ART[quest.type];
             return (
-              <li key={quest.id}>
-                <Card
-                  tone="paper"
-                  padding="sm"
-                  className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 px-4 py-3"
+              <li
+                key={quest.id}
+                className="flex items-center gap-3 rounded-[18px] bg-paper p-3"
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "grid size-10 flex-none place-items-center rounded-xl",
+                    art.tile,
+                  )}
                 >
-                  <span className="text-[15px] font-bold">{quest.label}</span>
-                  <span
-                    className={cn(
-                      "rounded-pill px-2.5 py-1 text-xs font-bold",
-                      quest.completed ? "bg-lime" : "bg-cream",
-                    )}
-                  >
-                    +{quest.xpReward} XP
-                  </span>
-                  <div className="col-span-2 flex items-center gap-3">
+                  <GameObject name={art.object} size={30} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <b className="block truncate text-[15px]">{quest.label}</b>
+                  <div className="mt-1.5 flex items-center gap-2">
                     <div
                       aria-hidden="true"
-                      className="h-2 flex-1 overflow-hidden rounded-pill bg-cream"
+                      className="h-2 flex-1 overflow-hidden rounded-pill bg-muted"
                     >
                       <div
                         className={cn(
@@ -52,14 +66,22 @@ export function QuestList({ quests }: QuestListProps) {
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium text-ink-soft">
+                    <small className="flex-none text-xs text-ink-soft">
                       {quest.progress} / {quest.target}
-                    </span>
-                    <span className="sr-only">
-                      {quest.completed ? "Completed" : "In progress"}
-                    </span>
+                    </small>
                   </div>
-                </Card>
+                  <span className="sr-only">
+                    {quest.completed ? "Completed" : "In progress"}
+                  </span>
+                </div>
+                <span
+                  className={cn(
+                    "flex-none rounded-pill px-2.5 py-1.5 text-[11px] leading-none font-bold",
+                    quest.completed ? "bg-lime" : "bg-muted",
+                  )}
+                >
+                  +{quest.xpReward} XP
+                </span>
               </li>
             );
           })}

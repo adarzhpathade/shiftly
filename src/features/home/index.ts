@@ -5,4 +5,5 @@ export * from "./HomeHeader";
 export * from "./HomeScreen";
 export * from "./LeaderboardTeaser";
 export * from "./QuestList";
+export * from "./SectionHead";
 export * from "./TodayCard";

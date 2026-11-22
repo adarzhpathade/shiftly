@@ -7,29 +7,27 @@ export interface LeaderboardTeaserProps {
 }
 
 export function LeaderboardTeaser({ myRank }: LeaderboardTeaserProps) {
-  if (!myRank) {
-    return null;
-  }
+  if (!myRank) return null;
 
   return (
-    <section aria-labelledby="leaderboard-teaser-heading">
-      <Card tone="ink" padding="lg" className="flex items-center gap-4">
-        <GameObject name="trophy" size={64} float />
+    <section aria-label="Leaderboard">
+      <Card
+        tone="ink"
+        padding="md"
+        className="flex items-center gap-3 rounded-[26px]"
+      >
+        <GameObject name="trophy" size={64} float className="flex-none" />
         <div className="min-w-0 flex-1">
-          <h2
-            id="leaderboard-teaser-heading"
-            className="text-xs font-bold tracking-widest text-cream/70 uppercase"
-          >
-            Leaderboard
-          </h2>
-          <p className="text-lg leading-tight font-extrabold">
+          <p className="text-[22px] leading-[1.05] font-extrabold tracking-[-0.02em]">
             You are #{myRank.rank} this week
           </p>
-          <span className="text-sm font-medium text-lime">{myRank.xp} XP</span>
+          <span className="mt-1 block text-[13px] font-bold text-lime">
+            {myRank.xp} XP
+          </span>
         </div>
         <a
           href="/leaderboard"
-          className="inline-flex min-h-11 items-center rounded-pill bg-lime px-4 text-sm font-bold text-ink"
+          className="inline-flex min-h-11 flex-none items-center rounded-pill bg-lime px-4 text-[13px] font-extrabold text-ink transition-transform duration-300 ease-spring active:scale-95"
         >
           View
         </a>

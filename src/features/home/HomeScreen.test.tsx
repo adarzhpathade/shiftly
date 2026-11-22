@@ -23,7 +23,7 @@ describe("HomeScreen", () => {
     // Greeting
     const firstName = data.user.name.split(" ")[0];
     expect(
-      screen.getByRole("heading", { level: 1, name: new RegExp(`Hi, ${firstName}`, "i") }),
+      screen.getByRole("heading", { level: 1, name: new RegExp(String.raw`Hey,\s*${firstName}\s*\[ready\?\]`, "i") }),
     ).toBeDefined();
 
     // Quests

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pop, Rise, Stagger } from "@/components/ui/Motion";
+import { Rise, Stagger } from "@/components/ui/Motion";
 import { ThemeColor } from "@/components/ui/ThemeColor";
 import type { HomeData, LeaderboardEntry } from "@/lib/types";
 import { CategoryGrid } from "./CategoryGrid";
@@ -14,7 +14,7 @@ export interface HomeScreenProps {
   data: HomeData;
   myRank: LeaderboardEntry | null;
   onCheckIn: (
-    habitId: string
+    habitId: string,
   ) => Promise<
     | { ok: true; xpEarned: number; streak: number }
     | { ok: false; error: string }
@@ -23,9 +23,9 @@ export interface HomeScreenProps {
 
 export function HomeScreen({ data, myRank, onCheckIn }: HomeScreenProps) {
   return (
-    <main className="mx-auto w-full max-w-md px-4 pt-5">
+    <main className="mx-auto w-full max-w-md overflow-x-clip px-4 pt-[18px]">
       <ThemeColor color="cream" />
-      <Stagger className="flex flex-col gap-6" gap={0.07}>
+      <Stagger className="flex flex-col gap-[22px]" gap={0.07}>
         <Rise>
           <HomeHeader
             user={data.user}
@@ -34,20 +34,20 @@ export function HomeScreen({ data, myRank, onCheckIn }: HomeScreenProps) {
             xpToNext={data.xpToNext}
           />
         </Rise>
-        <Pop>
+        <Rise>
           <TodayCard
             challenge={data.challenge}
             continueTraining={data.continueTraining}
           />
-        </Pop>
+        </Rise>
         <Rise>
           <QuestList quests={data.quests} />
         </Rise>
         <Rise>
-          <HabitList habits={data.todaysHabits} onCheckIn={onCheckIn} />
+          <CategoryGrid categories={data.categories} />
         </Rise>
         <Rise>
-          <CategoryGrid categories={data.categories} />
+          <HabitList habits={data.todaysHabits} onCheckIn={onCheckIn} />
         </Rise>
         <Rise>
           <LeaderboardTeaser myRank={myRank} />
