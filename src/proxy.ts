@@ -37,9 +37,9 @@ export const proxy = auth((req) => {
     }
   }
 
-  // /login and /register
-  const isAuthRoute = pathname === "/login" || pathname === "/register";
-  if (isAuthRoute) {
+  // Public auth & onboarding landing routes: /welcome, /login, /register
+  const isAuthOrWelcomeRoute = pathname === "/welcome" || pathname === "/login" || pathname === "/register";
+  if (isAuthOrWelcomeRoute) {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL("/", nextUrl));
     }
@@ -48,6 +48,10 @@ export const proxy = auth((req) => {
 
   // Everything else requires an active session
   if (!isLoggedIn) {
+    const hasSeenIntro = req.cookies.has("seen_intro");
+    if (!hasSeenIntro) {
+      return NextResponse.redirect(new URL("/welcome", nextUrl));
+    }
     const loginUrl = new URL("/login", nextUrl);
     const callbackPath = pathname + (nextUrl.search || "");
     loginUrl.searchParams.set("callbackUrl", callbackPath);

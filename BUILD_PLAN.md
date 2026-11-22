@@ -6,7 +6,8 @@ Live task board for building **shiftly** (placeholder name). Scope and design de
 
 | Level | Who | Does |
 |---|---|---|
-| Lead + watcher | Claude Opus (main session) | Plans, writes briefs, reviews every result, keeps this file updated |
+| Lead | Claude Opus (main session) | Critical work only: decisions, briefs, final approval (token saving) |
+| Watcher | Claude Haiku subagent | Runs the watcher checklist, screenshots, diff review, commits passing work, updates this file; reports a short pass/fail summary |
 | Frontend leads | Claude subagents: Sonnet (screens, components), Haiku (mechanical tasks) | All frontend; brief and check their own agy workers |
 | Workers | `agy` CLI workers | Backend and frontend↔backend connection |
 | Owners | **Adarsh** (repo owner), **Friend** (backend tasks marked *Friend*) | Owner = whose account commits the work |
@@ -35,12 +36,12 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | F6 | PWA shell: manifest, icons, service worker (Serwist), install prompt | Sonnet | Adarsh | done (hand-written sw.js, generated PNG icons) |
 | F7 | Dev **Screen Gallery** route (`/dev/gallery`) listing every screen and state | Haiku | Adarsh | merged into F5 |
 
-## Step 2: Features (parallel, max 3 workers at a time)
+## Step 2: Features (user side first, one screen group at a time; admin side in Step 3 later)
 
 ### Frontend (screens built against mock data)
 | ID | Task | Executor | Owner | Status |
 |---|---|---|---|---|
-| UI1 | Splash, intro story (3 scenes), login / register, setup (avatar + starter habits) | Sonnet | Adarsh | todo |
+| UI1 | Splash, intro story (3 scenes), login / register, setup (avatar + starter habits) | Sonnet | Adarsh | done |
 | UI2 | Home | Sonnet | Adarsh | todo |
 | UI3 | Training: categories, level path | Sonnet | Adarsh | todo |
 | UI4 | Training: scenario player, result | Sonnet | Adarsh | todo |

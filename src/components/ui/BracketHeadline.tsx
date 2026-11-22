@@ -1,7 +1,7 @@
 import { Fragment, type ElementType, type ReactNode } from "react";
 import { cn } from "./cn";
 
-export type HeadlineSize = "display" | "h1" | "h2" | "h3";
+export type HeadlineSize = "poster" | "display" | "h1" | "h2" | "h3";
 export type HighlightTone = "lav-ink" | "lav" | "paper";
 
 export type BracketHeadlineProps = {
@@ -15,6 +15,8 @@ export type BracketHeadlineProps = {
 };
 
 const SIZE: Record<HeadlineSize, string> = {
+  /** Giant poster word that still fits "[LEARN]" on a 360px screen. */
+  poster: "text-[clamp(3.4rem,20vw,5.5rem)] leading-[0.82] tracking-[-0.06em]",
   display:
     "text-[clamp(4.5rem,26vw,6.5rem)] leading-[0.82] tracking-[-0.06em]",
   h1: "text-4xl leading-[0.95] tracking-[-0.035em]",
@@ -29,6 +31,7 @@ const HIGHLIGHT: Record<HighlightTone, string> = {
 };
 
 const DEFAULT_TAG: Record<HeadlineSize, ElementType> = {
+  poster: "h1",
   display: "h1",
   h1: "h1",
   h2: "h2",

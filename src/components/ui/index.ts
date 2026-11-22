@@ -1,4 +1,6 @@
 export { Avatar, AVATAR_KEYS } from "./Avatar";
+export { BUDDIES, BUDDY_KEYS } from "@/assets/stickers";
+export type { BuddyKey } from "@/assets/stickers";
 export type { AvatarKey, AvatarProps, AvatarSize } from "./Avatar";
 export { BracketHeadline } from "./BracketHeadline";
 export type {
@@ -32,11 +34,17 @@ export { PopIn } from "./PopIn";
 export type { PopInProps } from "./PopIn";
 export { Sticker } from "./Sticker";
 export type { StickerPose, StickerProps } from "./Sticker";
+export { StepDots } from "./StepDots";
+export type { StepDotsProps } from "./StepDots";
 export { StreakPill } from "./StreakPill";
 export type { StreakPillProps } from "./StreakPill";
+export { TextField } from "./TextField";
+export type { TextFieldProps } from "./TextField";
 export { TabBar } from "./TabBar";
 export type { TabBarProps, TabKey, TabLinkProps } from "./TabBar";
 export { XpBar } from "./XpBar";
 export type { XpBarProps } from "./XpBar";
 export { cn } from "./cn";
 export type { ChipTone, SoftTone, SurfaceTone } from "./tones";
+export { Wordmark } from "./Wordmark";
+export type { WordmarkProps } from "./Wordmark";

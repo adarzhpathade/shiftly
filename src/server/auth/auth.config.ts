@@ -11,12 +11,18 @@ export const authConfig: NextAuthConfig = {
   providers: [],
   trustHost: true,
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.teamId = user.teamId;
         token.avatarKey = user.avatarKey;
+      }
+      if (trigger === "update" && session) {
+        const newAvatarKey = session.user?.avatarKey ?? session.avatarKey;
+        if (newAvatarKey) {
+          token.avatarKey = newAvatarKey;
+        }
       }
       return token;
     },

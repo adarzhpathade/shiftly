@@ -107,6 +107,11 @@ async function main() {
   const now = new Date();
 
   // 4. Admin User
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: "admin@shiftly.demo" },
+    select: { onboardedAt: true },
+  });
+
   await prisma.user.upsert({
     where: { email: "admin@shiftly.demo" },
     update: {
@@ -119,6 +124,7 @@ async function main() {
       currentStreak: 5,
       bestStreak: 14,
       lastActiveDate: now,
+      onboardedAt: existingAdmin?.onboardedAt ?? now,
     },
     create: {
       id: "user-admin",
@@ -132,6 +138,7 @@ async function main() {
       currentStreak: 5,
       bestStreak: 14,
       lastActiveDate: now,
+      onboardedAt: now,
     },
   });
 
@@ -180,6 +187,10 @@ async function main() {
   ];
 
   for (const mgr of managersData) {
+    const existingMgr = await prisma.user.findUnique({
+      where: { email: mgr.email },
+      select: { onboardedAt: true },
+    });
     const level = Math.floor(mgr.xp / 200) + 1;
     await prisma.user.upsert({
       where: { email: mgr.email },
@@ -194,6 +205,7 @@ async function main() {
         currentStreak: mgr.currentStreak,
         bestStreak: mgr.bestStreak,
         lastActiveDate: now,
+        onboardedAt: existingMgr?.onboardedAt ?? now,
       },
       create: {
         id: mgr.id,
@@ -208,6 +220,7 @@ async function main() {
         currentStreak: mgr.currentStreak,
         bestStreak: mgr.bestStreak,
         lastActiveDate: now,
+        onboardedAt: now,
       },
     });
 
@@ -395,6 +408,10 @@ async function main() {
   ];
 
   for (const emp of employeesData) {
+    const existingEmp = await prisma.user.findUnique({
+      where: { email: emp.email },
+      select: { onboardedAt: true },
+    });
     const level = Math.floor(emp.xp / 200) + 1;
     const lastActive = new Date(Date.now() - emp.daysAgoActive * 86400000);
 
@@ -411,6 +428,7 @@ async function main() {
         currentStreak: emp.currentStreak,
         bestStreak: emp.bestStreak,
         lastActiveDate: lastActive,
+        onboardedAt: existingEmp?.onboardedAt ?? now,
       },
       create: {
         id: emp.id,
@@ -425,6 +443,7 @@ async function main() {
         currentStreak: emp.currentStreak,
         bestStreak: emp.bestStreak,
         lastActiveDate: lastActive,
+        onboardedAt: now,
       },
     });
 

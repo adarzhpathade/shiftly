@@ -21,7 +21,7 @@ export const CHIP_CLASS: Record<ChipTone, string> = {
   paper: "bg-paper",
 };
 
-export type SoftTone = "peach" | "sky" | "lav" | "lime" | "paper" | "muted";
+export type SoftTone = "peach" | "sky" | "lav" | "lime" | "paper" | "muted" | "red";
 
 export const SOFT_BG_CLASS: Record<SoftTone, string> = {
   peach: "bg-peach",
@@ -30,4 +30,5 @@ export const SOFT_BG_CLASS: Record<SoftTone, string> = {
   lime: "bg-lime",
   paper: "bg-paper",
   muted: "bg-muted",
+  red: "bg-red",
 };

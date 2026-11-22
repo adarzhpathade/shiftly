@@ -5,6 +5,7 @@ import {
   BracketHeadline,
   Button,
   Card,
+  BUDDY_KEYS,
   ChatBubble,
   Chip,
   ChoiceCard,
@@ -16,8 +17,10 @@ import {
   PhotoCard,
   PopIn,
   Sticker,
+  StepDots,
   StreakPill,
   TabBar,
+  TextField,
   XpBar,
   type ChipTone,
   type SoftTone,
@@ -460,6 +463,22 @@ export default function GalleryPage() {
               const tones: SoftTone[] = ["peach", "sky", "lav", "lime", "muted", "paper"];
               return <Avatar key={k} name={k} avatarKey={k} size="lg" tone={tones[i % tones.length]} />;
             })}
+          </Tile>
+          <Tile label="Buddy avatars (buddy-1 .. buddy-6)" className="flex flex-wrap items-center gap-3">
+            {BUDDY_KEYS.map((k) => (
+              <Avatar key={k} name={k} avatarKey={k} size="xl" />
+            ))}
+            <Avatar name="Buddy small" avatarKey="buddy-4" size="sm" />
+            <Avatar name="Buddy medium" avatarKey="buddy-2" />
+          </Tile>
+          <Tile label="TextField" className="flex flex-col gap-3">
+            <TextField label="Email" placeholder="name@company.com" />
+            <TextField label="Password" type="password" hint="At least 8 characters" defaultValue="abc" />
+            <TextField label="Name" error="Name must be between 2 and 60 characters" defaultValue="A" />
+          </Tile>
+          <Tile label="StepDots" className="flex flex-col gap-3">
+            <StepDots count={2} active={0} />
+            <StepDots count={3} active={1} />
           </Tile>
         </Grid>
       </Section>
