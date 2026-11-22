@@ -101,7 +101,8 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 2. **Data only through the contract** in `src/data/`. Frontend uses mocks until the matching Connection task.
 3. **No colours outside the theme.** No hex, `rgb()` or named colours outside `src/styles/` (tokens) and `src/assets/`.
 4. **Backend code lives in `src/server/<domain>/`.** Friend's domains: `src/server/habits/`, `src/server/leaderboard/`, `prisma/seed/scenarios/`.
-5. **Workers never** run `git push`, `git reset`, delete files outside their task, touch `.env` secrets, or change files outside their allowed list.
+5. **New visual resources are welcome.** Frontend leads may create new sticker buddy poses, stand-in 3D objects, decorative shapes and backgrounds in the established style whenever a screen benefits. Art goes in `src/assets/`, exposed through the kit (`Sticker`, `GameObject`) and added to `/dev/gallery`.
+6. **Workers never** run `git push`, `git reset`, delete files outside their task, touch `.env` secrets, or change files outside their allowed list.
 
 ## Watcher checklist (after every task)
 1. `git status` and diff review: only allowed files changed.
