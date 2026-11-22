@@ -11,13 +11,14 @@ import type {
 import type { GamificationRepository, HomeRepository, LeaderboardRepository } from "../repositories";
 import { BADGE_DEFS, PEOPLE } from "./data";
 import { delay } from "./delay";
-import { CHALLENGE_BONUS_XP, CHALLENGE_SCENARIO_ID, ME_ID, SCENARIOS, state, resolveUser } from "./state";
+import { CHALLENGE_BONUS_XP, CHALLENGE_SCENARIO_ID, ME_ID, SCENARIOS, state, resolveUser, identityFor } from "./state";
 import { buildCategories, buildLevelPath, challengeCompletedToday, summaryOf } from "./training";
 import { mockHabitRepo } from "./habits";
 
-function meSummary(): UserSummary {
+function meSummary(userId?: string): UserSummary {
   const u = state.user;
-  return { id: ME_ID, name: u.name, avatarKey: u.avatarKey, teamName: u.teamName, level: levelForXp(u.xp), xp: u.xp };
+  const who = identityFor(userId);
+  return { id: who.id, name: who.name, avatarKey: who.avatarKey, teamName: u.teamName, level: levelForXp(u.xp), xp: u.xp };
 }
 
 function allBadges(): Badge[] {
@@ -56,7 +57,7 @@ export const mockHomeRepo: HomeRepository = {
     });
 
     return {
-      user: meSummary(),
+      user: meSummary(userId),
       streak: state.user.currentStreak,
       xpToNext: progress.xpToNext,
       xpProgress: progress.fraction,
@@ -75,13 +76,13 @@ export const mockHomeRepo: HomeRepository = {
 };
 
 export const mockGamificationRepo: GamificationRepository = {
-  async getProfile(): Promise<UserProfile> {
+  async getProfile(userId?: string): Promise<UserProfile> {
     await delay();
     const u = state.user;
     const progress = progressToNextLevel(u.xp);
     const scores = state.scoreHistory.map((s) => s.score);
     return {
-      ...meSummary(),
+      ...meSummary(userId),
       role: "employee",
       email: u.email,
       currentStreak: u.currentStreak,
@@ -129,12 +130,14 @@ export const mockGamificationRepo: GamificationRepository = {
 export const mockLeaderboardRepo: LeaderboardRepository = {
   async get(userId, scope, period): Promise<Leaderboard> {
     await delay();
-    const me = meSummary();
-    const pool: { user: UserSummary; xp: number; rankChange: number }[] = [
-      ...PEOPLE.map((p) => ({
+    const resolvedId = resolveUser(userId);
+    const me = meSummary(userId);
+    const pool: { user: UserSummary; xp: number; rankChange: number; isNew?: boolean }[] = [
+      ...PEOPLE.filter((p) => p.id !== resolvedId).map((p) => ({
         user: { id: p.id, name: p.name, avatarKey: p.avatarKey, teamName: p.teamName, level: levelForXp(p.xp), xp: p.xp },
         xp: period === "week" ? p.weeklyXp : p.xp,
         rankChange: p.rankChange,
+        ...(p.isNew ? { isNew: true } : {}),
       })),
       { user: me, xp: period === "week" ? state.user.weeklyXp : state.user.xp, rankChange: 1 },
     ]
@@ -142,8 +145,7 @@ export const mockLeaderboardRepo: LeaderboardRepository = {
       .sort((a, b) => b.xp - a.xp);
 
     const entries: LeaderboardEntry[] = pool.map((e, i) => ({ rank: i + 1, ...e }));
-    const resolvedId = resolveUser(userId);
-    const mine = entries.find((e) => e.user.id === resolvedId) ?? entries.find((e) => e.user.id === ME_ID);
+    const mine = entries.find((e) => e.user.id === resolvedId);
     if (!mine) throw new Error("Current user missing from leaderboard");
     return { scope, period, entries, me: mine };
   },

@@ -20,6 +20,21 @@ import { BADGE_DEFS, CATEGORY_DEFS, BOSS_PERSONAS, GUIDED_SCENARIOS, type Scenar
 
 export const ME_ID = "u-me";
 
+const sharedIdentities = globalThis as { __shiftlyMockIdentities?: Map<string, { name: string; avatarKey: string }> };
+const identities: Map<string, { name: string; avatarKey: string }> =
+  (sharedIdentities.__shiftlyMockIdentities ??= new Map());
+
+/** Registers who a session user is, so mock screens show their name and buddy. */
+export function registerMockIdentity(userId: string, ident: { name: string; avatarKey: string }): void {
+  if (userId && userId.trim()) identities.set(userId.trim(), ident);
+}
+
+export function identityFor(userId?: string): { id: string; name: string; avatarKey: string } {
+  const id = resolveUser(userId);
+  const reg = identities.get(id);
+  return { id, name: reg?.name || state.user.name, avatarKey: reg?.avatarKey || state.user.avatarKey };
+}
+
 export function resolveUser(userId?: string): string {
   return userId && userId.trim() ? userId : ME_ID;
 }
@@ -162,7 +177,7 @@ export function createInitialState(): MockState {
   return {
     user: {
       name: "Aarav Mehta",
-      avatarKey: "avatar-3",
+      avatarKey: "buddy-3",
       teamName: "Support Team A",
       email: "aarav.mehta@example.com",
       xp: 1240,
@@ -212,6 +227,7 @@ export let state: MockState = (shared.__shiftlyMockState ??= createInitialState(
 export function resetMockState(): void {
   state = createInitialState();
   shared.__shiftlyMockState = state;
+  identities.clear();
 }
 
 export function nextId(prefix: string): string {

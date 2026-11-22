@@ -51,7 +51,7 @@ export function RankRow({ entry, scope, isMe, pinned = false, rowRef }: RankRowP
         {entry.xp}
         <small className="ml-0.5 text-[10px] font-bold opacity-60">XP</small>
       </span>
-      <RankChange change={entry.rankChange} className="flex-none" />
+      <RankChange change={entry.rankChange} isNew={entry.isNew} className="flex-none" />
     </motion.li>
   );
 }

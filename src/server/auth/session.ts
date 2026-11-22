@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { registerMockIdentity } from "@/data/mock";
 import { auth } from "./index";
 import type { Role } from "@/generated/prisma/client";
 
@@ -16,13 +17,15 @@ export async function getViewer(): Promise<Viewer | null> {
   if (!session?.user?.id) {
     return null;
   }
-  return {
+  const viewer: Viewer = {
     id: session.user.id,
     name: session.user.name ?? "",
     role: session.user.role,
     teamId: session.user.teamId ?? null,
     avatarKey: session.user.avatarKey ?? "buddy-1",
   };
+  registerMockIdentity(viewer.id, { name: viewer.name, avatarKey: viewer.avatarKey });
+  return viewer;
 }
 
 export async function requireViewer(): Promise<Viewer> {

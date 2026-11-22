@@ -9,6 +9,7 @@ import {
   mockHomeRepo,
   mockLeaderboardRepo,
   mockTrainingRepo,
+  registerMockIdentity,
   resetMockState,
 } from "./index";
 
@@ -379,5 +380,65 @@ describe("gamification and leaderboard", () => {
     await mockHabitRepo.checkIn(ME_ID, "h-punctuality");
     const after = (await mockLeaderboardRepo.get(ME_ID, "team", "all")).me;
     expect(after.xp).toBeGreaterThan(before.xp);
+  });
+});
+
+describe("identity, avatars, and leaderboard flags", () => {
+  it("resolves registered identity for home, profile, and leaderboard", async () => {
+    registerMockIdentity("u-viewer-123", { name: "Tara Sharma", avatarKey: "buddy-5" });
+
+    const home = await mockHomeRepo.getHome("u-viewer-123");
+    expect(home.user.id).toBe("u-viewer-123");
+    expect(home.user.name).toBe("Tara Sharma");
+    expect(home.user.avatarKey).toBe("buddy-5");
+
+    const profile = await mockGamificationRepo.getProfile("u-viewer-123");
+    expect(profile.id).toBe("u-viewer-123");
+    expect(profile.name).toBe("Tara Sharma");
+    expect(profile.avatarKey).toBe("buddy-5");
+
+    const board = await mockLeaderboardRepo.get("u-viewer-123", "company", "all");
+    expect(board.me.user.id).toBe("u-viewer-123");
+    expect(board.me.user.name).toBe("Tara Sharma");
+    expect(board.me.user.avatarKey).toBe("buddy-5");
+    const entry = board.entries.find((e) => e.user.id === "u-viewer-123");
+    expect(entry).toBeDefined();
+    expect(entry?.user.name).toBe("Tara Sharma");
+    expect(entry?.user.avatarKey).toBe("buddy-5");
+  });
+
+  it("falls back to state.user defaults when identity is unregistered", async () => {
+    const home = await mockHomeRepo.getHome("u-unregistered");
+    expect(home.user.id).toBe("u-unregistered");
+    expect(home.user.name).toBe("Aarav Mehta");
+    expect(home.user.avatarKey).toBe("buddy-3");
+
+    const profile = await mockGamificationRepo.getProfile("u-unregistered");
+    expect(profile.id).toBe("u-unregistered");
+    expect(profile.name).toBe("Aarav Mehta");
+    expect(profile.avatarKey).toBe("buddy-3");
+
+    const board = await mockLeaderboardRepo.get("u-unregistered", "company", "all");
+    expect(board.me.user.id).toBe("u-unregistered");
+    expect(board.me.user.name).toBe("Aarav Mehta");
+    expect(board.me.user.avatarKey).toBe("buddy-3");
+  });
+
+  it("all leaderboard users have buddy avatar keys", async () => {
+    const board = await mockLeaderboardRepo.get(ME_ID, "company", "all");
+    expect(board.entries.length).toBeGreaterThan(0);
+    for (const entry of board.entries) {
+      expect(entry.user.avatarKey).toMatch(/^buddy-[1-6]$/);
+    }
+  });
+
+  it("passes through isNew flag for newly joined leaderboard members", async () => {
+    const board = await mockLeaderboardRepo.get(ME_ID, "company", "all");
+    const newEntries = board.entries.filter((e) => e.isNew === true);
+    expect(newEntries).toHaveLength(2);
+    expect(newEntries.map((e) => e.user.name).sort()).toEqual(["Kavya Pillai", "Rahul Verma"]);
+    for (const entry of newEntries) {
+      expect(entry.rankChange).toBe(0);
+    }
   });
 });

@@ -1,7 +1,19 @@
 import { cn } from "@/components/ui";
 
-/** Up / down / same marker. The contract has no "new" flag, so 0 reads as "no change". */
-export function RankChange({ change, className }: { change: number; className?: string }) {
+/** Up / down / same marker, or a "New" tag for users who just joined the board. */
+export function RankChange({ change, isNew = false, className }: { change: number; isNew?: boolean; className?: string }) {
+  if (isNew) {
+    return (
+      <span
+        className={cn(
+          "inline-flex w-9 justify-center rounded-pill bg-sky py-0.5 text-[10px] font-extrabold tracking-[0.04em] uppercase",
+          className,
+        )}
+      >
+        New
+      </span>
+    );
+  }
   if (change === 0) {
     return (
       <span className={cn("inline-flex w-9 justify-center text-xs font-extrabold text-ink-soft", className)}>

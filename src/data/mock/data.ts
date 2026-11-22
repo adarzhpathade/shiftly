@@ -104,24 +104,25 @@ export interface PersonDef {
   readonly xp: number;
   readonly weeklyXp: number;
   readonly rankChange: number;
+  readonly isNew?: boolean;
 }
 
 export const ME_TEAM = "Support Team A";
 
 export const PEOPLE: readonly PersonDef[] = [
-  { id: "u-priya", name: "Priya Nair", avatarKey: "avatar-1", teamName: ME_TEAM, xp: 2860, weeklyXp: 320, rankChange: 1 },
-  { id: "u-rohan", name: "Rohan Gupta", avatarKey: "avatar-2", teamName: ME_TEAM, xp: 1710, weeklyXp: 190, rankChange: -1 },
-  { id: "u-ananya", name: "Ananya Iyer", avatarKey: "avatar-4", teamName: ME_TEAM, xp: 1120, weeklyXp: 150, rankChange: 2 },
-  { id: "u-vikram", name: "Vikram Singh", avatarKey: "avatar-5", teamName: ME_TEAM, xp: 640, weeklyXp: 60, rankChange: 0 },
-  { id: "u-meera", name: "Meera Reddy", avatarKey: "avatar-6", teamName: ME_TEAM, xp: 430, weeklyXp: 95, rankChange: 1 },
-  { id: "u-karan", name: "Karan Malhotra", avatarKey: "avatar-2", teamName: "Support Team B", xp: 3320, weeklyXp: 410, rankChange: 0 },
-  { id: "u-sneha", name: "Sneha Kulkarni", avatarKey: "avatar-1", teamName: "Support Team B", xp: 2410, weeklyXp: 260, rankChange: 2 },
-  { id: "u-arjun", name: "Arjun Patel", avatarKey: "avatar-5", teamName: "Support Team B", xp: 1340, weeklyXp: 120, rankChange: -2 },
-  { id: "u-divya", name: "Divya Menon", avatarKey: "avatar-4", teamName: "Escalations", xp: 2980, weeklyXp: 350, rankChange: 1 },
-  { id: "u-imran", name: "Imran Sheikh", avatarKey: "avatar-3", teamName: "Escalations", xp: 1980, weeklyXp: 210, rankChange: -1 },
-  { id: "u-neha", name: "Neha Joshi", avatarKey: "avatar-6", teamName: "Escalations", xp: 910, weeklyXp: 40, rankChange: -3 },
-  { id: "u-siddharth", name: "Siddharth Rao", avatarKey: "avatar-3", teamName: "Onboarding", xp: 1560, weeklyXp: 175, rankChange: 3 },
-  { id: "u-pooja", name: "Pooja Bansal", avatarKey: "avatar-1", teamName: "Onboarding", xp: 780, weeklyXp: 85, rankChange: 0 },
-  { id: "u-rahul", name: "Rahul Verma", avatarKey: "avatar-2", teamName: "Onboarding", xp: 520, weeklyXp: 30, rankChange: -1 },
-  { id: "u-kavya", name: "Kavya Pillai", avatarKey: "avatar-6", teamName: "Onboarding", xp: 260, weeklyXp: 70, rankChange: 2 },
+  { id: "u-priya", name: "Priya Nair", avatarKey: "buddy-1", teamName: ME_TEAM, xp: 2860, weeklyXp: 320, rankChange: 1 },
+  { id: "u-rohan", name: "Rohan Gupta", avatarKey: "buddy-2", teamName: ME_TEAM, xp: 1710, weeklyXp: 190, rankChange: -1 },
+  { id: "u-ananya", name: "Ananya Iyer", avatarKey: "buddy-4", teamName: ME_TEAM, xp: 1120, weeklyXp: 150, rankChange: 2 },
+  { id: "u-vikram", name: "Vikram Singh", avatarKey: "buddy-5", teamName: ME_TEAM, xp: 640, weeklyXp: 60, rankChange: 0 },
+  { id: "u-meera", name: "Meera Reddy", avatarKey: "buddy-6", teamName: ME_TEAM, xp: 430, weeklyXp: 95, rankChange: 1 },
+  { id: "u-karan", name: "Karan Malhotra", avatarKey: "buddy-2", teamName: "Support Team B", xp: 3320, weeklyXp: 410, rankChange: 0 },
+  { id: "u-sneha", name: "Sneha Kulkarni", avatarKey: "buddy-1", teamName: "Support Team B", xp: 2410, weeklyXp: 260, rankChange: 2 },
+  { id: "u-arjun", name: "Arjun Patel", avatarKey: "buddy-5", teamName: "Support Team B", xp: 1340, weeklyXp: 120, rankChange: -2 },
+  { id: "u-divya", name: "Divya Menon", avatarKey: "buddy-4", teamName: "Escalations", xp: 2980, weeklyXp: 350, rankChange: 1 },
+  { id: "u-imran", name: "Imran Sheikh", avatarKey: "buddy-3", teamName: "Escalations", xp: 1980, weeklyXp: 210, rankChange: -1 },
+  { id: "u-neha", name: "Neha Joshi", avatarKey: "buddy-6", teamName: "Escalations", xp: 910, weeklyXp: 40, rankChange: -3 },
+  { id: "u-siddharth", name: "Siddharth Rao", avatarKey: "buddy-3", teamName: "Onboarding", xp: 1560, weeklyXp: 175, rankChange: 3 },
+  { id: "u-pooja", name: "Pooja Bansal", avatarKey: "buddy-1", teamName: "Onboarding", xp: 780, weeklyXp: 85, rankChange: 0 },
+  { id: "u-rahul", name: "Rahul Verma", avatarKey: "buddy-2", teamName: "Onboarding", xp: 520, weeklyXp: 30, rankChange: 0, isNew: true },
+  { id: "u-kavya", name: "Kavya Pillai", avatarKey: "buddy-6", teamName: "Onboarding", xp: 260, weeklyXp: 70, rankChange: 0, isNew: true },
 ];
