@@ -11,7 +11,7 @@ import type {
 import type { GamificationRepository, HomeRepository, LeaderboardRepository } from "../repositories";
 import { BADGE_DEFS, PEOPLE } from "./data";
 import { delay } from "./delay";
-import { CHALLENGE_BONUS_XP, CHALLENGE_SCENARIO_ID, ME_ID, SCENARIOS, state } from "./state";
+import { CHALLENGE_BONUS_XP, CHALLENGE_SCENARIO_ID, ME_ID, SCENARIOS, state, resolveUser } from "./state";
 import { buildCategories, buildLevelPath, challengeCompletedToday, summaryOf } from "./training";
 import { mockHabitRepo } from "./habits";
 
@@ -53,7 +53,7 @@ export const mockHomeRepo: HomeRepository = {
       },
       continueTraining,
       categories,
-      todaysHabits: await mockHabitRepo.listToday(userId),
+      todaysHabits: await mockHabitRepo.listToday(resolveUser(userId)),
       quests: state.quests,
     };
   },
@@ -96,7 +96,7 @@ export const mockGamificationRepo: GamificationRepository = {
 };
 
 export const mockLeaderboardRepo: LeaderboardRepository = {
-  async get(_userId, scope, period): Promise<Leaderboard> {
+  async get(userId, scope, period): Promise<Leaderboard> {
     await delay();
     const me = meSummary();
     const pool: { user: UserSummary; xp: number; rankChange: number }[] = [
@@ -111,7 +111,7 @@ export const mockLeaderboardRepo: LeaderboardRepository = {
       .sort((a, b) => b.xp - a.xp);
 
     const entries: LeaderboardEntry[] = pool.map((e, i) => ({ rank: i + 1, ...e }));
-    const mine = entries.find((e) => e.user.id === ME_ID);
+    const mine = entries.find((e) => e.user.id === resolveUser(userId));
     if (!mine) throw new Error("Current user missing from leaderboard");
     return { scope, period, entries, me: mine };
   },

@@ -20,6 +20,12 @@ import { BADGE_DEFS, CATEGORY_DEFS, BOSS_PERSONAS, DOUBLE_CHARGE, LATE_DELIVERY,
 
 export const ME_ID = "u-me";
 
+export function resolveUser(userId?: string): string {
+  void userId;
+  return ME_ID;
+}
+
+
 export interface HabitRecord {
   id: string;
   title: string;

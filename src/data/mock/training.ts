@@ -26,6 +26,7 @@ import {
   state,
   today,
   touchActivity,
+  resolveUser,
 } from "./state";
 
 export function summaryOf(id: string): ScenarioSummary {
@@ -87,7 +88,7 @@ export function challengeCompletedToday(): boolean {
 
 function getAttempt(userId: string, attemptId: string) {
   const attempt = state.attempts.get(attemptId);
-  if (!attempt || attempt.userId !== userId) throw new Error(`Attempt not found: ${attemptId}`);
+  if (!attempt || attempt.userId !== resolveUser(userId)) throw new Error(`Attempt not found: ${attemptId}`);
   return attempt;
 }
 
@@ -124,7 +125,7 @@ export const mockTrainingRepo: TrainingRepository = {
     const first = s?.steps[0];
     if (!s || !first) throw new Error(`Unknown scenario ${scenarioId}`);
     const id = nextId("attempt");
-    state.attempts.set(id, { id, userId, scenarioId, answers: [], result: null });
+    state.attempts.set(id, { id, userId: resolveUser(userId), scenarioId, answers: [], result: null });
     return { attemptId: id, scenarioId, firstStepId: first.id };
   },
 

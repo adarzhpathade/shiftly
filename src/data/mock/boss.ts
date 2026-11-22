@@ -4,7 +4,7 @@ import type { BossResult, BossSession, BossStreamEvent, TurnScores } from "@/lib
 import type { BossRepository } from "../repositories";
 import { BOSS_PERSONAS, type BossPersonaDef } from "./data";
 import { delay, tokenDelay } from "./delay";
-import { awardBadges, bestStars, bumpQuests, grantXp, nextId, personaFor, starKey, state, touchActivity, today, SCENARIOS, type BossRecord } from "./state";
+import { awardBadges, bestStars, bumpQuests, grantXp, nextId, personaFor, starKey, state, touchActivity, today, SCENARIOS, resolveUser, type BossRecord } from "./state";
 
 const BOSS_BASE_XP = 100;
 
@@ -61,7 +61,7 @@ function toSession(rec: BossRecord, persona: BossPersonaDef): BossSession {
 
 function getRecord(userId: string, sessionId: string): { rec: BossRecord; persona: BossPersonaDef } {
   const rec = state.bossSessions.get(sessionId);
-  if (!rec || rec.userId !== userId) throw new Error(`Boss session not found: ${sessionId}`);
+  if (!rec || rec.userId !== resolveUser(userId)) throw new Error(`Boss session not found: ${sessionId}`);
   const persona = BOSS_PERSONAS.find((p) => p.id === rec.personaId);
   if (!persona) throw new Error("Persona missing");
   return { rec, persona };
@@ -92,7 +92,7 @@ export const mockBossRepo: BossRepository = {
     const persona = personaFor(categoryKey);
     const rec: BossRecord = {
       id: nextId("boss"),
-      userId,
+      userId: resolveUser(userId),
       personaId: persona.id,
       mood: persona.startMood,
       turn: 0,
