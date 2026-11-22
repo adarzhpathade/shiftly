@@ -24,3 +24,18 @@
 
   --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Motion tokens added by the UI kit (F5). */
+@theme {
+  --animate-float: float 4s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -8px;
+    }
+  }
+}
