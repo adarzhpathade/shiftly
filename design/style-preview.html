@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F2ECE3;
+    --paper: #FBF7F0;
+    --ink: #3B0D12;
+    --ink-soft: #7A5A5D;
+    --lime: #D4DE3A;
+    --lav: #BDB2F5;
+    --lav-ink: #7A68E0;
+    --red: #E0352B;
+    --sky: #A9C7EC;
+    --peach: #F7C9A8;
+    --muted: #E6DDD0;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Bricolage Grotesque", system-ui, sans-serif; background: var(--cream); color: var(--ink); }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 16px 80px; }
+  .brk { color: var(--lav-ink); }
+
+  /* ---------- page header ---------- */
+  .hero { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .hero h1 { font-size: 64px; font-weight: 800; letter-spacing: -0.04em; line-height: .9; }
+  .hero svg { width: 110px; height: 120px; }
+  .lead { color: var(--ink-soft); font-size: 17px; max-width: 640px; margin-top: 12px; }
+
+  .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 32px; }
+  .tile { border-radius: 24px; padding: 20px; min-height: 230px; position: relative; overflow: hidden; }
+  .tile h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .tile p { font-size: 13px; margin-top: 6px; color: var(--ink-soft); }
+  .swatch-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .sw { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; }
+  .sw i { width: 28px; height: 28px; border-radius: 9px; display: block; box-shadow: inset 0 0 0 1px rgba(59,13,18,.15); }
+  .sw small { display: block; font-weight: 400; color: var(--ink-soft); font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+  .type-big { font-size: 46px; font-weight: 800; letter-spacing: -0.03em; line-height: .95; margin-top: 10px; }
+  .stickers { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .stickers svg { width: 96px; height: 104px; }
+  .objs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+  .objs svg { width: 100%; height: auto; }
+  .ph-note { position: absolute; right: 14px; top: 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; background: var(--ink); color: var(--cream); padding: 4px 8px; border-radius: 999px; }
+
+  h2.section { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; margin: 56px 0 6px; }
+  .section-sub { color: var(--ink-soft); }
+
+  /* ---------- phones ---------- */
+  .phones { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; margin-top: 24px; }
+  .phone-wrap { text-align: center; }
+  .phone-label { font-weight: 700; margin-bottom: 10px; }
+  .phone { width: 360px; max-width: calc(100vw - 32px); height: 760px; border-radius: 44px; border: 10px solid #1B0608; overflow: hidden; position: relative; background: var(--cream); text-align: left; box-shadow: 0 30px 60px rgba(59,13,18,.18); }
+  .screen { height: 100%; overflow-y: auto; padding: 18px 16px 110px; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* home */
+  .bar-top { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 26px; font-weight: 800; letter-spacing: -0.04em; display: flex; align-items: center; gap: 2px; }
+  .logo svg { width: 18px; height: 18px; margin-bottom: 10px; }
+  .pill { display: inline-flex; align-items: center; gap: 4px; background: var(--paper); border-radius: 999px; padding: 4px 12px 4px 4px; font-weight: 800; font-size: 15px; }
+  .pill svg { width: 30px; height: 30px; }
+  .greet { font-size: 36px; font-weight: 800; letter-spacing: -0.035em; line-height: .95; margin-top: 18px; }
+  .xp { margin-top: 14px; }
+  .xp-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+  .xp-row span:last-child { color: var(--ink-soft); font-weight: 600; }
+  .xp-bar { height: 10px; border-radius: 999px; background: var(--muted); margin-top: 6px; overflow: hidden; }
+  .xp-bar span { display: block; height: 100%; width: 64%; background: var(--ink); border-radius: 999px; }
+
+  .photo-card { margin-top: 18px; height: 230px; border-radius: 26px; position: relative; overflow: visible; }
+  .photo { position: absolute; inset: 0; border-radius: 26px; overflow: hidden;
+    background:
+      radial-gradient(circle at 70% 38%, #F3D2B5 0 16%, transparent 17%),
+      radial-gradient(ellipse at 70% 80%, #6C83B8 0 30%, transparent 31%),
+      linear-gradient(180deg, #CFE0F2 0%, #B9CFEA 55%, #8FA9D4 100%); }
+  .photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(27,6,8,.55)); }
+  .photo-tag { position: absolute; left: 16px; top: 46px; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.7); z-index: 1; }
+  .chip { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; }
+  .photo-card .chip { position: absolute; left: 14px; top: 14px; background: var(--lime); z-index: 1; }
+  .photo-card h3 { position: absolute; left: 16px; bottom: 50px; right: 90px; color: #fff; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: .95; z-index: 1; }
+  .photo-card h3 .brk { color: var(--lav); }
+  .play { position: absolute; left: 16px; bottom: 14px; z-index: 1; background: var(--lime); color: var(--ink); font-weight: 800; font-size: 13px; border-radius: 999px; padding: 7px 14px; }
+  .photo-card .peek { position: absolute; right: -6px; top: -42px; width: 92px; height: 100px; z-index: 2; transform: rotate(8deg); }
+
+  .sec { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 0 10px; }
+  .sec b { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  .sec span { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  .cats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cat { border-radius: 22px; padding: 14px; height: 156px; position: relative; overflow: hidden; }
+  .cat b { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; display: block; position: relative; z-index: 1; }
+  .cat small { font-size: 11px; font-weight: 700; position: absolute; left: 14px; bottom: 12px; background: rgba(251,247,240,.75); padding: 3px 8px; border-radius: 999px; }
+  .cat svg { position: absolute; right: -10px; bottom: -8px; width: 104px; height: 104px; }
+
+  .habit { display: flex; align-items: center; gap: 12px; background: var(--paper); border-radius: 18px; padding: 12px; margin-bottom: 8px; }
+  .habit .em { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; }
+  .habit div { flex: 1; }
+  .habit b { font-size: 15px; display: block; }
+  .habit small { font-size: 12px; color: var(--ink-soft); }
+  .tick { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; }
+  .tick.on { background: var(--ink); }
+  .tick svg { width: 16px; height: 16px; }
+
+  .tabs { position: absolute; left: 14px; right: 14px; bottom: 16px; height: 64px; background: var(--ink); border-radius: 999px; display: flex; justify-content: space-around; align-items: center; padding: 0 8px; }
+  .tabs span { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; }
+  .tabs span.on { background: var(--lime); }
+  .tabs svg { width: 22px; height: 22px; fill: none; stroke: var(--cream); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .tabs span.on svg { stroke: var(--ink); }
+
+  /* scenario */
+  .sc-top { display: flex; align-items: center; gap: 10px; }
+  .round { width: 40px; height: 40px; border-radius: 50%; background: var(--paper); display: grid; place-items: center; }
+  .round svg { width: 18px; height: 18px; fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .steps { flex: 1; display: flex; gap: 5px; }
+  .steps i { flex: 1; height: 6px; border-radius: 999px; background: var(--muted); }
+  .steps i.on { background: var(--ink); }
+  .sc-count { font-size: 13px; font-weight: 700; }
+  .sc-chip { background: var(--lav); margin-top: 18px; }
+  .sc-title { font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: .95; margin-top: 10px; }
+  .cust { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
+  .cust-photo { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #E9BE98 0 30%, #8C6450 31% 45%, #A9C7EC 46%); }
+  .cust b { font-size: 14px; display: block; }
+  .cust small { font-size: 12px; color: var(--ink-soft); }
+  .bubble { background: var(--paper); border-radius: 6px 22px 22px 22px; padding: 14px 16px; margin-top: 10px; font-size: 16px; font-weight: 500; line-height: 1.35; }
+  .ask { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin: 20px 0 10px; }
+  .choice { background: var(--paper); border-radius: 18px; padding: 13px 14px; font-size: 14px; line-height: 1.35; margin-bottom: 8px; display: flex; gap: 10px; }
+  .choice .key { width: 24px; height: 24px; border-radius: 8px; background: var(--muted); display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: none; }
+  .choice.best { background: var(--lime); position: relative; flex-direction: column; gap: 8px; }
+  .choice.best .row { display: flex; gap: 10px; }
+  .choice.best .key { background: var(--ink); color: var(--lime); }
+  .fb { background: rgba(251,247,240,.65); border-radius: 12px; padding: 10px 64px 10px 12px; font-size: 12.5px; position: relative; }
+  .fb b { display: block; font-size: 13px; margin-bottom: 2px; }
+  .fb .cheer { position: absolute; right: -4px; bottom: -14px; width: 64px; height: 70px; transform: rotate(10deg); }
+  .stickers svg { width: 84px; height: 92px; }
+  .cta { position: absolute; left: 16px; right: 16px; bottom: 18px; height: 56px; border-radius: 999px; background: var(--ink); color: var(--cream); display: grid; place-items: center; font-weight: 800; font-size: 16px; }
+
+  /* level up */
+  .lv { background: var(--lav); }
+  .lv .screen { padding-bottom: 120px; text-align: center; position: relative; }
+  .lv-kicker { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-top: 30px; }
+  .lv-giant { font-size: 104px; font-weight: 800; letter-spacing: -0.06em; line-height: .82; margin-top: 10px; }
+  .lv-giant .brk { color: var(--paper); }
+  .lv-stage { position: relative; height: 280px; margin-top: 4px; }
+  .lv-stage .trophy { position: absolute; left: 50%; top: 10px; width: 210px; height: 210px; transform: translateX(-50%) rotate(-6deg); }
+  .lv-stage .gift { position: absolute; left: 6px; top: 140px; width: 110px; height: 110px; transform: rotate(-14deg); }
+  .lv-stage .coin { position: absolute; right: 14px; top: 30px; width: 80px; height: 80px; transform: rotate(18deg); }
+  .lv-stage .cheer { position: absolute; right: 4px; bottom: -6px; width: 120px; height: 130px; transform: rotate(6deg); }
+  .lv-stats { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .lv-stats span { background: var(--paper); border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 13px; }
+  .lv-stats span.lime { background: var(--lime); }
+  .lv-line { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-top: 18px; }
+  .lv-line .brk { color: var(--paper); }
+
+  .float { animation: float 4s ease-in-out infinite; }
+  .float.d2 { animation-delay: -1.3s; }
+  .float.d3 { animation-delay: -2.6s; }
+  @keyframes float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+  @media (prefers-reduced-motion: reduce) { .float { animation: none; } }
+
+  .notes { margin-top: 48px; background: var(--paper); border-radius: 24px; padding: 24px; }
+  .notes h3 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+  .notes ul { padding-left: 18px; line-height: 1.6; }
+  .notes li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- shared gradients and filters for every SVG on the page -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="sticker" x="-20%" y="-20%" width="140%" height="140%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="grow"/>
+      <feFlood flood-color="#FFFFFF"/>
+      <feComposite in2="grow" operator="in" result="halo"/>
+      <feDropShadow in="halo" dx="0" dy="3" stdDeviation="3" flood-color="#3B0D12" flood-opacity=".18" result="haloShadow"/>
+      <feMerge><feMergeNode in="haloShadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="drop" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#3B0D12" flood-opacity=".28"/>
+    </filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="2"/></filter>
+
+    <radialGradient id="gFlame" cx="45%" cy="70%" r="65%"><stop offset="0" stop-color="#FFC24A"/><stop offset=".45" stop-color="#F7722E"/><stop offset="1" stop-color="#C92A18"/></radialGradient>
+    <radialGradient id="gFlameIn" cx="45%" cy="65%" r="60%"><stop offset="0" stop-color="#FFF6C4"/><stop offset=".6" stop-color="#FFD34D"/><stop offset="1" stop-color="#F7A12E"/></radialGradient>
+    <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE48A"/><stop offset=".45" stop-color="#F5B83D"/><stop offset="1" stop-color="#C47F12"/></linearGradient>
+    <linearGradient id="gGoldEdge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D69420"/><stop offset="1" stop-color="#9A5F0A"/></linearGradient>
+    <linearGradient id="gLavTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E6E0FF"/><stop offset="1" stop-color="#C9BFFA"/></linearGradient>
+    <linearGradient id="gLavL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BDB2F5"/><stop offset="1" stop-color="#A396EE"/></linearGradient>
+    <linearGradient id="gLavR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9385E6"/><stop offset="1" stop-color="#7565D6"/></linearGradient>
+    <linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF7A61"/><stop offset=".5" stop-color="#E0352B"/><stop offset="1" stop-color="#A81E17"/></linearGradient>
+    <linearGradient id="gCoral" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFA58C"/><stop offset=".55" stop-color="#F26B4F"/><stop offset="1" stop-color="#C2412A"/></linearGradient>
+    <linearGradient id="gWhite" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#EEF2F8"/><stop offset="1" stop-color="#C5CFDE"/></linearGradient>
+    <linearGradient id="gBlue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8FB7F2"/><stop offset=".55" stop-color="#4F86E0"/><stop offset="1" stop-color="#2E5FB5"/></linearGradient>
+    <linearGradient id="gCloud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8E8AA8"/><stop offset="1" stop-color="#55506F"/></linearGradient>
+    <linearGradient id="gLime" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EEF57A"/><stop offset=".55" stop-color="#D4DE3A"/><stop offset="1" stop-color="#A3AD1C"/></linearGradient>
+    <linearGradient id="gPurple" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D3CBFF"/><stop offset=".5" stop-color="#9C8CF0"/><stop offset="1" stop-color="#6B59D1"/></linearGradient>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>Style [preview]</h1>
+    <svg viewBox="0 0 120 130" data-sticker="wave"></svg>
+  </div>
+  <p class="lead">Klubi-inspired direction: warm cream, lime and lavender blocks, maroon type, soft 3D objects, real photos, and a loose hand-drawn sticker character. The 3D objects and photos here are stand-ins until the AI renders are made.</p>
+
+  <div class="board">
+    <div class="tile" style="background:var(--paper)">
+      <h3>Colours</h3>
+      <div class="swatch-list">
+        <div class="sw"><i style="background:#F2ECE3"></i><div>Cream<small>#F2ECE3</small></div></div>
+        <div class="sw"><i style="background:#FBF7F0"></i><div>Paper<small>#FBF7F0</small></div></div>
+        <div class="sw"><i style="background:#3B0D12"></i><div>Maroon ink<small>#3B0D12</small></div></div>
+        <div class="sw"><i style="background:#D4DE3A"></i><div>Lime<small>#D4DE3A</small></div></div>
+        <div class="sw"><i style="background:#BDB2F5"></i><div>Lavender<small>#BDB2F5</small></div></div>
+        <div class="sw"><i style="background:#E0352B"></i><div>Red pop<small>#E0352B</small></div></div>
+        <div class="sw"><i style="background:#A9C7EC"></i><div>Sky<small>#A9C7EC</small></div></div>
+        <div class="sw"><i style="background:#F7C9A8"></i><div>Peach<small>#F7C9A8</small></div></div>
+      </div>
+    </div>
+    <div class="tile" style="background:var(--lime)">
+      <h3>Type</h3>
+      <p style="color:var(--ink)">Bricolage Grotesque 800, maroon, tight spacing</p>
+      <div class="type-big">Small habits, <span style="color:var(--paper)">[big wins]</span></div>
+    </div>
+    <div class="tile" style="background:var(--paper)">
+      <h3>Sticker buddy</h3>
+      <p>Loose line, white sticker edge</p>
+      <div class="stickers">
+        <svg viewBox="0 0 120 130" data-sticker="wave"></svg>
+        <svg viewBox="0 0 120 130" data-sticker="headset"></svg>
+        <svg viewBox="0 0 120 130" data-sticker="cheer"></svg>
+      </div>
+    </div>
+    <div class="tile" style="background:var(--lav)">
+      <span class="ph-note">Stand-in for AI 3D</span>
+      <h3>3D objects</h3>
+      <div class="objs">
+        <svg viewBox="0 0 100 100" data-obj="flame"></svg>
+        <svg viewBox="0 0 100 100" data-obj="coin"></svg>
+        <svg viewBox="0 0 100 100" data-obj="gift"></svg>
+        <svg viewBox="0 0 100 100" data-obj="trophy"></svg>
+        <svg viewBox="0 0 100 100" data-obj="megaphone"></svg>
+        <svg viewBox="0 0 100 100" data-obj="bubble"></svg>
+        <svg viewBox="0 0 100 100" data-obj="cloud"></svg>
+        <svg viewBox="0 0 100 100" data-obj="puzzle"></svg>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">Three key [screens]</h2>
+  <p class="section-sub">Home, a scenario in Training Mode, and the Level Up celebration.</p>
+
+  <div class="phones">
+    <!-- HOME -->
+    <div class="phone-wrap">
+      <div class="phone-label">Home</div>
+      <div class="phone">
+        <div class="screen">
+          <div class="bar-top">
+            <div class="logo">shiftly<svg viewBox="0 0 24 24"><path d="M12 1l2.2 6.2L20.5 5l-3.7 5.4L23 12l-6.2 1.6 3.7 5.4-6.3-2.2L12 23l-2.2-6.2L3.5 19l3.7-5.4L1 12l6.2-1.6L3.5 5l6.3 2.2z" fill="#3B0D12"/></svg></div>
+            <div class="pill"><svg viewBox="0 0 100 100" data-obj="flame"></svg>12</div>
+          </div>
+          <div class="greet">Morning,<br>Adarsh <span class="brk">[ready?]</span></div>
+          <div class="xp">
+            <div class="xp-row"><span>Level 4</span><span>640 / 1000 XP</span></div>
+            <div class="xp-bar"><span></span></div>
+          </div>
+
+          <div class="photo-card">
+            <div class="photo"></div>
+            <span class="photo-tag">Photo: support agent on a call</span>
+            <span class="chip">Today's challenge</span>
+            <h3>Calm the <span class="brk">[angry]</span> caller</h3>
+            <span class="play">Play · +50 XP</span>
+            <svg class="peek" viewBox="0 0 120 130" data-sticker="headset"></svg>
+          </div>
+
+          <div class="sec"><b>Training</b><span>4 categories</span></div>
+          <div class="cats">
+            <div class="cat" style="background:var(--peach)"><b>Handling Complaints</b><small>3 / 5</small><svg class="float" viewBox="0 0 100 100" data-obj="megaphone"></svg></div>
+            <div class="cat" style="background:var(--sky)"><b>Customer Queries</b><small>2 / 5</small><svg class="float d2" viewBox="0 0 100 100" data-obj="bubble"></svg></div>
+            <div class="cat" style="background:var(--lav)"><b>Difficult Customers</b><small>1 / 5</small><svg class="float d3" viewBox="0 0 100 100" data-obj="cloud"></svg></div>
+            <div class="cat" style="background:var(--lime)"><b>Problem Solving</b><small>New</small><svg class="float" viewBox="0 0 100 100" data-obj="puzzle"></svg></div>
+          </div>
+
+          <div class="sec"><b>Small habits, <span class="brk">[big wins]</span></b><span>2 / 3</span></div>
+          <div class="habit"><span class="em" style="background:var(--peach)">⏰</span><div><b>Be on time</b><small>12 day streak</small></div><span class="tick on"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#D4DE3A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="habit"><span class="em" style="background:var(--sky)">📞</span><div><b>Customer follow-up</b><small>5 day streak</small></div><span class="tick on"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#D4DE3A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="habit"><span class="em" style="background:var(--lav)">📘</span><div><b>Learn 10 minutes</b><small>3 day streak</small></div><span class="tick"></span></div>
+        </div>
+        <nav class="tabs">
+          <span class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 12.5l3 3 5-6"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><path d="M8 21V11h8v10M3 21v-6h5M16 21v-8h5v8M2 21h20"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg></span>
+        </nav>
+      </div>
+    </div>
+
+    <!-- SCENARIO -->
+    <div class="phone-wrap">
+      <div class="phone-label">Scenario player</div>
+      <div class="phone">
+        <div class="screen">
+          <div class="sc-top">
+            <span class="round"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></span>
+            <div class="steps"><i class="on"></i><i></i><i></i></div>
+            <span class="sc-count">1/3</span>
+          </div>
+          <span class="chip sc-chip">Difficult Customers</span>
+          <div class="sc-title">The <span class="brk">[third]</span> call this week</div>
+          <div class="cust">
+            <div class="cust-photo"></div>
+            <div><b>Mr. Sharma</b><small>Customer · waiting on a refund</small></div>
+          </div>
+          <div class="bubble">"This is the THIRD time I'm calling about my refund. Does anyone there actually do their job?!"</div>
+
+          <div class="ask">How do you reply?</div>
+          <div class="choice best">
+            <div class="row"><span class="key">A</span><span>"I'm really sorry you've had to call again. Let me check your refund right now and stay with you until it's sorted."</span></div>
+            <div class="fb"><b>Best answer · +30 XP</b>You apologised, took ownership and promised follow-through.<svg class="cheer" viewBox="0 0 120 130" data-sticker="cheer"></svg></div>
+          </div>
+          <div class="choice"><span class="key">B</span><span>"Please calm down, sir. Refunds take 7–10 working days."</span></div>
+          <div class="choice"><span class="key">C</span><span>"I'll transfer you to the refunds team."</span></div>
+        </div>
+        <div class="cta">Continue</div>
+      </div>
+    </div>
+
+    <!-- LEVEL UP -->
+    <div class="phone-wrap">
+      <div class="phone-label">Level up celebration</div>
+      <div class="phone lv">
+        <div class="screen">
+          <div class="lv-kicker">You did it, Adarsh</div>
+          <div class="lv-giant">LEVEL<br><span class="brk">[5]</span></div>
+          <div class="lv-stage">
+            <svg class="trophy float" viewBox="0 0 100 100" data-obj="trophy"></svg>
+            <svg class="gift float d2" viewBox="0 0 100 100" data-obj="gift"></svg>
+            <svg class="coin float d3" viewBox="0 0 100 100" data-obj="coin"></svg>
+            <svg class="cheer" viewBox="0 0 120 130" data-sticker="cheer"></svg>
+          </div>
+          <div class="lv-stats">
+            <span class="lime">+120 XP</span>
+            <span>New badge: Calm Master</span>
+          </div>
+          <div class="lv-line">Small steps, <span class="brk">[big feelings]</span></div>
+        </div>
+        <div class="cta">Keep going</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>What changes from the old style</h3>
+    <ul>
+      <li><b>No thick ink outlines.</b> Shapes are soft solid blocks; depth comes from 3D renders and shadows.</li>
+      <li><b>3D objects</b> (flame, coin, gift, trophy and one per category) will be AI renders in one consistent style. The ones above are hand-coded stand-ins.</li>
+      <li><b>Sticker buddy</b> appears at key moments only: Today's Challenge, best answers, celebrations and empty states.</li>
+      <li><b>[Bracket] words</b> in lavender highlight one word in a headline, as in Klubi.</li>
+      <li><b>Real photos</b> on challenge cards and customer avatars (stock photos from Unsplash or Pexels).</li>
+      <li>App name <b>"shiftly"</b> is a placeholder until we pick the name.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const INK = '#3B0D12';
+
+// Loose, hand-drawn sticker character. The white edge comes from the #sticker filter.
+const stickerArms = {
+  wave: `<path d="M37 82c-9 5-14 12-16 21"/><path d="M89 68c9-6 14-16 16-28"/><path d="M101 36l6-6M104 44l8-2"/>`,
+  cheer: `<path d="M39 72c-9-8-14-20-16-32"/><path d="M89 68c9-8 13-19 15-31"/><path d="M18 34l-5-5M27 30l-1-8M104 33l5-5M96 28l1-8"/>`,
+  headset: `<path d="M37 84c-6 6-8 14-7 21"/><path d="M89 84c6 6 8 14 7 21"/>`,
+};
+const headset = `<path d="M38 56c0-30 54-30 54 0" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>
+  <rect x="31" y="49" width="12" height="18" rx="5" fill="#E0352B" stroke="${INK}" stroke-width="3"/>
+  <rect x="87" y="49" width="12" height="18" rx="5" fill="#E0352B" stroke="${INK}" stroke-width="3"/>
+  <path d="M37 66c3 11 12 15 20 13" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="58" cy="79" r="3.5" fill="${INK}"/>`;
+
+function sticker(pose) {
+  return `<g filter="url(#sticker)">
+    <g fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M40 118c-8-24-13-58 4-80 13-17 41-15 48 8 7 22 2 52-4 72l-11-1-3-11-14 1-2 11z" fill="#FFFFFF"/>
+      ${stickerArms[pose]}
+      <path d="M51 61q4.5-5 9 0M69 61q4.5-5 9 0"/>
+      <path d="M58 73q6 6 12 0"/>
+    </g>
+    ${pose === 'headset' ? headset : ''}
+  </g>`;
+}
+
+// Hand-coded stand-ins for the AI 3D renders.
+const objects = {
+  flame: `<g filter="url(#drop)"><path d="M50 6c6 16 30 26 30 52a30 30 0 0 1-60 0c0-15 9-22 14-33 3 9 9 14 9 14 0-13 3-24 7-33z" fill="url(#gFlame)"/>
+    <path d="M50 46c4 9 15 14 15 26a15 15 0 0 1-30 0c0-9 8-14 15-26z" fill="url(#gFlameIn)"/>
+    <ellipse cx="38" cy="44" rx="4" ry="10" fill="#fff" opacity=".45" filter="url(#soft)"/></g>`,
+  coin: `<g filter="url(#drop)"><ellipse cx="54" cy="52" rx="36" ry="38" fill="url(#gGoldEdge)"/>
+    <ellipse cx="48" cy="50" rx="36" ry="38" fill="url(#gGold)"/>
+    <ellipse cx="48" cy="50" rx="26" ry="28" fill="none" stroke="#FFE9A6" stroke-width="3" opacity=".8"/>
+    <path d="M48 32l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z" fill="#FFF3C9"/>
+    <ellipse cx="32" cy="30" rx="6" ry="11" fill="#fff" opacity=".5" transform="rotate(30 32 30)" filter="url(#soft)"/></g>`,
+  gift: `<g filter="url(#drop)"><path d="M50 22l36 15-36 15-36-15z" fill="url(#gLavTop)"/>
+    <path d="M14 37l36 15v38L14 75z" fill="url(#gLavL)"/>
+    <path d="M50 52l36-15v38L50 90z" fill="url(#gLavR)"/>
+    <path d="M28 31l36 15v38l-6 3V49L22 34z" fill="url(#gRed)" opacity=".95"/>
+    <path d="M72 31L36 46v38l-6-3V44l36-15z" fill="url(#gRed)" opacity=".8"/>
+    <path d="M50 37c-14-18-28-12-22-3 4 6 22 3 22 3zM50 37c14-18 28-12 22-3-4 6-22 3-22 3z" fill="url(#gRed)"/></g>`,
+  trophy: `<g filter="url(#drop)"><path d="M26 14h48v24a24 24 0 0 1-48 0z" fill="url(#gGold)"/>
+    <path d="M26 20H13c0 16 7 22 16 24M74 20h13c0 16-7 22-16 24" fill="none" stroke="url(#gGoldEdge)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M44 60h12v14H44z" fill="url(#gGoldEdge)"/>
+    <path d="M30 74h40l4 14H26z" fill="url(#gPurple)"/>
+    <ellipse cx="38" cy="28" rx="4" ry="10" fill="#fff" opacity=".55" filter="url(#soft)"/>
+    <path d="M50 24l3.5 7 7.5.8-5.6 5 1.6 7.4L50 40.5l-7 3.7 1.6-7.4-5.6-5 7.5-.8z" fill="#FFF3C9"/></g>`,
+  megaphone: `<g filter="url(#drop)"><path d="M16 42h14l40-22v58L30 58H16z" fill="url(#gCoral)"/>
+    <ellipse cx="70" cy="49" rx="8" ry="29" fill="#FBD2C4"/>
+    <ellipse cx="70" cy="49" rx="4" ry="17" fill="#C2412A"/>
+    <path d="M22 58l5 22h12l-5-22" fill="url(#gWhite)"/>
+    <rect x="10" y="42" width="8" height="16" rx="3" fill="#FBF7F0"/>
+    <ellipse cx="42" cy="38" rx="10" ry="3.5" fill="#fff" opacity=".45" transform="rotate(-28 42 38)" filter="url(#soft)"/></g>`,
+  bubble: `<g filter="url(#drop)"><path d="M20 14h60a12 12 0 0 1 12 12v34a12 12 0 0 1-12 12H48L28 88V72h-8A12 12 0 0 1 8 60V26a12 12 0 0 1 12-12z" fill="url(#gBlue)"/>
+    <text x="50" y="57" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="40" fill="#FFFFFF">?</text>
+    <ellipse cx="24" cy="26" rx="8" ry="3.5" fill="#fff" opacity=".5" filter="url(#soft)"/></g>`,
+  cloud: `<g filter="url(#drop)"><path d="M24 62a15 15 0 0 1 2-30 21 21 0 0 1 40-4 16 16 0 0 1 8 34z" fill="url(#gCloud)"/>
+    <path d="M52 56l-11 18h10l-6 18 20-24H54l7-12z" fill="url(#gGold)"/>
+    <ellipse cx="40" cy="30" rx="10" ry="4" fill="#fff" opacity=".35" filter="url(#soft)"/></g>`,
+  puzzle: `<g filter="url(#drop)" transform="rotate(-10 50 50)"><path d="M14 26h20a9 9 0 1 1 18 0h20v20a9 9 0 1 1 0 18v20H52a9 9 0 1 0-18 0H14V64a9 9 0 1 0 0-18z" fill="url(#gPurple)"/>
+    <ellipse cx="26" cy="36" rx="7" ry="3" fill="#fff" opacity=".5" filter="url(#soft)"/></g>`,
+};
+
+document.querySelectorAll('[data-sticker]').forEach(el => { el.innerHTML = sticker(el.dataset.sticker); });
+document.querySelectorAll('[data-obj]').forEach(el => { el.innerHTML = objects[el.dataset.obj]; });
+</script>
+</body>
+</html>
