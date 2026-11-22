@@ -21,13 +21,13 @@ import { BADGE_DEFS, CATEGORY_DEFS, BOSS_PERSONAS, DOUBLE_CHARGE, LATE_DELIVERY,
 export const ME_ID = "u-me";
 
 export function resolveUser(userId?: string): string {
-  void userId;
-  return ME_ID;
+  return userId && userId.trim() ? userId : ME_ID;
 }
 
 
 export interface HabitRecord {
   id: string;
+  userId: string;
   title: string;
   icon: string;
   frequency: HabitFrequency;
@@ -38,6 +38,7 @@ export interface HabitRecord {
   lastCheckIn: string | null;
   /** date -> note ("" when none) */
   logs: Map<string, string>;
+  isActive?: boolean;
 }
 
 export interface AttemptRecord {
@@ -107,6 +108,7 @@ function hash(text: string): number {
 }
 
 function seedHabit(
+  userId: string,
   id: string,
   title: string,
   icon: string,
@@ -130,6 +132,7 @@ function seedHabit(
   }
   return {
     id,
+    userId,
     title,
     icon,
     frequency,
@@ -139,6 +142,7 @@ function seedHabit(
     bestStreak,
     lastCheckIn: streak > 0 ? end : null,
     logs,
+    isActive: true,
   };
 }
 
@@ -171,13 +175,13 @@ export function createInitialState(): MockState {
     attempts: new Map(),
     bossSessions: new Map(),
     habits: [
-      seedHabit("h-punctuality", "Punctuality", "clock", "daily", [1, 2, 3, 4, 5, 6, 7], "09:00", 6, 1, 9, {
+      seedHabit(ME_ID, "h-punctuality", "Punctuality", "clock", "daily", [1, 2, 3, 4, 5, 6, 7], "09:00", 6, 1, 9, {
         2: "Reached 10 minutes early and prepped my queue.",
       }),
-      seedHabit("h-learning", "Daily Learning", "book", "daily", [1, 2, 3, 4, 5, 6, 7], "18:30", 3, 0, 7, {
+      seedHabit(ME_ID, "h-learning", "Daily Learning", "book", "daily", [1, 2, 3, 4, 5, 6, 7], "18:30", 3, 0, 7, {
         0: "Read about the HEARD apology method.",
       }),
-      seedHabit("h-followup", "Customer Follow-up", "phone", "weekly", [1, 3, 5], "16:00", 0, 3, 4),
+      seedHabit(ME_ID, "h-followup", "Customer Follow-up", "phone", "weekly", [1, 3, 5], "16:00", 0, 3, 4),
     ],
     badges,
     quests: [

@@ -40,6 +40,13 @@ describe("home", () => {
     expect(home.challenge.scenario.id).toBeTruthy();
     expect(home.continueTraining).not.toBeNull();
   });
+
+  it("returns empty habits and zero habit quest progress for a new user", async () => {
+    const home = await mockHomeRepo.getHome("u-brand-new");
+    expect(home.todaysHabits).toEqual([]);
+    const habitQuest = home.quests.find((q) => q.type === "habit");
+    expect(habitQuest?.progress).toBe(0);
+  });
 });
 
 describe("training", () => {
@@ -289,6 +296,50 @@ describe("habits", () => {
     expect(detail.heatmap).toHaveLength(84);
     expect(detail.completionRate).toBeGreaterThan(0);
     expect(detail.completionRate).toBeLessThanOrEqual(1);
+  });
+
+  it("new user starts with no habits", async () => {
+    const habits = await mockHabitRepo.listToday("u-brand-new");
+    expect(habits).toEqual([]);
+  });
+
+  it("creating Punctuality twice for a new user yields one habit", async () => {
+    const userId = "u-brand-new";
+    const h1 = await mockHabitRepo.create(userId, {
+      title: "Punctuality",
+      icon: "clock",
+      frequency: "daily",
+      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+      reminderTime: null,
+    });
+    const h2 = await mockHabitRepo.create(userId, {
+      title: "  punctuality  ",
+      icon: "clock",
+      frequency: "daily",
+      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+      reminderTime: "09:00",
+    });
+    expect(h1.id).toBe(h2.id);
+    const habits = await mockHabitRepo.listToday(userId);
+    expect(habits).toHaveLength(1);
+    expect(habits[0]?.title).toBe("Punctuality");
+  });
+
+  it("demo user still has the 3 defaults and creating Punctuality for them does not add a 4th", async () => {
+    const before = await mockHabitRepo.listToday(ME_ID);
+    expect(before).toHaveLength(3);
+
+    const created = await mockHabitRepo.create(ME_ID, {
+      title: "  punctuality  ",
+      icon: "clock",
+      frequency: "daily",
+      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+      reminderTime: null,
+    });
+    expect(created.id).toBe("h-punctuality");
+
+    const after = await mockHabitRepo.listToday(ME_ID);
+    expect(after).toHaveLength(3);
   });
 });
 

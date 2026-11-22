@@ -3,7 +3,7 @@ import type { CheckInResult, Habit, HabitDetail } from "@/lib/types";
 import type { HabitRepository } from "../repositories";
 import { HABIT_TEMPLATES } from "./data";
 import { delay } from "./delay";
-import { awardBadges, bumpQuests, grantXp, nextId, state, today, touchActivity, type HabitRecord } from "./state";
+import { awardBadges, bumpQuests, grantXp, ME_ID, nextId, resolveUser, state, today, touchActivity, type HabitRecord } from "./state";
 
 const CHECK_IN_XP = 10;
 const HEATMAP_DAYS = 84;
@@ -26,16 +26,20 @@ function toHabit(r: HabitRecord): Habit {
   };
 }
 
-function find(habitId: string): HabitRecord {
-  const rec = state.habits.find((h) => h.id === habitId);
+function find(userId: string, habitId: string): HabitRecord {
+  const uid = resolveUser(userId);
+  const rec = state.habits.find((h) => h.id === habitId && h.userId === uid);
   if (!rec) throw new Error(`Habit not found: ${habitId}`);
   return rec;
 }
 
 export const mockHabitRepo: HabitRepository = {
-  async listToday() {
+  async listToday(userId: string) {
     await delay();
-    return state.habits.map(toHabit);
+    const uid = resolveUser(userId);
+    return state.habits
+      .filter((h) => h.userId === uid && (h.isActive ?? true))
+      .map(toHabit);
   },
 
   async listTemplates() {
@@ -43,10 +47,19 @@ export const mockHabitRepo: HabitRepository = {
     return HABIT_TEMPLATES;
   },
 
-  async create(_userId, input) {
+  async create(userId, input) {
     await delay();
+    const uid = resolveUser(userId);
+    const normalizedTitle = input.title.trim().toLowerCase();
+    const existing = state.habits.find(
+      (h) => h.userId === uid && (h.isActive ?? true) && h.title.trim().toLowerCase() === normalizedTitle,
+    );
+    if (existing) {
+      return toHabit(existing);
+    }
     const rec: HabitRecord = {
       id: nextId("h"),
+      userId: uid,
       title: input.title,
       icon: input.icon,
       frequency: input.frequency,
@@ -56,14 +69,15 @@ export const mockHabitRepo: HabitRepository = {
       bestStreak: 0,
       lastCheckIn: null,
       logs: new Map(),
+      isActive: true,
     };
     state.habits.push(rec);
     return toHabit(rec);
   },
 
-  async update(_userId, habitId, patch) {
+  async update(userId, habitId, patch) {
     await delay();
-    const rec = find(habitId);
+    const rec = find(userId, habitId);
     if (patch.title !== undefined) rec.title = patch.title;
     if (patch.icon !== undefined) rec.icon = patch.icon;
     if (patch.frequency !== undefined) rec.frequency = patch.frequency;
@@ -72,15 +86,15 @@ export const mockHabitRepo: HabitRepository = {
     return toHabit(rec);
   },
 
-  async remove(_userId, habitId) {
+  async remove(userId, habitId) {
     await delay();
-    find(habitId);
-    state.habits = state.habits.filter((h) => h.id !== habitId);
+    const rec = find(userId, habitId);
+    state.habits = state.habits.filter((h) => h.id !== rec.id);
   },
 
-  async checkIn(_userId, habitId, note): Promise<CheckInResult> {
+  async checkIn(userId, habitId, note): Promise<CheckInResult> {
     await delay();
-    const rec = find(habitId);
+    const rec = find(userId, habitId);
     const now = today();
     if (rec.logs.has(now)) {
       const habit = toHabit(rec);
@@ -93,13 +107,36 @@ export const mockHabitRepo: HabitRepository = {
     rec.lastCheckIn = now;
     rec.logs.set(now, note?.trim() ?? "");
 
-    state.counters.habitCheckIns += 1;
-    touchActivity();
+    const uid = resolveUser(userId);
+    let questsCompleted: CheckInResult["questsCompleted"] = [];
+    let leveledUp: CheckInResult["leveledUp"] | undefined;
 
-    const before = levelForXp(state.user.xp);
-    grantXp(CHECK_IN_XP);
-    const questsCompleted = bumpQuests("habit");
-    const after = levelForXp(state.user.xp);
+    if (uid === ME_ID) {
+      state.counters.habitCheckIns += 1;
+      touchActivity();
+
+      const before = levelForXp(state.user.xp);
+      grantXp(CHECK_IN_XP);
+      questsCompleted = bumpQuests("habit");
+      const after = levelForXp(state.user.xp);
+      if (after > before) leveledUp = { newLevel: after };
+    } else {
+      const userHabits = state.habits.filter((h) => h.userId === uid && (h.isActive ?? true));
+      const doneCount = userHabits.filter((h) => h.logs.has(now)).length;
+      if (doneCount === 3) {
+        questsCompleted = [
+          {
+            id: "q-habits",
+            type: "habit",
+            label: "Check in 3 habits",
+            target: 3,
+            progress: 3,
+            completed: true,
+            xpReward: 20,
+          },
+        ];
+      }
+    }
 
     const milestone = streakMilestone(update.streak);
     const newBadges = milestone === 7 ? awardBadges(["seven-day-streak"]) : [];
@@ -109,15 +146,15 @@ export const mockHabitRepo: HabitRepository = {
       xpEarned: CHECK_IN_XP,
       streak: update.streak,
       ...(milestone ? { milestone } : {}),
-      ...(after > before ? { leveledUp: { newLevel: after } } : {}),
+      ...(leveledUp ? { leveledUp } : {}),
       newBadges,
       questsCompleted,
     };
   },
 
-  async getDetail(_userId, habitId): Promise<HabitDetail> {
+  async getDetail(userId, habitId): Promise<HabitDetail> {
     await delay();
-    const rec = find(habitId);
+    const rec = find(userId, habitId);
     const now = today();
     const heatmap: { date: string; done: boolean }[] = [];
     let scheduled = 0;

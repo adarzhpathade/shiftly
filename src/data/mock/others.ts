@@ -40,6 +40,21 @@ export const mockHomeRepo: HomeRepository = {
     }
 
     const challenge = summaryOf(CHALLENGE_SCENARIO_ID);
+    const uid = resolveUser(userId);
+    const todaysHabits = await mockHabitRepo.listToday(uid);
+    const habitsDoneToday = todaysHabits.filter((h) => h.doneToday).length;
+    const quests = state.quests.map((q) => {
+      if (q.type === "habit") {
+        const questProgress = uid === ME_ID ? q.progress : Math.min(q.target, habitsDoneToday);
+        return {
+          ...q,
+          progress: questProgress,
+          completed: questProgress >= q.target,
+        };
+      }
+      return q;
+    });
+
     return {
       user: meSummary(),
       streak: state.user.currentStreak,
@@ -53,8 +68,8 @@ export const mockHomeRepo: HomeRepository = {
       },
       continueTraining,
       categories,
-      todaysHabits: await mockHabitRepo.listToday(resolveUser(userId)),
-      quests: state.quests,
+      todaysHabits,
+      quests,
     };
   },
 };
@@ -89,9 +104,25 @@ export const mockGamificationRepo: GamificationRepository = {
     return allBadges();
   },
 
-  async listQuests() {
+  async listQuests(userId?: string) {
     await delay();
-    return state.quests;
+    const uid = resolveUser(userId);
+    if (uid === ME_ID) {
+      return state.quests;
+    }
+    const todaysHabits = await mockHabitRepo.listToday(uid);
+    const habitsDoneToday = todaysHabits.filter((h) => h.doneToday).length;
+    return state.quests.map((q) => {
+      if (q.type === "habit") {
+        const questProgress = Math.min(q.target, habitsDoneToday);
+        return {
+          ...q,
+          progress: questProgress,
+          completed: questProgress >= q.target,
+        };
+      }
+      return q;
+    });
   },
 };
 
@@ -111,7 +142,8 @@ export const mockLeaderboardRepo: LeaderboardRepository = {
       .sort((a, b) => b.xp - a.xp);
 
     const entries: LeaderboardEntry[] = pool.map((e, i) => ({ rank: i + 1, ...e }));
-    const mine = entries.find((e) => e.user.id === resolveUser(userId));
+    const resolvedId = resolveUser(userId);
+    const mine = entries.find((e) => e.user.id === resolvedId) ?? entries.find((e) => e.user.id === ME_ID);
     if (!mine) throw new Error("Current user missing from leaderboard");
     return { scope, period, entries, me: mine };
   },
