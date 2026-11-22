@@ -27,7 +27,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: THEME_COLOR_CREAM,
+  // Cream in both modes: the app has no dark theme, so dark phones get the page colour too.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_COLOR_CREAM },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLOR_CREAM },
+  ],
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
 };

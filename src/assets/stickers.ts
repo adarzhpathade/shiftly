@@ -1,12 +1,13 @@
 import { INK } from "./svg-art";
 
-export type StickerPose = "wave" | "headset" | "cheer";
+export type StickerPose = "wave" | "headset" | "cheer" | "think";
 
 export const STICKER_VIEWBOX = "0 0 120 130";
 
 const ARMS: Record<StickerPose, string> = {
   wave: `<path d="M37 82c-9 5-14 12-16 21"/><path d="M89 68c9-6 14-16 16-28"/><path d="M101 36l6-6M104 44l8-2"/>`,
   cheer: `<path d="M39 72c-9-8-14-20-16-32"/><path d="M89 68c9-8 13-19 15-31"/><path d="M18 34l-5-5M27 30l-1-8M104 33l5-5M96 28l1-8"/>`,
+  think: `<path d="M37 84c-6 6-8 14-7 21"/><path d="M89 84c-3-8-10-12-17-9"/><path d="M99 40c0-4 5-4 5 0 0 3-4 3-4 6M100 52v1"/>`,
   headset: `<path d="M37 84c-6 6-8 14-7 21"/><path d="M89 84c6 6 8 14 7 21"/>`,
 };
 

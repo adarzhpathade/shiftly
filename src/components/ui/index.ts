@@ -1,3 +1,5 @@
+export { AnimatedWordmark } from "./AnimatedWordmark";
+export type { AnimatedWordmarkProps } from "./AnimatedWordmark";
 export { Avatar, AVATAR_KEYS } from "./Avatar";
 export { BUDDIES, BUDDY_KEYS } from "@/assets/stickers";
 export type { BuddyKey } from "@/assets/stickers";
@@ -28,6 +30,18 @@ export { MasteryRing } from "./MasteryRing";
 export type { MasteryRingProps, RingTone } from "./MasteryRing";
 export { MoodMeter } from "./MoodMeter";
 export type { MoodMeterProps } from "./MoodMeter";
+export {
+  AnimatedCheck,
+  Drop,
+  Pop,
+  Rise,
+  RiseText,
+  ShakeText,
+  Stagger,
+} from "./Motion";
+export type { RiseTextProps, ShakeTextProps, StaggerProps } from "./Motion";
+export { RiseHeadline } from "./RiseHeadline";
+export type { RiseHeadlineProps } from "./RiseHeadline";
 export { PhotoCard } from "./PhotoCard";
 export type { PhotoCardProps } from "./PhotoCard";
 export { PopIn } from "./PopIn";
@@ -38,6 +52,7 @@ export { StepDots } from "./StepDots";
 export type { StepDotsProps } from "./StepDots";
 export { StreakPill } from "./StreakPill";
 export type { StreakPillProps } from "./StreakPill";
+export { ThemeColor, useThemeColor } from "./ThemeColor";
 export { TextField } from "./TextField";
 export type { TextFieldProps } from "./TextField";
 export { TabBar } from "./TabBar";

@@ -42,6 +42,7 @@ export function GameObject({
   const scope = useId();
   const src = source ?? OBJECT_SOURCES[name];
   const cls = cn(float && "motion-safe:animate-float", className);
+  const svgCls = cn("overflow-visible", cls);
   const st: CSSProperties = {
     ...(float && floatDelay ? { animationDelay: `${floatDelay}s` } : null),
     ...style,
@@ -66,7 +67,7 @@ export function GameObject({
       viewBox={OBJECT_VIEWBOX}
       width={size}
       height={size}
-      className={cls}
+      className={svgCls}
       style={st}
       role={label ? "img" : undefined}
       aria-label={label}

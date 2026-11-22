@@ -14,7 +14,7 @@ export type BracketHeadlineProps = {
   className?: string;
 };
 
-const SIZE: Record<HeadlineSize, string> = {
+export const HEADLINE_SIZE: Record<HeadlineSize, string> = {
   /** Giant poster word that still fits "[LEARN]" on a 360px screen. */
   poster: "text-[clamp(3.4rem,20vw,5.5rem)] leading-[0.82] tracking-[-0.06em]",
   display:
@@ -24,13 +24,13 @@ const SIZE: Record<HeadlineSize, string> = {
   h3: "text-[22px] leading-none tracking-[-0.02em]",
 };
 
-const HIGHLIGHT: Record<HighlightTone, string> = {
+export const HEADLINE_HIGHLIGHT: Record<HighlightTone, string> = {
   "lav-ink": "text-lav-ink",
   lav: "text-lav",
   paper: "text-paper",
 };
 
-const DEFAULT_TAG: Record<HeadlineSize, ElementType> = {
+export const HEADLINE_TAG: Record<HeadlineSize, ElementType> = {
   poster: "h1",
   display: "h1",
   h1: "h1",
@@ -48,7 +48,7 @@ function renderLine(
       <span
         key={`${lineKey}-${i}`}
         data-bracket=""
-        className={HIGHLIGHT[tone]}
+        className={HEADLINE_HIGHLIGHT[tone]}
       >
         {part}
       </span>
@@ -65,10 +65,10 @@ export function BracketHeadline({
   as,
   className,
 }: BracketHeadlineProps) {
-  const Tag = as ?? DEFAULT_TAG[size];
+  const Tag = as ?? HEADLINE_TAG[size];
   const lines = children.split("\n");
   return (
-    <Tag className={cn("font-extrabold", SIZE[size], className)}>
+    <Tag className={cn("font-extrabold", HEADLINE_SIZE[size], className)}>
       {lines.map((line, i) => (
         <Fragment key={i}>
           {i > 0 && <br />}

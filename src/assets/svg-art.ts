@@ -72,17 +72,17 @@ export const GRADIENTS: Record<string, Gradient> = {
 };
 
 const FILTERS: Record<string, string> = {
-  sticker: `<filter id="sticker" x="-20%" y="-20%" width="140%" height="140%">
+  sticker: `<filter id="sticker" x="-50%" y="-50%" width="200%" height="200%">
       <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="grow"/>
       <feFlood flood-color="#FFFFFF"/>
       <feComposite in2="grow" operator="in" result="halo"/>
       <feDropShadow in="halo" dx="0" dy="3" stdDeviation="3" flood-color="${INK}" flood-opacity=".18" result="haloShadow"/>
       <feMerge><feMergeNode in="haloShadow"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>`,
-  drop: `<filter id="drop" x="-30%" y="-30%" width="160%" height="170%">
+  drop: `<filter id="drop" x="-60%" y="-60%" width="220%" height="240%">
       <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="${INK}" flood-opacity=".28"/>
     </filter>`,
-  soft: `<filter id="soft"><feGaussianBlur stdDeviation="2"/></filter>`,
+  soft: `<filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2"/></filter>`,
 };
 
 const REF = /url\(#(\w+)\)/g;

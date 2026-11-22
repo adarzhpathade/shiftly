@@ -1,6 +1,7 @@
 import { useId, type CSSProperties } from "react";
 import { STICKER_VIEWBOX, stickerBody, type StickerPose } from "@/assets/stickers";
 import { renderSvgInner } from "@/assets/svg-art";
+import { cn } from "./cn";
 
 export type { StickerPose };
 
@@ -22,7 +23,7 @@ export function Sticker({ pose, size = 96, label, className, style }: StickerPro
       viewBox={STICKER_VIEWBOX}
       width={size}
       height={(size * 130) / 120}
-      className={className}
+      className={cn("overflow-visible", className)}
       style={style}
       role={label ? "img" : undefined}
       aria-label={label}

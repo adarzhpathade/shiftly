@@ -2,6 +2,7 @@
 @import "../styles/tokens.css";
 
 html {
+  color-scheme: light;
   background: var(--color-cream);
   color: var(--color-ink);
 }

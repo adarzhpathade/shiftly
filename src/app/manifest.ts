@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { BRAND_CREAM, BRAND_INK } from "@/styles/brand-colors";
+import { BRAND_CREAM } from "@/styles/brand-colors";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     orientation: "portrait",
     background_color: BRAND_CREAM,
-    theme_color: BRAND_INK,
+    theme_color: BRAND_CREAM,
     categories: ["education", "productivity"],
     icons: [
       { src: "/icons/icon-192", sizes: "192x192", type: "image/png", purpose: "any" },

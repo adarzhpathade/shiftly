@@ -1,3 +1,4 @@
+import { AnimatedCheck } from "./Motion";
 import { cn } from "./cn";
 import { SOFT_BG_CLASS, type SoftTone } from "./tones";
 
@@ -48,7 +49,7 @@ export function HabitRow({
         onClick={onToggle}
         aria-pressed={checked}
         aria-label={`${checked ? "Uncheck" : "Check in"}: ${title}`}
-        className="-m-1.5 grid size-11 flex-none place-items-center rounded-full transition-transform duration-300 ease-spring active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-lav-ink"
+        className="-m-1.5 grid size-11 flex-none place-items-center rounded-full transition-transform duration-300 ease-spring focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-lav-ink active:scale-90"
       >
         <span
           className={cn(
@@ -56,19 +57,7 @@ export function HabitRow({
             checked && "bg-ink",
           )}
         >
-          {checked && (
-            <svg viewBox="0 0 16 16" aria-hidden="true" className="size-4">
-              <path
-                d="M3 8.5l3 3 7-7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-lime"
-              />
-            </svg>
-          )}
+          {checked && <AnimatedCheck className="size-4 text-lime" />}
         </span>
       </button>
     </div>

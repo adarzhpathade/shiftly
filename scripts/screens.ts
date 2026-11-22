@@ -62,30 +62,49 @@ async function main() {
     await page.goto(`${BASE}/`);
     await page.waitForURL("**/welcome");
     expectPath(page, "/welcome");
-    await page.waitForTimeout(1000);
-    await shot(page, "splash");
+    // Mid-animation frames prove the splash actually moves.
+    await page.waitForTimeout(150);
+    await shot(page, "splash-150ms");
+    await page.waitForTimeout(250);
+    await shot(page, "splash-400ms");
+    await page.waitForTimeout(500);
+    await shot(page, "splash-900ms");
+    await page.waitForTimeout(1100);
+    await shot(page, "splash-settled");
 
     // Auto-advance to the intro.
     await page
       .getByRole("button", { name: "Next", exact: true })
       .waitFor({ timeout: 5000 });
-    await page.waitForTimeout(600);
+    await shot(page, "intro-1-150ms");
+    await page.waitForTimeout(250);
+    await shot(page, "intro-1-400ms");
+    await page.waitForTimeout(500);
+    await shot(page, "intro-1-900ms");
+    await page.waitForTimeout(1200);
     await shot(page, "intro-1-learn");
     await page.getByRole("button", { name: "Next", exact: true }).click();
-    await page.waitForTimeout(900);
+    await page.waitForTimeout(300);
+    await shot(page, "intro-2-mid-transition");
+    await page.waitForTimeout(1500);
     await shot(page, "intro-2-build");
     await page.getByRole("button", { name: "Next", exact: true }).click();
-    await page.waitForTimeout(900);
+    await page.waitForTimeout(1800);
     await shot(page, "intro-3-level-up");
     await page.getByRole("button", { name: "Get started" }).click();
     await page.waitForURL("**/login");
     expectPath(page, "/login");
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(1400);
     await shot(page, "login-empty");
 
-    // Intro is not shown again: a protected page now goes to /login.
+    // Intro is not shown again (unless NEXT_PUBLIC_INTRO_ALWAYS=1): a protected page now goes to /login.
+    const always = process.env.NEXT_PUBLIC_INTRO_ALWAYS === "1";
     await page.goto(`${BASE}/`);
-    await page.waitForURL("**/login**");
+    await page.waitForURL(always ? "**/welcome" : "**/login**");
+    if (always) {
+      console.log("ok   intro-always: unauth / -> /welcome");
+      await page.goto(`${BASE}/login`);
+    }
     console.log(
       `ok   unauth / -> ${new URL(page.url()).pathname}${new URL(page.url()).search}`,
     );

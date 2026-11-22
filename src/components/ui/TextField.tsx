@@ -1,4 +1,5 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from "react";
+import { ShakeText } from "./Motion";
 import { cn } from "./cn";
 
 export type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
@@ -61,13 +62,13 @@ export function TextField({
         )}
       </div>
       {error ? (
-        <p
+        <ShakeText
           id={`${inputId}-error`}
           role="alert"
           className="mt-1.5 text-[13px] font-bold text-red"
         >
           {error}
-        </p>
+        </ShakeText>
       ) : hint ? (
         <p id={`${inputId}-hint`} className="mt-1.5 text-[13px] font-semibold text-ink-soft">
           {hint}

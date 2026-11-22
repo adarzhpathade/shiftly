@@ -7,15 +7,24 @@ import {
   Card,
   BUDDY_KEYS,
   ChatBubble,
+  AnimatedCheck,
+  AnimatedWordmark,
   Chip,
   ChoiceCard,
+  Drop,
   GAME_OBJECT_NAMES,
   GameObject,
   HabitRow,
   MasteryRing,
   MoodMeter,
   PhotoCard,
+  Pop,
   PopIn,
+  Rise,
+  RiseHeadline,
+  RiseText,
+  ShakeText,
+  Stagger,
   Sticker,
   StepDots,
   StreakPill,
@@ -483,9 +492,53 @@ export default function GalleryPage() {
         </Grid>
       </Section>
 
-      <Section title="[Sticker] buddy" sub="Loose line, white sticker edge: wave, headset, cheer.">
+      <Section title="[Motion]" sub="Stagger, Rise, Pop, Drop, RiseText, ShakeText, AnimatedCheck, AnimatedWordmark. They play on load; reduced motion falls back to fades.">
+        <Grid>
+          <Tile label="Stagger + Rise / Pop / Drop" className="flex flex-col items-center">
+            <Stagger className="flex w-full flex-col items-center gap-2">
+              <Rise>
+                <Chip tone="lime">Rise</Chip>
+              </Rise>
+              <div className="flex items-end gap-3">
+                <Pop wiggle>
+                  <GameObject name="coin" size={64} float />
+                </Pop>
+                <Drop delay={0.2}>
+                  <GameObject name="gift" size={80} float />
+                </Drop>
+              </div>
+              <Rise>
+                <p className="text-sm font-semibold text-ink-soft">Fades up last</p>
+              </Rise>
+            </Stagger>
+          </Tile>
+          <Tile label="RiseHeadline (letters)" className="flex flex-col items-center gap-3">
+            <RiseHeadline size="display" by="letters">
+              {"LEVEL\n[UP]"}
+            </RiseHeadline>
+          </Tile>
+          <Tile label="RiseText (words)" className="flex flex-col items-center gap-3">
+            <RiseText className="text-center text-xl font-extrabold">Small habits, [big wins]</RiseText>
+          </Tile>
+          <Tile label="ThemeColor / useThemeColor" className="text-sm font-semibold">
+            Sets the phone browser bar colour to a page token and restores it on unmount:
+            <code> useThemeColor(&quot;lav&quot;)</code> or <code>&lt;ThemeColor color=&quot;lav&quot; /&gt;</code>.
+          </Tile>
+          <Tile label="AnimatedWordmark" className="flex justify-center">
+            <AnimatedWordmark sizeClass="text-[44px]" />
+          </Tile>
+          <Tile label="ShakeText + AnimatedCheck" className="flex flex-col items-center gap-3">
+            <ShakeText className="text-[14px] font-bold text-red">Please enter a valid email</ShakeText>
+            <span className="grid size-9 place-items-center rounded-full bg-ink text-lime">
+              <AnimatedCheck className="size-5" />
+            </span>
+          </Tile>
+        </Grid>
+      </Section>
+
+      <Section title="[Sticker] buddy" sub="Loose line, white sticker edge: wave, headset, cheer, think.">
         <div className="flex flex-wrap gap-2">
-          {(["wave", "headset", "cheer"] as const).map((p) => (
+          {(["wave", "headset", "cheer", "think"] as const).map((p) => (
             <Sticker key={p} pose={p} size={110} label={`Sticker: ${p}`} />
           ))}
         </div>

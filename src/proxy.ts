@@ -4,6 +4,9 @@ import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
+// UI review mode: always show the intro, even when logged in or after it was seen.
+const INTRO_ALWAYS = process.env.NEXT_PUBLIC_INTRO_ALWAYS === "1";
+
 export const proxy = auth((req) => {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
@@ -40,6 +43,9 @@ export const proxy = auth((req) => {
   // Public auth & onboarding landing routes: /welcome, /login, /register
   const isAuthOrWelcomeRoute = pathname === "/welcome" || pathname === "/login" || pathname === "/register";
   if (isAuthOrWelcomeRoute) {
+    if (INTRO_ALWAYS && pathname === "/welcome") {
+      return NextResponse.next();
+    }
     if (isLoggedIn) {
       return NextResponse.redirect(new URL("/", nextUrl));
     }
@@ -49,7 +55,7 @@ export const proxy = auth((req) => {
   // Everything else requires an active session
   if (!isLoggedIn) {
     const hasSeenIntro = req.cookies.has("seen_intro");
-    if (!hasSeenIntro) {
+    if (INTRO_ALWAYS || !hasSeenIntro) {
       return NextResponse.redirect(new URL("/welcome", nextUrl));
     }
     const loginUrl = new URL("/login", nextUrl);

@@ -28,4 +28,5 @@ export const OBJECT_SOURCES: Record<GameObjectName, ObjectSource> = {
   headset: { kind: "svg" },
   calendar: { kind: "svg" },
   target: { kind: "svg" },
+  sparkle: { kind: "svg" },
 };

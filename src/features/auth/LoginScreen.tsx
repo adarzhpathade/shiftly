@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { BracketHeadline, Button, Sticker, TextField } from "@/components/ui";
+import {
+  Button,
+  Pop,
+  Rise,
+  RiseHeadline,
+  ShakeText,
+  Sticker,
+  TextField,
+} from "@/components/ui";
 import { AuthShell } from "./AuthShell";
 import { PasswordField } from "./PasswordField";
 import type { DemoAccount, FormResult } from "./types";
@@ -15,7 +23,11 @@ export type LoginScreenProps = {
   demoAccounts?: readonly DemoAccount[];
 };
 
-export function LoginScreen({ onSubmit, registerHref, demoAccounts }: LoginScreenProps) {
+export function LoginScreen({
+  onSubmit,
+  registerHref,
+  demoAccounts,
+}: LoginScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -38,65 +50,82 @@ export function LoginScreen({ onSubmit, registerHref, demoAccounts }: LoginScree
 
   return (
     <AuthShell>
-      <div className="relative mt-8">
-        <BracketHeadline size="h1" className="max-w-[240px]">
-          {"Welcome\n[back]"}
-        </BracketHeadline>
-        <Sticker
-          pose="wave"
-          size={112}
-          className="absolute -top-3 right-1 rotate-6"
-        />
-      </div>
-      <p className="mt-2 max-w-[200px] text-[15px] font-semibold text-ink-soft">
-        Log in to keep your streak.
-      </p>
+      <Pop wiggle className="mt-6 flex justify-center">
+        <Sticker pose="wave" size={104} className="rotate-3" />
+      </Pop>
+      <RiseHeadline size="h1" className="mt-1" delay={0.25}>
+        {"Welcome\n[back]"}
+      </RiseHeadline>
+      <Rise>
+        <p className="mt-2 text-center text-[15px] font-semibold text-ink-soft">
+          Log in to keep your streak.
+        </p>
+      </Rise>
 
       <form action={submit} noValidate className="mt-6 flex flex-col gap-4">
-        {failed && (!failed.fieldErrors || Object.keys(fieldErrors).length === 0) && (
-          <p role="alert" className="rounded-card bg-paper p-3 text-[14px] font-bold text-red">
-            {failed.error}
-          </p>
-        )}
+        {failed &&
+          (!failed.fieldErrors || Object.keys(fieldErrors).length === 0) && (
+            <ShakeText
+              role="alert"
+              className="rounded-card bg-paper p-3 text-center text-[14px] font-bold text-red"
+            >
+              {failed.error}
+            </ShakeText>
+          )}
 
-        <TextField
-          label="Email"
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          autoCapitalize="none"
-          placeholder="name@company.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={fieldErrors.email}
-          required
-        />
-        <PasswordField
-          label="Password"
-          name="password"
-          autoComplete="current-password"
-          placeholder="Your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={fieldErrors.password}
-          required
-        />
+        <Rise>
+          <TextField
+            label="Email"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            placeholder="name@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={fieldErrors.email}
+            required
+          />
+        </Rise>
+        <Rise>
+          <PasswordField
+            label="Password"
+            name="password"
+            autoComplete="current-password"
+            placeholder="Your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={fieldErrors.password}
+            required
+          />
+        </Rise>
 
-        <Button type="submit" variant="ink" size="lg" fullWidth disabled={pending} className="mt-2">
-          {pending ? "Logging in..." : "Log in"}
-        </Button>
+        <Rise>
+          <Button
+            type="submit"
+            variant="ink"
+            size="lg"
+            fullWidth
+            disabled={pending}
+            className="mt-2"
+          >
+            {pending ? "Logging in..." : "Log in"}
+          </Button>
+        </Rise>
       </form>
 
-      <p className="mt-5 text-center text-[15px] font-semibold text-ink-soft">
-        New here?{" "}
-        <Link
-          href={registerHref}
-          className="font-extrabold text-lav-ink underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lav-ink"
-        >
-          Create an account
-        </Link>
-      </p>
+      <Rise>
+        <p className="mt-5 text-center text-[15px] font-semibold text-ink-soft">
+          New here?{" "}
+          <Link
+            href={registerHref}
+            className="font-extrabold text-lav-ink underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lav-ink"
+          >
+            Create an account
+          </Link>
+        </p>
+      </Rise>
 
       {demoAccounts && demoAccounts.length > 0 && (
         <section

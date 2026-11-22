@@ -1,13 +1,20 @@
 "use client";
 
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useActionState, useState } from "react";
 import {
+  AnimatedCheck,
   Avatar,
   BUDDIES,
   BUDDY_KEYS,
-  BracketHeadline,
   Button,
+  Pop,
+  Rise,
+  RiseHeadline,
+  ShakeText,
+  Stagger,
   StepDots,
+  useThemeColor,
   type BuddyKey,
   type SurfaceTone,
 } from "@/components/ui";
@@ -30,7 +37,10 @@ export type SetupFlowProps = {
   templates: readonly SetupTemplate[];
   initialAvatarKey?: string;
   /** Saves the choices. The host navigates away on `{ ok: true }`. */
-  onComplete: (input: { avatarKey: string; templateIds: string[] }) => Promise<SetupResult>;
+  onComplete: (input: {
+    avatarKey: string;
+    templateIds: string[];
+  }) => Promise<SetupResult>;
 };
 
 const MIN = 2;
@@ -55,21 +65,6 @@ const CARD_BG: Record<SurfaceTone, string> = {
   ink: "bg-ink",
 };
 
-function Check() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className="size-4">
-      <path
-        d="M3 8.5l3 3 7-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function BuddyStep({
   name,
   value,
@@ -83,58 +78,73 @@ function BuddyStep({
 }) {
   const first = name.trim().split(/\s+/)[0] || "you";
   return (
-    <>
-      <BracketHeadline size="h1">{"Pick your\n[buddy]"}</BracketHeadline>
-      <p className="mt-2 text-[15px] font-semibold text-ink-soft">
-        Hi {first}! Your buddy cheers you on everywhere in shiftly.
-      </p>
+    <Stagger className="flex flex-1 flex-col" gap={0.06}>
+      <RiseHeadline size="h1">{"Pick your\n[buddy]"}</RiseHeadline>
+      <Rise>
+        <p className="mt-2 text-center text-[15px] font-semibold text-ink-soft">
+          Hi {first}! Your buddy cheers you on everywhere in shiftly.
+        </p>
+      </Rise>
 
       <div
         role="radiogroup"
         aria-label="Choose your buddy"
         className="mt-6 grid grid-cols-3 gap-x-2 gap-y-4"
       >
-        {BUDDY_KEYS.map((key) => {
+        {BUDDY_KEYS.map((key, i) => {
           const selected = key === value;
           return (
-            <button
-              key={key}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              aria-label={BUDDIES[key].label}
-              onClick={() => onChange(key)}
-              className="group flex flex-col items-center gap-1.5 rounded-card p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lav-ink"
-            >
-              <span
-                className={cn(
-                  "relative rounded-full transition-transform duration-300 ease-spring",
-                  selected
-                    ? "scale-105 ring-4 ring-ink ring-offset-[3px] ring-offset-cream"
-                    : "group-active:scale-95",
-                )}
+            <Pop key={key} delay={i * 0.03} className="flex justify-center">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={BUDDIES[key].label}
+                onClick={() => onChange(key)}
+                className="group flex flex-col items-center gap-1.5 rounded-card p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lav-ink"
               >
-                <Avatar name={BUDDIES[key].label} avatarKey={key} size="xl" />
-                {selected && (
-                  <span className="absolute -right-1 -bottom-1 grid size-7 place-items-center rounded-full bg-ink text-lime">
-                    <Check />
-                  </span>
-                )}
-              </span>
-              <span className={cn("text-[13px] font-bold", selected ? "text-ink" : "text-ink-soft")}>
-                {BUDDIES[key].label}
-              </span>
-            </button>
+                <motion.span
+                  initial={false}
+                  animate={
+                    selected
+                      ? { scale: [1, 1.22, 1.06], rotate: [0, -9, 6, 0] }
+                      : { scale: 1, rotate: 0 }
+                  }
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className={cn(
+                    "relative rounded-full",
+                    selected
+                      ? "ring-4 ring-ink ring-offset-[3px] ring-offset-cream"
+                      : "group-active:scale-95",
+                  )}
+                >
+                  <Avatar name={BUDDIES[key].label} avatarKey={key} size="xl" />
+                  {selected && (
+                    <span className="absolute -right-1 -bottom-1 grid size-7 place-items-center rounded-full bg-ink text-lime">
+                      <AnimatedCheck />
+                    </span>
+                  )}
+                </motion.span>
+                <span
+                  className={cn(
+                    "text-[13px] font-bold",
+                    selected ? "text-ink" : "text-ink-soft",
+                  )}
+                >
+                  {BUDDIES[key].label}
+                </span>
+              </button>
+            </Pop>
           );
         })}
       </div>
 
-      <div className="mt-auto pt-8">
+      <Rise className="mt-auto pt-8">
         <Button variant="ink" size="lg" fullWidth onClick={onNext}>
           Next
         </Button>
-      </div>
-    </>
+      </Rise>
+    </Stagger>
   );
 }
 
@@ -155,11 +165,16 @@ function HabitsStep({
 }) {
   const full = selected.length >= MAX;
   return (
-    <>
-      <BracketHeadline size="h1">{"Pick [2–3]\nhabits to start"}</BracketHeadline>
-      <p className="mt-2 text-[15px] font-semibold text-ink-soft" aria-live="polite">
-        {selected.length} of {MAX} picked. You can change them later.
-      </p>
+    <Stagger className="flex flex-1 flex-col" gap={0.06}>
+      <RiseHeadline size="h1">{"Pick [2–3]\nhabits to start"}</RiseHeadline>
+      <Rise>
+        <p
+          className="mt-2 text-center text-[15px] font-semibold text-ink-soft"
+          aria-live="polite"
+        >
+          {selected.length} of {MAX} picked. You can change them later.
+        </p>
+      </Rise>
 
       <ul className="mt-5 flex flex-col gap-2.5">
         {templates.map((t, i) => {
@@ -167,57 +182,64 @@ function HabitsStep({
           const blocked = full && !on;
           return (
             <li key={t.key}>
-              <button
-                type="button"
-                aria-pressed={on}
-                disabled={blocked}
-                onClick={() => onToggle(t.key)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-card bg-paper p-3 text-left ring-[3px] transition-transform duration-300 ease-spring",
-                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lav-ink",
-                  "active:scale-[0.98] disabled:opacity-45",
-                  on ? "ring-ink" : "ring-transparent",
-                )}
-              >
-                <span
-                  aria-hidden="true"
+              <Rise>
+                <button
+                  type="button"
+                  aria-pressed={on}
+                  disabled={blocked}
+                  onClick={() => onToggle(t.key)}
                   className={cn(
-                    "grid size-12 flex-none place-items-center rounded-[16px] text-2xl",
-                    CARD_BG[CARD_TONES[i % CARD_TONES.length] ?? "peach"],
+                    "flex w-full items-center gap-3 rounded-card bg-paper p-3 text-left ring-[3px] transition-transform duration-300 ease-spring",
+                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lav-ink",
+                    "active:scale-[0.98] disabled:opacity-45",
+                    on ? "ring-ink" : "ring-transparent",
                   )}
                 >
-                  {ICON_EMOJI[t.icon] ?? "✨"}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <b className="block text-[16px] leading-tight font-extrabold tracking-tight">
-                    {t.title}
-                  </b>
-                  <small className="mt-0.5 block text-[13px] leading-snug font-semibold text-ink-soft">
-                    {t.description}
-                  </small>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "grid size-7 flex-none place-items-center rounded-full border-2 transition-colors",
-                    on ? "border-ink bg-ink text-lime" : "border-muted text-transparent",
-                  )}
-                >
-                  <Check />
-                </span>
-              </button>
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "grid size-12 flex-none place-items-center rounded-[16px] text-2xl",
+                      CARD_BG[CARD_TONES[i % CARD_TONES.length] ?? "peach"],
+                    )}
+                  >
+                    {ICON_EMOJI[t.icon] ?? "✨"}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <b className="block text-[16px] leading-tight font-extrabold tracking-tight">
+                      {t.title}
+                    </b>
+                    <small className="mt-0.5 block text-[13px] leading-snug font-semibold text-ink-soft">
+                      {t.description}
+                    </small>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "grid size-7 flex-none place-items-center rounded-full border-2 transition-colors duration-200",
+                      on
+                        ? "border-ink bg-ink text-lime"
+                        : "border-muted text-transparent",
+                    )}
+                  >
+                    {on && <AnimatedCheck />}
+                  </span>
+                </button>
+              </Rise>
             </li>
           );
         })}
       </ul>
 
       {error && (
-        <p role="alert" className="mt-4 rounded-card bg-paper p-3 text-[14px] font-bold text-red">
+        <ShakeText
+          role="alert"
+          className="mt-4 rounded-card bg-paper p-3 text-center text-[14px] font-bold text-red"
+        >
           {error}
-        </p>
+        </ShakeText>
       )}
 
-      <div className="mt-auto flex flex-col gap-2 pt-6">
+      <Rise className="mt-auto flex flex-col gap-2 pt-6">
         <Button
           type="submit"
           variant="ink"
@@ -235,29 +257,35 @@ function HabitsStep({
         >
           Back
         </button>
-      </div>
-    </>
+      </Rise>
+    </Stagger>
   );
 }
 
 /** Two-step setup: pick a buddy, then pick 2-3 starter habits. */
-export function SetupFlow({ name, templates, initialAvatarKey, onComplete }: SetupFlowProps) {
+export function SetupFlow({
+  name,
+  templates,
+  initialAvatarKey,
+  onComplete,
+}: SetupFlowProps) {
+  useThemeColor("cream");
   const [step, setStep] = useState<0 | 1>(0);
   const [avatarKey, setAvatarKey] = useState<BuddyKey>(
     BUDDY_KEYS.find((k) => k === initialAvatarKey) ?? "buddy-1",
   );
   const [selected, setSelected] = useState<string[]>([]);
 
-  const [result, submit, pending] = useActionState<SetupResult | null, FormData>(
-    async () => {
-      try {
-        return await onComplete({ avatarKey, templateIds: selected });
-      } catch {
-        return { ok: false, error: "Something went wrong. Please try again." };
-      }
-    },
-    null,
-  );
+  const [result, submit, pending] = useActionState<
+    SetupResult | null,
+    FormData
+  >(async () => {
+    try {
+      return await onComplete({ avatarKey, templateIds: selected });
+    } catch {
+      return { ok: false, error: "Something went wrong. Please try again." };
+    }
+  }, null);
 
   function toggle(key: string) {
     setSelected((cur) =>
@@ -270,36 +298,53 @@ export function SetupFlow({ name, templates, initialAvatarKey, onComplete }: Set
   }
 
   const error =
-    result && !result.ok ? (result.fieldErrors?.templateIds ?? result.error) : undefined;
+    result && !result.ok
+      ? (result.fieldErrors?.templateIds ?? result.error)
+      : undefined;
 
   return (
-    <main className="min-h-dvh bg-cream">
-      <form
-        action={submit}
-        className="mx-auto flex min-h-dvh max-w-[440px] flex-col px-gutter pt-5 pb-6"
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <StepDots count={2} active={step} label={`Step ${step + 1} of 2`} />
-          <span className="text-[13px] font-bold text-ink-soft">Step {step + 1} of 2</span>
-        </div>
-        {step === 0 ? (
-          <BuddyStep
-            name={name}
-            value={avatarKey}
-            onChange={setAvatarKey}
-            onNext={() => setStep(1)}
-          />
-        ) : (
-          <HabitsStep
-            templates={templates}
-            selected={selected}
-            onToggle={toggle}
-            onBack={() => setStep(0)}
-            error={error}
-            pending={pending}
-          />
-        )}
-      </form>
-    </main>
+    <MotionConfig reducedMotion="user">
+      <main className="min-h-dvh bg-cream">
+        <form
+          action={submit}
+          className="mx-auto flex min-h-dvh max-w-[440px] flex-col px-gutter pt-5 pb-6"
+        >
+          <div className="mb-6 flex items-center justify-between">
+            <StepDots count={2} active={step} label={`Step ${step + 1} of 2`} />
+            <span className="text-[13px] font-bold text-ink-soft">
+              Step {step + 1} of 2
+            </span>
+          </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={step}
+              className="flex flex-1 flex-col"
+              initial={{ opacity: 0, x: step === 0 ? -36 : 36 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: step === 0 ? 36 : -36 }}
+              transition={{ type: "spring", stiffness: 380, damping: 32 }}
+            >
+              {step === 0 ? (
+                <BuddyStep
+                  name={name}
+                  value={avatarKey}
+                  onChange={setAvatarKey}
+                  onNext={() => setStep(1)}
+                />
+              ) : (
+                <HabitsStep
+                  templates={templates}
+                  selected={selected}
+                  onToggle={toggle}
+                  onBack={() => setStep(0)}
+                  error={error}
+                  pending={pending}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </form>
+      </main>
+    </MotionConfig>
   );
 }
