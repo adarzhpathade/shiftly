@@ -1,0 +1,3 @@
+# assets
+
+SVGs and images.

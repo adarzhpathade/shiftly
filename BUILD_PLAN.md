@@ -27,7 +27,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 ## Step 1: Foundation (sequential, reviewed before Step 2)
 | ID | Task | Executor | Owner | Status |
 |---|---|---|---|---|
-| F1 | Next.js (App Router, TS strict) scaffold, Tailwind with design tokens from `design/style-preview.html`, Bricolage Grotesque, ESLint, Prettier, Vitest | Sonnet | Adarsh | todo |
+| F1 | Next.js (App Router, TS strict) scaffold, Tailwind with design tokens from `design/style-preview.html`, Bricolage Grotesque, ESLint, Prettier, Vitest | Sonnet | Adarsh | done (Next 16.4.6, React 19.3, Tailwind 4.3, TS 5.9) |
 | F2 | **Shared contract**: domain types (`src/lib/types.ts`), repository interfaces, mock implementations with fake delay, `src/data/index.ts` switch (mock or real) | Sonnet, reviewed by Opus | Adarsh | todo |
 | F3 | Prisma schema (all tables from overview section 9), Neon Postgres, first migration, demo company seed (1 company, 4 teams, ~20 users) | agy under Sonnet | Adarsh | todo |
 | F4 | Auth: Auth.js credentials login, roles (Employee / Manager / Admin), route protection | agy under Sonnet | Adarsh | todo |
@@ -109,7 +109,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 4. `npm test`: passes.
 5. Colour grep: no hex / `rgb(` / named colours outside the theme.
 6. Contract check: backend results match `src/lib/types.ts`.
-7. Visual check: headless screenshot at 360×800 compared with `design/style-preview.html`.
+7. Visual check: screenshot at 360×800 compared with `design/style-preview.html`. Use Playwright device emulation (headless Edge has a ~500px minimum window width and crops narrower shots).
 8. Pass → local commit. Fail → short fix brief; after 2 failed retries the task is `blocked` and goes to Adarsh.
 
 ## Worker setup (from preflight, 2026-11-22)
@@ -118,6 +118,12 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 - Headless command permission rules only match **exact** command lines; the only wildcard is `command(*)` (all commands).
 - `--sandbox` breaks `npm` and does not stop writes outside the folder, so it is not used.
 - Decision on command permissions (Adarsh, 2026-11-22): **Option B**. Workers run with `--mode accept-edits` and a settings file allowing `command(*)`. Guardrails: git checkpoint before every worker run, full diff review after, briefs forbid `git push` / `git reset` / deleting or writing outside the allowed paths, and the watcher reports anything harmful or unexpected to Adarsh immediately.
+
+## Setup decisions (Adarsh, 2026-11-22)
+- Package manager: **pnpm**
+- Database: **new Neon project** on Adarsh's account, Singapore region, created through the Neon connector. Created 2026-11-22: project `shiftly`, Postgres 18, database `shiftly`; `DATABASE_URL` (pooled) and `DIRECT_URL` (direct, for migrations) are in `.env`
+- Deploy: **Vercel from Step 1** (live HTTPS link early for PWA testing)
+- GitHub repo: **public**, named **shiftly**
 
 ## Worker brief template
 ```
