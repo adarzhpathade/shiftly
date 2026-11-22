@@ -48,6 +48,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | UI6 | Leaderboard (Team / Company, weekly / all time, podium) | Sonnet | Adarsh | todo |
 | UI7 | Profile (badges, progress charts) and Settings | Sonnet | Adarsh | todo |
 | UI8 | Celebration overlays: LEVEL UP, NEW BADGE, STREAK!, PERFECT | Sonnet | Adarsh | todo |
+| UI10 | Boss level: live call chat (streaming replies, typing indicator, mood meter, quick-reply chips) and boss result screen | Sonnet | Adarsh | todo |
 | UI9 | Offline and 404 pages | Haiku | Adarsh | todo |
 
 ### Backend (implements the F2 contract)
@@ -57,14 +58,15 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | B2 | Gamification: XP events, levels, badge rules, daily quests, Today's Challenge | agy under Sonnet | Adarsh | todo |
 | B3 | **Habits**: create / edit / delete, check-in, streak calculation | agy (run by Friend) | **Friend** | todo, waits on F2–F4 |
 | B4 | **Leaderboard**: weekly / all-time XP, Team / Company, "your rank" | agy (run by Friend) | **Friend** | todo, waits on F2–F4 |
-| B5 | **Scenario content**: 20 scenarios (4 categories × 5) + seed script | agy (run by Friend) | **Friend** | todo, waits on F3 |
+| B5 | **Scenario content**: 16 guided scenarios (4 categories × 4) + 4 boss personas + seed script | agy (run by Friend) | **Friend** | todo, waits on F3 |
 | B6 | Web push: habit reminders, streak-at-risk, new assignment | agy under Sonnet | Adarsh | todo |
+| B7 | **AI roleplay engine** (NVIDIA Nemotron): customer persona, judge with JSON scores, mood meter, win / lose rules, daily limits, safety, fallback to multiple choice, streaming endpoint | agy under Sonnet | Adarsh | todo, needs `NVIDIA_API_KEY` |
 
 ### Connection (swap mock → real, one feature at a time)
 | ID | Task | Executor | Owner | Status |
 |---|---|---|---|---|
 | C1 | Auth + onboarding | agy under Sonnet | Adarsh | todo |
-| C2 | Training (B1 + B2) | agy under Sonnet | Adarsh | todo |
+| C2 | Training (B1 + B2 + B7) | agy under Sonnet | Adarsh | todo |
 | C3 | Habits (B3) | agy under Sonnet | Adarsh | todo |
 | C4 | Leaderboard, Profile (B2 + B4) | agy under Sonnet | Adarsh | todo |
 
@@ -115,7 +117,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 - Auto mode is **not available** on this account. `--mode accept-edits` allows file edits.
 - Headless command permission rules only match **exact** command lines; the only wildcard is `command(*)` (all commands).
 - `--sandbox` breaks `npm` and does not stop writes outside the folder, so it is not used.
-- Decision on command permissions: **pending** (see chat).
+- Decision on command permissions (Adarsh, 2026-11-22): **Option B**. Workers run with `--mode accept-edits` and a settings file allowing `command(*)`. Guardrails: git checkpoint before every worker run, full diff review after, briefs forbid `git push` / `git reset` / deleting or writing outside the allowed paths, and the watcher reports anything harmful or unexpected to Adarsh immediately.
 
 ## Worker brief template
 ```

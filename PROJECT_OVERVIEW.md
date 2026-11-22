@@ -66,14 +66,29 @@ Rejected extra modes (Rush, Team Battle, separate Practice, AI Roleplay) to keep
 | **Problem Solving** | Root cause, options, follow-through | Repeated issue, request outside policy, system outage | Teal |
 
 - Professional communication (tone, empathy, etiquette) is not a separate category. It is commented on in the feedback of every scenario.
-- **5 scenarios per category (20 total):** 2 Beginner → 2 Intermediate → 1 Advanced, shown as a **level path** like a game map. Earning stars unlocks the next level.
-- Each scenario: a short situation (customer "chat bubble" style) and **3–4 response choices**.
-- Each choice is rated **Best / Okay / Poor**, gives points and explains *why*.
-- Advanced scenarios are **multi-step** (2–3 steps): the conversation continues after your reply.
+- **5 levels per category**, shown as a **level path** like a game map. Earning stars unlocks the next level:
+  - **Levels 1–4 (Guided):** 2 Beginner + 2 Intermediate multiple-choice scenarios (16 total).
+  - **Level 5 (BOSS): Live call** with an AI customer (4 boss personas, one per category).
+- **Guided scenario:** a short situation (customer "chat bubble" style) and **3–4 response choices**. Each choice is rated **Best / Okay / Poor**, gives points and explains *why*. Intermediate scenarios can be **multi-step** (2–3 steps).
+- **Boss level (AI roleplay):** see 5.2a.
 - Result screen: score, stars (1–3), XP earned and the feedback for each step.
 - **Mastery ring** per category fills as stars are earned.
 - Any scenario can be replayed to improve the score (no separate practice mode).
 - **Today's Challenge:** one highlighted scenario per day for bonus XP.
+
+### 5.2a Boss Level: Live Call with an AI Customer
+The last level of every category is a free-text chat with an AI customer who behaves like a real person. Powered by **NVIDIA Nemotron** through NVIDIA's OpenAI-compatible API.
+
+- **Two AI roles:**
+  1. **Customer:** a persona with a name, problem, starting mood and hidden goal (e.g. "Mr. Sharma, third call about a refund, angry, calms down only if someone takes ownership"). Stays in character; replies stream word by word.
+  2. **Judge:** silently scores every user reply on **empathy, ownership, clarity, solution and tone** and returns structured JSON.
+- **Mood meter (boss health bar):** moves 😡 → 😐 → 🙂 with each reply.
+- **Win:** customer calm and problem resolved. **Lose:** mood hits rock bottom. Maximum ~8 turns.
+- **Result:** stars, XP, score per skill, and "A better reply would be…" for the weakest reply.
+- **Input:** typing with quick-reply chips; voice input (Web Speech API) optional.
+- **Limits and safety:** API key server-side only; ~10 boss attempts per user per day; reply length cap; off-topic or abusive input ends the call politely.
+- **Fallback:** if the AI API fails, the boss switches to a multiple-choice version of the same scenario.
+- Conversations are saved so managers can review them.
 
 ### 5.3 Habit Mode (core)
 - Create habits from **templates** (Punctuality, Effective Communication, Task Completion, Teamwork, Customer Follow-up, Daily Learning) or a custom habit.
@@ -110,7 +125,7 @@ Rejected extra modes (Rush, Team Battle, separate Practice, AI Roleplay) to keep
 - Offline basics: app shell and today's habits load without internet. Check-ins sync when back online.
 
 ### 5.8 Optional / Future (only if time allows)
-- **AI feedback:** user types a free-text reply to a customer, and AI rates it and suggests a better response.
+- Voice input for the boss level (speech to text).
 - Personalised recommendations ("You score low in Difficult Customers, try these").
 - Dark mode.
 - Export reports (PDF/CSV) for managers.
@@ -121,9 +136,9 @@ Rejected extra modes (Rush, Team Battle, separate Practice, AI Roleplay) to keep
 
 | Tier | Features |
 |---|---|
-| **Must have** | Auth and roles, scenario training with feedback and scoring, habit check-ins with streaks, XP and levels, employee home dashboard, PWA install |
+| **Must have** | Auth and roles, guided scenarios with feedback and scoring, **AI boss level**, habit check-ins with streaks, XP and levels, employee home dashboard, PWA install |
 | **Should have** | Badges, daily quests, leaderboard, progress charts, admin scenario editor, manager team dashboard, push reminders |
-| **Nice to have** | Multi-step branching scenarios, offline check-in sync, AI feedback, recommendations, dark mode, report export |
+| **Nice to have** | Voice input, offline check-in sync, recommendations, dark mode, report export |
 
 ---
 
@@ -184,7 +199,7 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | Auth | **Auth.js (NextAuth)** with email and password | Role-based sessions |
 | PWA | Web app manifest + service worker (**Serwist**) + Web Push | Install, offline shell, reminders |
 | Hosting | **Vercel** | Free, auto-deploy, HTTPS (needed for PWA and push) |
-| AI (optional) | Vercel AI Gateway | Only for the optional AI feedback feature |
+| AI | **NVIDIA Nemotron** (NVIDIA API, OpenAI-compatible) | Boss-level AI customer and judge |
 
 ---
 
@@ -207,6 +222,9 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | `DailyQuest` | id, userId, date, type, target, progress, completed |
 | `Assignment` | id, teamId, scenarioId, dueDate, assignedBy |
 | `XpEvent` | id, userId, source, amount, createdAt (used for the weekly leaderboard) |
+| `BossPersona` | id, categoryId, name, problem, startMood, hiddenGoal, systemPrompt |
+| `RoleplaySession` | id, userId, personaId, status (ACTIVE/WON/LOST/FALLBACK), finalMood, stars, xpEarned, startedAt, endedAt |
+| `RoleplayTurn` | id, sessionId, order, userMessage, customerReply, moodAfter, scores (empathy, ownership, clarity, solution, tone), feedback |
 
 ---
 
@@ -228,7 +246,7 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | | **Training tab** | |
 | 6 | Categories | 4 coloured category cards with mastery rings |
 | 7 | Level path | Game-map path of a category's 5 scenarios, with stars and locks |
-| 8 | Scenario player | Customer chat bubble, 3–4 choice cards, feedback after each answer |
+| 8 | Scenario player | Guided: customer chat bubble, 3–4 choice cards, feedback after each answer. Boss: live chat with the AI customer, mood meter, quick-reply chips |
 | 9 | Result | Score, 1–3 stars, XP count-up, feedback for each step; Replay / Next |
 | | **Habits tab** | |
 | 10 | My habits | Today's habits, one-tap check-in, streak on each |
@@ -261,7 +279,7 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | 1 | Finalise this overview | Approved scope |
 | 2 | **Design prototypes** in HTML (like the Delivery `design/` folder): tokens, hero-object SVGs, key mobile screens | Clickable prototype and final palette |
 | 3 | Project setup: Next.js, Tailwind tokens, Prisma + Neon, auth, PWA shell | Running skeleton, deployed |
-| 4 | Training Mode + seed scenarios (20, across 4 categories) | Playable training |
+| 4 | Training Mode: 16 guided scenarios + 4 AI boss personas | Playable training |
 | 5 | Habit module: check-ins, streaks, heatmap | Working habits |
 | 6 | Gamification: XP, levels, badges, quests, leaderboard, celebrations | Game layer |
 | 7 | Dashboards and charts (employee + manager) | Analytics |
@@ -297,4 +315,6 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | 2026-11-22 | 20 scenarios: 5 per category (2 Beginner, 2 Intermediate, 1 Advanced multi-step) |
 | 2026-11-22 | Employee PWA: 15 pages + 4 celebration overlays, 5 bottom tabs. Progress and Badges merged into Profile |
 | 2026-11-22 | Leaderboard is company-only: Team (default) and Company views, weekly XP reset plus All time |
+| 2026-11-22 | **AI boss level:** level 5 of every category is a live chat with an AI customer (NVIDIA Nemotron) plus an AI judge and mood meter. Boss level only, no separate roleplay mode. Content becomes 16 guided scenarios + 4 boss personas |
+| 2026-11-22 | Workers run commands themselves (Option B), with git checkpoints and diff review |
 | 2026-11-22 | **Visual style changed** to Klubi-inspired playful identity: cream / lime / lavender / maroon, soft 3D objects (AI renders), real photos, loose sticker character. Flat thick-outline Delivery style dropped |
