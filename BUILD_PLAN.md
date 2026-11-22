@@ -30,9 +30,9 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | F1 | Next.js (App Router, TS strict) scaffold, Tailwind with design tokens from `design/style-preview.html`, Bricolage Grotesque, ESLint, Prettier, Vitest | Sonnet | Adarsh | done (Next 16.4.6, React 19.3, Tailwind 4.3, TS 5.9) |
 | F2 | **Shared contract**: domain types (`src/lib/types.ts`), repository interfaces, mock implementations with fake delay, `src/data/index.ts` switch (mock or real) | Sonnet, reviewed by Opus | Adarsh | done (59 tests) |
 | F3 | Prisma schema (all tables from overview section 9), Neon Postgres, first migration, demo company seed (1 company, 4 teams, ~20 users) | agy under Sonnet | Adarsh | done (Prisma 7.10.1, 20 models, migration init, seed verified) |
-| F4 | Auth: Auth.js credentials login, roles (Employee / Manager / Admin), route protection | agy under Sonnet | Adarsh | todo |
+| F4 | Auth: Auth.js credentials login, roles (Employee / Manager / Admin), route protection | agy under Sonnet | Adarsh | in progress |
 | F5 | UI kit from the style preview: buttons, pills, chips, cards, bracket headline, tab bar, sticker buddy (3 poses), 3D object placeholders (swappable for AI renders), XP bar, mastery ring | Sonnet | Adarsh | done (19 components, /dev/gallery) |
-| F6 | PWA shell: manifest, icons, service worker (Serwist), install prompt | Sonnet | Adarsh | todo |
+| F6 | PWA shell: manifest, icons, service worker (Serwist), install prompt | Sonnet | Adarsh | done (hand-written sw.js, generated PNG icons) |
 | F7 | Dev **Screen Gallery** route (`/dev/gallery`) listing every screen and state | Haiku | Adarsh | merged into F5 |
 
 ## Step 2: Features (parallel, max 3 workers at a time)
