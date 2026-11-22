@@ -199,7 +199,7 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | Auth | **Auth.js (NextAuth)** with email and password | Role-based sessions |
 | PWA | Web app manifest + service worker (**Serwist**) + Web Push | Install, offline shell, reminders |
 | Hosting | **Vercel** | Free, auto-deploy, HTTPS (needed for PWA and push) |
-| AI | **OpenRouter**: ERNIE 5.5 Flash (customer), Perplexity Decider Flash V1.3 (judge) | One key, free models, swappable through `.env` |
+| AI | **Groq** (main): `openai/gpt-oss-120b` plays the customer and judges in one structured call. **OpenRouter** (backup): ERNIE 5.5 Flash customer + Perplexity Decider Flash judge. Then multiple-choice fallback | Free: Groq 1,000 requests/day; only `:free`/free-plan models allowed; models set in `.env` |
 
 ---
 
@@ -317,5 +317,6 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | 2026-11-22 | Leaderboard is company-only: Team (default) and Company views, weekly XP reset plus All time |
 | 2026-11-22 | **AI boss level:** level 5 of every category is a live chat with an AI customer (originally NVIDIA Nemotron) plus an AI judge and mood meter. Boss level only, no separate roleplay mode. Content becomes 16 guided scenarios + 4 boss personas |
 | 2026-11-22 | AI provider changed to **OpenRouter**: ERNIE 5.5 Flash Preview as the customer, Perplexity Decider Flash V1.3 as the judge (free models; config in `.env`) |
+| 2026-11-22 | **AI provider final:** Groq free plan as main (verified 1,000 requests/day, 8,000 tokens/min; `gpt-oss-120b`, customer + judge in one call), OpenRouter free as automatic backup, multiple-choice as last fallback. Cost must stay zero: the engine refuses non-free models; dev and tests use a mock AI |
 | 2026-11-22 | Workers run commands themselves (Option B), with git checkpoints and diff review |
 | 2026-11-22 | **Visual style changed** to Klubi-inspired playful identity: cream / lime / lavender / maroon, soft 3D objects (AI renders), real photos, loose sticker character. Flat thick-outline Delivery style dropped |
