@@ -66,7 +66,7 @@ describe("training", () => {
   });
 
   it("does not leak ratings or feedback in a guided scenario", async () => {
-    const s = await mockTrainingRepo.getGuidedScenario("sc-double-charge");
+    const s = await mockTrainingRepo.getGuidedScenario("sc-hc-3");
     expect(s.steps).toHaveLength(2);
     for (const step of s.steps) {
       for (const choice of step.choices) {
@@ -76,8 +76,8 @@ describe("training", () => {
   });
 
   it("answers a step with feedback and finishes with a result", async () => {
-    const start = await mockTrainingRepo.startAttempt(ME_ID, "sc-late-delivery");
-    const answer = await mockTrainingRepo.answerStep(ME_ID, start.attemptId, start.firstStepId, "c1");
+    const start = await mockTrainingRepo.startAttempt(ME_ID, "sc-hc-1");
+    const answer = await mockTrainingRepo.answerStep(ME_ID, start.attemptId, start.firstStepId, "sc-hc-1-s1-c1");
     expect(answer.rating).toBe("best");
     expect(answer.feedback.length).toBeGreaterThan(10);
     expect(answer.nextStepId).toBeNull();
@@ -93,13 +93,13 @@ describe("training", () => {
   });
 
   it("follows a two step scenario and rejects out of order answers", async () => {
-    const start = await mockTrainingRepo.startAttempt(ME_ID, "sc-double-charge");
-    await expect(mockTrainingRepo.answerStep(ME_ID, start.attemptId, "s2", "c1")).rejects.toThrow();
+    const start = await mockTrainingRepo.startAttempt(ME_ID, "sc-hc-3");
+    await expect(mockTrainingRepo.answerStep(ME_ID, start.attemptId, "sc-hc-3-s2", "sc-hc-3-s2-c1")).rejects.toThrow();
     await expect(mockTrainingRepo.finishAttempt(ME_ID, start.attemptId)).rejects.toThrow();
-    const a1 = await mockTrainingRepo.answerStep(ME_ID, start.attemptId, "s1", "c2");
+    const a1 = await mockTrainingRepo.answerStep(ME_ID, start.attemptId, "sc-hc-3-s1", "sc-hc-3-s1-c2");
     expect(a1.rating).toBe("okay");
-    expect(a1.nextStepId).toBe("s2");
-    const a2 = await mockTrainingRepo.answerStep(ME_ID, start.attemptId, "s2", "c1");
+    expect(a1.nextStepId).toBe("sc-hc-3-s2");
+    const a2 = await mockTrainingRepo.answerStep(ME_ID, start.attemptId, "sc-hc-3-s2", "sc-hc-3-s2-c1");
     expect(a2.nextStepId).toBeNull();
     const result = await mockTrainingRepo.finishAttempt(ME_ID, start.attemptId);
     expect(result.score).toBe(15);
@@ -114,7 +114,7 @@ describe("training", () => {
     const id = before[0]?.scenarioId;
     expect(id).toBeTruthy();
     const start = await mockTrainingRepo.startAttempt(ME_ID, id!);
-    await mockTrainingRepo.answerStep(ME_ID, start.attemptId, start.firstStepId, "c1");
+    await mockTrainingRepo.answerStep(ME_ID, start.attemptId, start.firstStepId, "sc-cq-1-s1-c1");
     await mockTrainingRepo.finishAttempt(ME_ID, start.attemptId);
     const after = await mockTrainingRepo.getLevelPath(ME_ID, "customer-queries");
     expect(after[0]?.stars).toBe(3);
@@ -218,8 +218,8 @@ describe("boss limits and fallback", () => {
 describe("quests grant XP on completion", () => {
   it("finishing a scenario completes the quest and adds its XP", async () => {
     const xp0 = (await mockGamificationRepo.getProfile(ME_ID)).xp;
-    const start = await mockTrainingRepo.startAttempt(ME_ID, "sc-late-delivery");
-    await mockTrainingRepo.answerStep(ME_ID, start.attemptId, start.firstStepId, "c1");
+    const start = await mockTrainingRepo.startAttempt(ME_ID, "sc-hc-1");
+    await mockTrainingRepo.answerStep(ME_ID, start.attemptId, start.firstStepId, "sc-hc-1-s1-c1");
     const result = await mockTrainingRepo.finishAttempt(ME_ID, start.attemptId);
     expect(result.questsCompleted.map((q) => q.type).sort()).toEqual(["scenario", "stars"]);
     const bonus = result.questsCompleted.reduce((n, q) => n + q.xpReward, 0);

@@ -59,7 +59,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | B2 | Gamification: XP events, levels, badge rules, daily quests, Today's Challenge | agy under Sonnet | Adarsh | todo |
 | B3 | **Habits**: create / edit / delete, check-in, streak calculation | agy (run by Friend) | **Friend** | todo, waits on F2–F4 |
 | B4 | **Leaderboard**: weekly / all-time XP, Team / Company, "your rank" | agy (run by Friend) | **Friend** | todo, waits on F2–F4 |
-| B5 | **Scenario content**: 16 guided scenarios (4 categories × 4) + 4 boss personas + seed script | agy (run by Friend) | **Friend** | todo, waits on F3 |
+| B5 | **Scenario content**: 16 guided scenarios (4 categories × 4) + 4 boss personas + seed script | agy worker (reassigned by Adarsh) | agy worker | done (wired into seed later) |
 | B6 | Web push: habit reminders, streak-at-risk, new assignment | agy under Sonnet | Adarsh | todo |
 | B7 | **AI roleplay engine**: provider chain Groq `gpt-oss-120b` (customer + judge in one structured call) → OpenRouter (ERNIE customer + Decider Flash judge) → multiple-choice fallback; `AI_MODE=mock|real`; free-model guard; daily request budget; customer persona, judge, mood meter, win / lose rules, daily limits, safety, fallback to multiple choice, streaming endpoint | agy under Sonnet | Adarsh | todo (keys in `.env`) |
 

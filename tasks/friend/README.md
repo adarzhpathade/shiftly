@@ -6,7 +6,7 @@ Hi! You own three backend tasks. You run them with the `agy` CLI on your laptop,
 |---|---|---|---|
 | 1 | `01-habits.md` | **B3 Habits backend**: create / edit / delete habits, check-in, streaks | `src/server/habits/` |
 | 2 | `02-leaderboard.md` | **B4 Leaderboard backend**: weekly / all-time XP, Team / Company | `src/server/leaderboard/` |
-| 3 | `03-scenarios.md` | **B5 Scenario content**: 16 guided scenarios + 4 AI boss customers | `prisma/seed/scenarios/`, `docs/scenarios.md` |
+| 3 | `03-scenarios.md` | **B5 Scenario content** (done by an agy worker, reassigned by Adarsh): 16 guided scenarios + 4 AI boss customers | `prisma/seed/scenarios/`, `docs/scenarios.md` |
 
 Read `PROJECT_OVERVIEW.md` first (10 minutes): it explains the whole app. Then `BUILD_PLAN.md` "Rules".
 

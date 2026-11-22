@@ -63,7 +63,7 @@ describe("ScenarioPlayer", () => {
   });
 
   it("executes the full scenario flow through onStart, onAnswer, onFinish to result and replay", async () => {
-    const scenario = await mockTrainingRepo.getGuidedScenario("sc-double-charge");
+    const scenario = await mockTrainingRepo.getGuidedScenario("sc-hc-3");
     expect(scenario.steps).toHaveLength(2);
 
     const onStart = vi.fn(async (scenarioId: string) => {
@@ -144,7 +144,7 @@ describe("ScenarioPlayer", () => {
   });
 
   it("shows error alert when onStart fails, and retries successfully when Try again is clicked", async () => {
-    const scenario = await mockTrainingRepo.getGuidedScenario("sc-late-delivery");
+    const scenario = await mockTrainingRepo.getGuidedScenario("sc-hc-1");
     let attemptCount = 0;
 
     const onStart = vi.fn(async () => {

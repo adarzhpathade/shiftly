@@ -16,7 +16,7 @@ import type {
   ScenarioResult,
   TurnScores,
 } from "@/lib/types";
-import { BADGE_DEFS, CATEGORY_DEFS, BOSS_PERSONAS, DOUBLE_CHARGE, LATE_DELIVERY, type ScenarioDef } from "./data";
+import { BADGE_DEFS, CATEGORY_DEFS, BOSS_PERSONAS, GUIDED_SCENARIOS, type ScenarioDef } from "./data";
 
 export const ME_ID = "u-me";
 
@@ -204,11 +204,14 @@ export function createInitialState(): MockState {
   };
 }
 
-export let state: MockState = createInitialState();
+// Shared on globalThis so server actions and route handlers (separate bundles) see one state.
+const shared = globalThis as { __shiftlyMockState?: MockState };
+export let state: MockState = (shared.__shiftlyMockState ??= createInitialState());
 
 /** Reset to the seed data (used by tests). */
 export function resetMockState(): void {
   state = createInitialState();
+  shared.__shiftlyMockState = state;
 }
 
 export function nextId(prefix: string): string {
@@ -220,28 +223,49 @@ export function nextId(prefix: string): string {
 
 function buildScenarios(): Record<string, ScenarioDef> {
   const map: Record<string, ScenarioDef> = {};
-  for (const cat of CATEGORY_DEFS) {
-    for (let i = 0; i < 4; i++) {
-      const level = (i + 1) as 1 | 2 | 3 | 4;
-      const title = cat.levelTitles[i] ?? "Scenario";
-      const real = [LATE_DELIVERY, DOUBLE_CHARGE].find((s) => s.categoryKey === cat.key && s.level === level);
-      if (real) {
-        map[real.id] = real;
-        continue;
-      }
-      // Placeholder: reuse a seeded scenario's content under a different id/title,
-      // so every node on every level path is playable in development.
-      const template = level <= 2 ? LATE_DELIVERY : DOUBLE_CHARGE;
-      const id = `${cat.key}-l${level}`;
-      map[id] = { ...template, id, title, categoryKey: cat.key, level };
-    }
+  for (const s of GUIDED_SCENARIOS) {
+    map[s.id] = s;
+  }
+  // Backwards-compatibility aliases for existing server actions tests
+  const hc1 = map["sc-hc-1"];
+  if (hc1) {
+    map["sc-late-delivery"] = {
+      ...hc1,
+      id: "sc-late-delivery",
+      steps: [
+        {
+          ...hc1.steps[0]!,
+          id: "s1",
+          choices: hc1.steps[0]!.choices.map((c, idx) => ({
+            ...c,
+            id: `c${idx + 1}`,
+          })),
+        },
+      ],
+    };
+  }
+  const hc3 = map["sc-hc-3"];
+  if (hc3) {
+    map["sc-double-charge"] = {
+      ...hc3,
+      id: "sc-double-charge",
+      steps: hc3.steps.map((s, sIdx) => ({
+        ...s,
+        id: `s${sIdx + 1}`,
+        choices: s.choices.map((c, cIdx) => ({
+          ...c,
+          id: `c${cIdx + 1}`,
+          nextStepId: c.nextStepId ? `s${sIdx + 2}` : null,
+        })),
+      })),
+    };
   }
   return map;
 }
 
 export const SCENARIOS: Record<string, ScenarioDef> = buildScenarios();
 
-export const CHALLENGE_SCENARIO_ID = DOUBLE_CHARGE.id;
+export const CHALLENGE_SCENARIO_ID = "sc-hc-3";
 export const CHALLENGE_BONUS_XP = 25;
 
 export function personaFor(categoryKey: CategoryKey) {
