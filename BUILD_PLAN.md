@@ -84,7 +84,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | S1 | Swap stand-in 3D objects for AI renders, add stock photos | Haiku | Adarsh | todo, waits on renders |
 | S2 | PWA polish: offline check-in sync, install flow, Lighthouse PWA pass | Sonnet | Adarsh | todo |
 | S3 | End-to-end tests of main flows (Playwright) | Sonnet | Adarsh | todo |
-| S4 | Deploy to Vercel (production) | Opus | Adarsh | todo |
+| S4 | Deploy to Vercel (production) | Opus | Adarsh | first deploy done: https://shiftly-two-kappa.vercel.app (auto-deploys from main) |
 
 ## Step 5: College submission
 | ID | Task | Owner | Status |
