@@ -42,7 +42,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | ID | Task | Executor | Owner | Status |
 |---|---|---|---|---|
 | UI1 | Splash, intro story (3 scenes), login / register, setup (avatar + starter habits) | Sonnet | Adarsh | done |
-| UI2 | Home | Sonnet | Adarsh | todo |
+| UI2 | Home | Sonnet | Adarsh | done |
 | UI3 | Training: categories, level path | Sonnet | Adarsh | todo |
 | UI4 | Training: scenario player, result | Sonnet | Adarsh | todo |
 | UI5 | Habits: list, add / edit, detail (heatmap) | Sonnet | Adarsh | todo |

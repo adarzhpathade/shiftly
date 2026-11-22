@@ -19,7 +19,7 @@ neonConfig.webSocketConstructor = ws;
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const OUT =
   process.env.SCREENS_OUT ??
-  "D:\\Video Creation\\remotion-tmp\\claude\\090905147524e1df\\c4c58dd5-bfc9-4785-b73c-80dbd4ee6059\\scratchpad\\ui1";
+  "D:\\Video Creation\\remotion-tmp\\claude\\090905147524e1df\\c4c58dd5-bfc9-4785-b73c-80dbd4ee6059\\scratchpad\\ui2";
 mkdirSync(OUT, { recursive: true });
 
 const email = `ui1-shots-${Date.now()}@shiftly.test`;
@@ -181,13 +181,28 @@ async function main() {
     await page.waitForTimeout(600);
     expectPath(page, "/");
     await page.getByRole("heading", { level: 1 }).waitFor();
-    await shot(page, "home-placeholder");
+    await page.waitForTimeout(1500);
+    await shot(page, "home-top");
+    await page.evaluate(() => window.scrollTo(0, 650));
+    await page.waitForTimeout(500);
+    await shot(page, "home-mid");
+    await page.getByRole("checkbox", { checked: false }).first().click({ force: true });
+    await page.waitForTimeout(250);
+    await shot(page, "home-checkin-pop");
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(600);
+    await shot(page, "home-bottom");
+    await page.getByRole("link", { name: "Training", exact: true }).click();
+    await page.waitForURL("**/training");
+    await page.waitForTimeout(600);
+    await shot(page, "training-coming-soon");
 
     // /login while logged in -> /.
     await page.goto(`${BASE}/login`);
     await page.waitForURL(`${BASE}/`);
     console.log("ok   logged-in /login -> /");
 
+    await page.goto(`${BASE}/profile`);
     await page.getByRole("button", { name: "Log out" }).click();
     await page.waitForURL("**/login**");
     expectPath(page, "/login");
