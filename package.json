@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:db": "tsx --env-file=.env src/server/auth/auth.db-check.ts && tsx --env-file=.env src/server/onboarding/onboarding.db-check.ts",
+    "test:ai": "tsx --env-file=.env src/server/boss/boss.live-check.ts",
     "format": "prettier --write .",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

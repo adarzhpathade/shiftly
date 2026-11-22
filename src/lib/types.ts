@@ -214,6 +214,8 @@ export type BossStreamEvent =
       readonly moodAfter: number;
       readonly scores: TurnScores;
       readonly status: BossStatus;
+      /** Optional coaching feedback from the AI judge. */
+      readonly feedback?: string;
     }
   | { readonly type: "error"; readonly message: string; readonly fallback: boolean };
 
@@ -349,6 +351,8 @@ export interface LeaderboardEntry {
   readonly xp: number;
   /** Positive = moved up, negative = moved down, 0 = same. */
   readonly rankChange: number;
+  /** True when the user joined the board recently: show a "New" tag instead of a change. */
+  readonly isNew?: boolean;
 }
 
 export interface Leaderboard {
