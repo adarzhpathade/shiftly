@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { TabBar, type TabKey } from "@/components/ui/TabBar";
 
@@ -12,7 +13,7 @@ function pathnameToTab(pathname: string): TabKey {
   return "home";
 }
 
-export function AppTabBar() {
+function TabBarInner() {
   const pathname = usePathname();
   const active = pathnameToTab(pathname || "/");
 
@@ -38,5 +39,13 @@ export function AppTabBar() {
         </Link>
       )}
     />
+  );
+}
+
+export function AppTabBar() {
+  return (
+    <Suspense fallback={null}>
+      <TabBarInner />
+    </Suspense>
   );
 }

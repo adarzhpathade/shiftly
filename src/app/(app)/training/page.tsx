@@ -1,5 +1,18 @@
-import { ComingSoon } from "@/features/home/ComingSoon";
+import { Suspense } from "react";
+import { trainingRepo } from "@/data";
+import { CategoryList } from "@/features/training";
+import { requireViewer } from "@/server/auth/session";
+
+async function TrainingContent() {
+  const viewer = await requireViewer();
+  const categories = await trainingRepo.listCategories(viewer.id);
+  return <CategoryList categories={categories} />;
+}
 
 export default function TrainingPage() {
-  return <ComingSoon title="Training" />;
+  return (
+    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+      <TrainingContent />
+    </Suspense>
+  );
 }
