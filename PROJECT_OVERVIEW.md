@@ -77,7 +77,7 @@ Rejected extra modes (Rush, Team Battle, separate Practice, AI Roleplay) to keep
 - **Today's Challenge:** one highlighted scenario per day for bonus XP.
 
 ### 5.2a Boss Level: Live Call with an AI Customer
-The last level of every category is a free-text chat with an AI customer who behaves like a real person. Powered by **NVIDIA Nemotron** through NVIDIA's OpenAI-compatible API.
+The last level of every category is a free-text chat with an AI customer who behaves like a real person. Powered by **OpenRouter**: the customer is **Baidu ERNIE 5.5 Flash** (`baidu/ernie-5.5-flash-preview:free`) and the judge is **Perplexity Decider Flash V1.3** (`perplexity/pplx-decider-flash-v1.3:free`), a decision model that returns typed rubric scores instead of text. Models are set in `.env`, so they can be swapped without code changes.
 
 - **Two AI roles:**
   1. **Customer:** a persona with a name, problem, starting mood and hidden goal (e.g. "Mr. Sharma, third call about a refund, angry, calms down only if someone takes ownership"). Stays in character; replies stream word by word.
@@ -199,7 +199,7 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | Auth | **Auth.js (NextAuth)** with email and password | Role-based sessions |
 | PWA | Web app manifest + service worker (**Serwist**) + Web Push | Install, offline shell, reminders |
 | Hosting | **Vercel** | Free, auto-deploy, HTTPS (needed for PWA and push) |
-| AI | **NVIDIA Nemotron** (NVIDIA API, OpenAI-compatible) | Boss-level AI customer and judge |
+| AI | **OpenRouter**: ERNIE 5.5 Flash (customer), Perplexity Decider Flash V1.3 (judge) | One key, free models, swappable through `.env` |
 
 ---
 
@@ -315,6 +315,7 @@ Best / Okay / Poor feedback always shows a label and icon as well as colour.
 | 2026-11-22 | 20 scenarios: 5 per category (2 Beginner, 2 Intermediate, 1 Advanced multi-step) |
 | 2026-11-22 | Employee PWA: 15 pages + 4 celebration overlays, 5 bottom tabs. Progress and Badges merged into Profile |
 | 2026-11-22 | Leaderboard is company-only: Team (default) and Company views, weekly XP reset plus All time |
-| 2026-11-22 | **AI boss level:** level 5 of every category is a live chat with an AI customer (NVIDIA Nemotron) plus an AI judge and mood meter. Boss level only, no separate roleplay mode. Content becomes 16 guided scenarios + 4 boss personas |
+| 2026-11-22 | **AI boss level:** level 5 of every category is a live chat with an AI customer (originally NVIDIA Nemotron) plus an AI judge and mood meter. Boss level only, no separate roleplay mode. Content becomes 16 guided scenarios + 4 boss personas |
+| 2026-11-22 | AI provider changed to **OpenRouter**: ERNIE 5.5 Flash Preview as the customer, Perplexity Decider Flash V1.3 as the judge (free models; config in `.env`) |
 | 2026-11-22 | Workers run commands themselves (Option B), with git checkpoints and diff review |
 | 2026-11-22 | **Visual style changed** to Klubi-inspired playful identity: cream / lime / lavender / maroon, soft 3D objects (AI renders), real photos, loose sticker character. Flat thick-outline Delivery style dropped |

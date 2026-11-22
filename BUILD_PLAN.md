@@ -60,7 +60,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | B4 | **Leaderboard**: weekly / all-time XP, Team / Company, "your rank" | agy (run by Friend) | **Friend** | todo, waits on F2–F4 |
 | B5 | **Scenario content**: 16 guided scenarios (4 categories × 4) + 4 boss personas + seed script | agy (run by Friend) | **Friend** | todo, waits on F3 |
 | B6 | Web push: habit reminders, streak-at-risk, new assignment | agy under Sonnet | Adarsh | todo |
-| B7 | **AI roleplay engine** (NVIDIA Nemotron): customer persona, judge with JSON scores, mood meter, win / lose rules, daily limits, safety, fallback to multiple choice, streaming endpoint | agy under Sonnet | Adarsh | todo, needs `NVIDIA_API_KEY` |
+| B7 | **AI roleplay engine** (OpenRouter: ERNIE 5.5 Flash customer, Perplexity Decider Flash judge with typed rubric scores): customer persona, judge, mood meter, win / lose rules, daily limits, safety, fallback to multiple choice, streaming endpoint | agy under Sonnet | Adarsh | todo, needs `OPENROUTER_API_KEY` |
 
 ### Connection (swap mock → real, one feature at a time)
 | ID | Task | Executor | Owner | Status |
