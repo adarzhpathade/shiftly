@@ -46,7 +46,7 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 | UI3 | Training: categories, level path | Sonnet | Adarsh | done |
 | UI4 | Training: scenario player, result | Sonnet | Adarsh | done |
 | UI5 | Habits: list, add / edit, detail (heatmap) | Sonnet | Adarsh | done |
-| UI6 | Leaderboard (Team / Company, weekly / all time, podium) | Sonnet | Adarsh | todo |
+| UI6 | Leaderboard (Team / Company, weekly / all time, podium) | Sonnet | Adarsh | done |
 | UI7 | Profile (badges, progress charts) and Settings | Sonnet | Adarsh | todo |
 | UI8 | Celebration overlays: LEVEL UP, NEW BADGE, STREAK!, PERFECT | Sonnet | Adarsh | todo |
 | UI10 | Boss level: live call chat (streaming replies, typing indicator, mood meter, quick-reply chips) and boss result screen | Sonnet | Adarsh | todo |

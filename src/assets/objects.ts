@@ -13,6 +13,7 @@ export const GAME_OBJECT_NAMES = [
   "calendar",
   "target",
   "sparkle",
+  "crown",
 ] as const;
 
 export type GameObjectName = (typeof GAME_OBJECT_NAMES)[number];
@@ -82,6 +83,11 @@ export const OBJECT_ART: Record<GameObjectName, string> = {
     <rect x="64" y="8" width="8" height="18" rx="4" fill="url(#gGoldEdge)"/>
     <g fill="url(#gLavR)"><circle cx="30" cy="54" r="4.5"/><circle cx="50" cy="54" r="4.5"/><circle cx="70" cy="54" r="4.5"/><circle cx="30" cy="72" r="4.5"/><circle cx="50" cy="72" r="4.5"/></g>
     <circle cx="70" cy="72" r="6.5" fill="url(#gLime)"/></g>`,
+  crown: `<g filter="url(#drop)"><path d="M12 76L8 28l24 22 18-34 18 34 24-22-4 48z" fill="url(#gGold)"/>
+    <rect x="12" y="76" width="76" height="12" rx="5" fill="url(#gGoldEdge)"/>
+    <circle cx="8" cy="26" r="6" fill="#FFF3C9"/><circle cx="50" cy="14" r="6" fill="#FFF3C9"/><circle cx="92" cy="26" r="6" fill="#FFF3C9"/>
+    <circle cx="30" cy="82" r="3" fill="#FFF3C9"/><circle cx="50" cy="82" r="3" fill="#FFF3C9"/><circle cx="70" cy="82" r="3" fill="#FFF3C9"/>
+    <path d="M24 66l-2-20" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".45"/></g>`,
   sparkle: `<g filter="url(#drop)"><path d="M50 4l10 32 32 14-32 14-10 32-10-32-32-14 32-14z" fill="url(#gGold)"/>
     <path d="M50 22l5 21 21 7-21 7-5 21-5-21-21-7 21-7z" fill="#FFF3C9" opacity=".85"/></g>`,
   target: `<g filter="url(#drop)"><circle cx="46" cy="54" r="38" fill="url(#gRed)"/>
