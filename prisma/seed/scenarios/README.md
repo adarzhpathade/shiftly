@@ -7,7 +7,7 @@ This directory allows Friend / content agents to supply scenario and boss person
 Create an `index.ts` file in this directory (`prisma/seed/scenarios/index.ts`) that exports a `seedScenarios` function:
 
 ```typescript
-import { PrismaClient } from "../../src/generated/prisma/client";
+import { PrismaClient } from "../../../src/generated/prisma/client";
 
 export async function seedScenarios(prisma: PrismaClient): Promise<void> {
   // 1. Look up existing categories by slug:
