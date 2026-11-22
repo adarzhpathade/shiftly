@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/components/ui/cn";
 import { GAME_OBJECT_NAMES, GameObject } from "@/components/ui/GameObject";
 import type { GameObjectName } from "@/components/ui/GameObject";
@@ -21,7 +22,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
         {categories.map((category, i) => {
           const { completedLevels, totalLevels } = category.progress;
           return (
-            <a
+            <Link
               key={category.key}
               href="/training"
               className={cn(
@@ -46,7 +47,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
                   className="pointer-events-none absolute -right-2.5 -bottom-2"
                 />
               )}
-            </a>
+            </Link>
           );
         })}
       </div>
