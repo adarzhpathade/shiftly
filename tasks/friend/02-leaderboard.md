@@ -1,6 +1,6 @@
 # B4: Leaderboard backend
 
-**Owner:** Friend · **Branch:** `feat/leaderboard-api`
+**Owner:** Khushi · **Branch:** `feat/leaderboard-api` · Independent: start any time.
 
 ## Goal
 Replace the mock leaderboard with real rankings computed from the XP history in the database.

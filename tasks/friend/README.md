@@ -1,12 +1,14 @@
 # Your tasks on shiftly
 
-Hi! You own three backend tasks. You run them with the `agy` CLI on your laptop, check the result, and push them from your own GitHub account through a pull request.
+Hi! You own two backend tasks. You run them with the `agy` CLI on your laptop, check the result, and push them from your own GitHub account through a pull request.
 
 | Order | Brief | Task | Your folders |
 |---|---|---|---|
-| 1 | `01-habits.md` | **B3 Habits backend**: create / edit / delete habits, check-in, streaks | `src/server/habits/` |
-| 2 | `02-leaderboard.md` | **B4 Leaderboard backend**: weekly / all-time XP, Team / Company | `src/server/leaderboard/` |
-| 3 | `03-scenarios.md` | **B5 Scenario content** (done by an agy worker, reassigned by Adarsh): 16 guided scenarios + 4 AI boss customers | `prisma/seed/scenarios/`, `docs/scenarios.md` |
+| 1 | `02-leaderboard.md` | **B4 Leaderboard backend**: weekly / all-time XP, Team / Company. **Start now.** | `src/server/leaderboard/` |
+| 2 | `01-habits.md` | **B3 Habits backend**: create / edit / delete habits, check-in, streaks. **Start after Mayur's M1 PR is merged** (it gives you the XP / quest / badge helpers). | `src/server/habits/` |
+| done | `03-scenarios.md` | B5 Scenario content: already done by Adarsh's worker. Nothing to do. | |
+
+Mayur works at the same time on training, gamification and home (`src/server/progress/`, `gamification/`, `training/`, `home/`). Don't touch those folders; he won't touch yours. You both edit one line each in `src/data/index.ts`; if git shows a conflict there, keep both lines.
 
 Read `PROJECT_OVERVIEW.md` first (10 minutes): it explains the whole app. Then `BUILD_PLAN.md` "Rules".
 
@@ -40,9 +42,9 @@ Read `PROJECT_OVERVIEW.md` first (10 minutes): it explains the whole app. Then `
 ```
 git checkout main
 git pull
-git checkout -b feat/habits-api            # one branch per task: feat/habits-api, feat/leaderboard-api, feat/scenario-content
+git checkout -b feat/leaderboard-api       # one branch per task: feat/leaderboard-api, then feat/habits-api
 
-agy -p "Read tasks/friend/01-habits.md and do the task exactly." --model gemini-3.8-flash-high --mode accept-edits --settings ".agy/worker-settings.json" --print-timeout 900s
+agy -p "Read tasks/friend/02-leaderboard.md and do the task exactly." --model gemini-3.8-flash-high --mode accept-edits --settings ".agy/worker-settings.json" --print-timeout 900s
 ```
 
 If the worker stops with problems, continue the same conversation with a fix instruction:
