@@ -5,7 +5,9 @@ Read this first in a new session, then `BUILD_PLAN.md` (task board), `PROJECT_OV
 ## Where things stand
 - **User app: feature-complete on real data, waiting for the user's own end-to-end test.** Live: https://shiftly-two-kappa.vercel.app (auto-deploys from `main`; Vercel `adarz/shiftly`, region `sin1`). Repo: https://github.com/adarzhpathade/shiftly.
 - **The user and friends test it themselves, creating accounts with their own emails. Do NOT test it for them**; wait for their bug reports.
-- Production needs `DATA_SOURCE=real` on Vercel. Setting it was blocked for the agent; the user runs: `npx vercel env add DATA_SOURCE --environment production --value real --yes`, then redeploys. Check it with `npx vercel env ls production` (names only).
+- Production runs on real data: `DATA_SOURCE=real` is set on Vercel (2026-11-23).
+- **Deploy only by `git push` to main, never `vercel deploy` from this PC.** A CLI deploy once baked the local `.env` (`NEXT_PUBLIC_DEMO_MODE=1`) into production. A `.vercelignore` now blocks `.env*`.
+- Small cleanup: the auto-habits comment block in `src/data/index.ts` still says "No real implementations exist yet". It's stale.
 - Checks on main: `pnpm typecheck`, `pnpm lint`, `pnpm test` (~350), `pnpm build` pass. `src/server/habits/repository.test.ts` is a real-DB test that can time out on a cold Neon; re-run it alone.
 
 ## Done today
