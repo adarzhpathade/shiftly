@@ -36,3 +36,19 @@ live in `src/styles/theme-color.ts`.
 - `ContextLoader variant="scene" | "call"`: inline "Setting the scene…" / "Connecting call…"
   (ringing headset) for real waits inside a screen.
 - Previews: `/dev/gallery` (Loaders section) and `/dev/loaders` (full-screen, for a phone).
+
+## Auth and habits pieces
+
+- `PeekBuddy`: a buddy that reacts (`pose` swaps with a pop, `wobble` + `wobbleKey` shake it). In the
+  `sign` pose it holds a small sign (`sign="[welcome back]"`). Sit it on a card's top edge. New sticker
+  poses (in `src/assets/stickers.ts`): `sign`, `cover` (hands over eyes), `thumbs`, `shrug`, `key`.
+- `StrengthMeter`: password strength bar (`level` 0 to 3 + `text`) with a flame riding the fill tip.
+- `CodeInput`: separate digit boxes for a one-time code. Auto-advance, backspace steps back, paste or
+  SMS autofill fills all boxes, `onChange(digits, code | null)`. Uncontrolled: change its `key` to clear.
+  Pure logic in `code-input.ts` (tested).
+- `Heatmap`: `variant="row"` (last N days, thin strip for cards) or `"grid"` (weeks as columns, Monday
+  first, for a detail page). Needs `cells: { date: "YYYY-MM-DD", count }[]`. Layout helpers in
+  `heatmap-layout.ts` (tested).
+- `StageBadge` / `StageObject`: habit stage as a soft object plus pill: sprout (forming), flame
+  (building), gem (solid).
+- New 3D stand-ins in `GameObject`: `mailbox`, `sprout`, `gem`.

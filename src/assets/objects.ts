@@ -14,6 +14,9 @@ export const GAME_OBJECT_NAMES = [
   "target",
   "sparkle",
   "crown",
+  "mailbox",
+  "sprout",
+  "gem",
 ] as const;
 
 export type GameObjectName = (typeof GAME_OBJECT_NAMES)[number];
@@ -98,4 +101,22 @@ export const OBJECT_ART: Record<GameObjectName, string> = {
     <path d="M46 54L82 14" stroke="url(#gGoldEdge)" stroke-width="4" stroke-linecap="round"/>
     <path d="M76 8l10 2-2 10-6-3z" fill="url(#gLime)"/>
     <ellipse cx="26" cy="34" rx="5" ry="10" fill="#fff" opacity=".4" transform="rotate(40 26 34)" filter="url(#soft)"/></g>`,
+  mailbox: `<g filter="url(#drop)"><path d="M16 46a34 34 0 0 1 68 0v40H16z" fill="url(#gBlue)"/>
+    <path d="M16 46a34 34 0 0 1 34-34v74H16z" fill="url(#gBlue)"/>
+    <path d="M50 12a34 34 0 0 1 34 34v40H50z" fill="#2E5FB5" opacity=".35"/>
+    <rect x="30" y="40" width="40" height="8" rx="4" fill="#1F3F82"/>
+    <rect x="44" y="84" width="12" height="12" rx="3" fill="url(#gGoldEdge)"/>
+    <rect x="80" y="24" width="6" height="30" rx="3" fill="url(#gGoldEdge)"/>
+    <path d="M86 24h12v10H86z" fill="url(#gRed)"/>
+    <ellipse cx="28" cy="40" rx="4" ry="12" fill="#fff" opacity=".4" filter="url(#soft)"/></g>`,
+  sprout: `<g filter="url(#drop)"><path d="M26 92c0-12 10-20 24-20s24 8 24 20z" fill="url(#gCoral)"/>
+    <path d="M50 74V44" stroke="#5E8A1E" stroke-width="6" stroke-linecap="round"/>
+    <path d="M50 52C32 52 18 42 16 24c18-2 32 6 34 28z" fill="url(#gLime)"/>
+    <path d="M50 46c2-18 16-28 34-26-2 18-16 28-34 26z" fill="url(#gLime)"/>
+    <ellipse cx="30" cy="32" rx="3" ry="7" fill="#fff" opacity=".5" transform="rotate(-40 30 32)" filter="url(#soft)"/></g>`,
+  gem: `<g filter="url(#drop)"><path d="M30 18h40l22 24-42 48L8 42z" fill="url(#gBlue)"/>
+    <path d="M8 42h84L50 90z" fill="url(#gBlue)" opacity=".85"/>
+    <path d="M30 18l-8 24 28 48 28-48-8-24z" fill="#CFE2FA" opacity=".55"/>
+    <path d="M30 18l20 24 20-24M22 42h56M50 42v48" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" opacity=".7"/>
+    <ellipse cx="30" cy="30" rx="4" ry="8" fill="#fff" opacity=".6" transform="rotate(25 30 30)" filter="url(#soft)"/></g>`,
 };

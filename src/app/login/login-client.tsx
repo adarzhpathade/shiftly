@@ -15,14 +15,14 @@ export function LoginClient({
   return (
     <LoginScreen
       registerHref="/register"
+      forgotHref="/forgot-password"
       demoAccounts={demoAccounts}
       onSubmit={async (input) => {
-        const result = await loginAction(input);
-        if (result.ok) {
-          router.replace(callbackUrl);
-          router.refresh();
-        }
-        return result;
+        return loginAction(input);
+      }}
+      onSuccess={() => {
+        router.replace(callbackUrl);
+        router.refresh();
       }}
     />
   );

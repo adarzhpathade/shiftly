@@ -30,4 +30,7 @@ export const OBJECT_SOURCES: Record<GameObjectName, ObjectSource> = {
   target: { kind: "svg" },
   sparkle: { kind: "svg" },
   crown: { kind: "svg" },
+  mailbox: { kind: "svg" },
+  sprout: { kind: "svg" },
+  gem: { kind: "svg" },
 };

@@ -4,7 +4,7 @@ import { Rise, Stagger } from "@/components/ui/Motion";
 import { ThemeColor } from "@/components/ui/ThemeColor";
 import type { HomeData, LeaderboardEntry } from "@/lib/types";
 import { CategoryGrid } from "./CategoryGrid";
-import { HabitList } from "./HabitList";
+import { HabitStrip } from "./HabitStrip";
 import { HomeHeader } from "./HomeHeader";
 import { LeaderboardTeaser } from "./LeaderboardTeaser";
 import { QuestList } from "./QuestList";
@@ -41,7 +41,7 @@ export function HomeScreen({ data, myRank }: HomeScreenProps) {
           <CategoryGrid categories={data.categories} />
         </Rise>
         <Rise>
-          <HabitList habits={data.habits} />
+          <HabitStrip habits={data.habits} />
         </Rise>
         <Rise>
           <LeaderboardTeaser myRank={myRank} />

@@ -1,6 +1,6 @@
 export * from "./CategoryGrid";
 export * from "./ComingSoon";
-export * from "./HabitList";
+export * from "./HabitStrip";
 export * from "./HomeHeader";
 export * from "./HomeScreen";
 export * from "./LeaderboardTeaser";

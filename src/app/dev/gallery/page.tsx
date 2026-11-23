@@ -537,9 +537,9 @@ export default function GalleryPage() {
         </Grid>
       </Section>
 
-      <Section title="[Sticker] buddy" sub="Loose line, white sticker edge: wave, headset, cheer, think.">
+      <Section title="[Sticker] buddy" sub="Loose line, white sticker edge: wave, headset, cheer, think, sign, cover, thumbs, shrug, key.">
         <div className="flex flex-wrap gap-2">
-          {(["wave", "headset", "cheer", "think"] as const).map((p) => (
+          {(["wave", "headset", "cheer", "think", "sign", "cover", "thumbs", "shrug", "key"] as const).map((p) => (
             <Sticker key={p} pose={p} size={110} label={`Sticker: ${p}`} />
           ))}
         </div>
