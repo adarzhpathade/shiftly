@@ -18,6 +18,7 @@ import {
 } from "./mock";
 import { getAiMode } from "@/server/boss/mode";
 import { realGamificationRepo } from "@/server/gamification/repository";
+import { realHabitRepo } from "@/server/habits/repository";
 import { realLeaderboardRepo } from "@/server/leaderboard/repository";
 
 /**
@@ -51,7 +52,7 @@ const lazyBossRepo: BossRepository = {
   finishSession: async (u, id) => (await lazyReal()).finishSession(u, id),
 };
 export const bossRepo: BossRepository = useRealBoss ? lazyBossRepo : mockBossRepo;
-export const habitRepo: HabitRepository = mockHabitRepo;
+export const habitRepo: HabitRepository = source === "real" ? realHabitRepo : mockHabitRepo;
 export const gamificationRepo: GamificationRepository = source === "real" ? realGamificationRepo : mockGamificationRepo;
 export const leaderboardRepo: LeaderboardRepository = source === "real" ? realLeaderboardRepo : mockLeaderboardRepo;
 
