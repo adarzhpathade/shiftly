@@ -25,6 +25,7 @@ import { realGamificationRepo } from "@/server/gamification/repository";
 import { realLeaderboardRepo } from "@/server/leaderboard/repository";
 import { realTrainingRepo } from "@/server/training/repository";
 import { realHomeRepo } from "@/server/home/repository";
+import { realActivityRepo } from "@/server/activity/repository";
 
 /**
  * The active data implementations. Server-side only: use them in route files
@@ -67,7 +68,7 @@ export const bossRepo: BossRepository = useRealBoss ? lazyBossRepo : mockBossRep
  * (AI + cache) but is part of habitRepo, so he plugs it into Khushi's repo.
  */
 export const habitRepo: HabitRepository = mockHabitRepo;
-export const activityRepo: ActivityRepository = mockActivityRepo;
+export const activityRepo: ActivityRepository = source === "real" ? realActivityRepo : mockActivityRepo;
 export const passwordResetRepo: PasswordResetRepository = mockPasswordResetRepo;
 export const gamificationRepo: GamificationRepository = source === "real" ? realGamificationRepo : mockGamificationRepo;
 export const leaderboardRepo: LeaderboardRepository = source === "real" ? realLeaderboardRepo : mockLeaderboardRepo;

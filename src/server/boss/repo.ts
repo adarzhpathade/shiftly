@@ -11,6 +11,7 @@ import { getAiMode } from "./mode";
 import { runTurn } from "./engine";
 import { RoleplayStatus, XpSource } from "@/generated/prisma/client";
 import { awardXp, checkBadges, touchStreak } from "@/server/progress";
+import { recordActivity } from "@/server/activity/repository";
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -524,6 +525,14 @@ export const realBossRepo: BossRepository = {
 
       await touchStreak(tx, userId);
       const newBadges = await checkBadges(tx, userId);
+
+      await recordActivity(tx, userId, {
+        type: "boss_finished",
+        categoryKey,
+        won: domainStatus === "won",
+        stars,
+        categoryId: session.persona.categoryId,
+      });
 
       return { awardResult, newBadges };
     });

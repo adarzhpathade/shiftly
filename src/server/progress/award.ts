@@ -5,6 +5,7 @@ import { levelForXp, streakAfterCheckIn, type StreakStatus } from "@/lib/gamific
 import { todayISO } from "@/lib/time";
 import type { Badge, Quest, QuestType } from "@/lib/types";
 import { ensureTodayQuests } from "./quests";
+import { recordActivity } from "@/server/activity/repository";
 
 export interface AwardXpInput {
   readonly source: XpSource | keyof typeof XpSource;
@@ -171,6 +172,10 @@ export async function progressQuests(
         refId: targetQuest.id,
       });
     }
+    await recordActivity(tx, userId, {
+      type: "quest_completed",
+      questId: targetQuest.id,
+    });
     return [updatedQuest];
   }
 

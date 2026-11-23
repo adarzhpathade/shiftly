@@ -88,16 +88,39 @@ export async function logoutAction(): Promise<void> {
   await signOut({ redirectTo: "/login" });
 }
 
-/** TODO(Mayur): add memberCount (count of users per team) for the register ID card; see docs/contract-auto-habits.md. */
+/** Registration teams with employee memberCount per team (one grouped query). */
 export async function listTeamsForRegistration(): Promise<RegistrationTeam[]> {
-  const teams = await db.team.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-  return teams;
+  const [teams, counts] = await Promise.all([
+    db.team.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+    db.user.groupBy({
+      by: ["teamId"],
+      where: {
+        teamId: { not: null },
+      },
+      _count: {
+        _all: true,
+      },
+    }),
+  ]);
+
+  const countMap = new Map<string, number>();
+  for (const c of counts) {
+    if (c.teamId) {
+      countMap.set(c.teamId, c._count._all);
+    }
+  }
+
+  return teams.map((team) => ({
+    id: team.id,
+    name: team.name,
+    memberCount: countMap.get(team.id) ?? 0,
+  }));
 }

@@ -27,8 +27,8 @@ describe("quests", () => {
       const habit = QUEST_DEFS.find((q) => q.type === "habit");
       expect(habit).toEqual({
         type: "habit",
-        label: "Check in 3 habits",
-        target: 3,
+        label: "Clock in today",
+        target: 1,
         xpReward: 20,
       });
 
@@ -68,7 +68,7 @@ describe("quests", () => {
     it("creates missing quests when user has none today", async () => {
       const mockCreated = [
         { id: "q1", type: "scenario", target: 1, progress: 0, completed: false },
-        { id: "q2", type: "habit", target: 3, progress: 0, completed: false },
+        { id: "q2", type: "habit", target: 1, progress: 0, completed: false },
         { id: "q3", type: "stars", target: 1, progress: 0, completed: false },
       ];
 

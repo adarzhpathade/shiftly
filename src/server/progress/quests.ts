@@ -13,7 +13,7 @@ export interface QuestDef {
 
 export const QUEST_DEFS: readonly QuestDef[] = [
   { type: "scenario", label: "Finish 1 scenario", target: 1, xpReward: 30 },
-  { type: "habit", label: "Check in 3 habits", target: 3, xpReward: 20 },
+  { type: "habit", label: "Clock in today", target: 1, xpReward: 20 },
   { type: "stars", label: "Score 2 stars or more", target: 1, xpReward: 25 },
 ] as const;
 

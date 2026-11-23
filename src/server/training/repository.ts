@@ -18,6 +18,7 @@ import type {
   StepFeedback,
 } from "@/lib/types";
 import { GUIDED_SCENARIOS } from "../../../prisma/seed/scenarios/content";
+import { recordActivity } from "@/server/activity/repository";
 import { awardXp, checkBadges, progressQuests, touchStreak } from "@/server/progress";
 import { computeXpAward, isLevelLocked } from "./scoring";
 
@@ -428,6 +429,22 @@ export const realTrainingRepo: TrainingRepository = {
 
       const newBadges = await checkBadges(tx, userId);
       await touchStreak(tx, userId);
+
+      const categoryKey = scenario.category.slug as CategoryKey;
+      await recordActivity(tx, userId, {
+        type: "training_finished",
+        categoryKey,
+        stars,
+        categoryId: scenario.categoryId,
+      });
+
+      if (stars === 3) {
+        await recordActivity(tx, userId, {
+          type: "perfect_score",
+          categoryKey,
+          categoryId: scenario.categoryId,
+        });
+      }
 
       return { awardResult, questsCompleted, newBadges };
     });
