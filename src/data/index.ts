@@ -33,17 +33,10 @@ import { realPasswordResetRepo } from "@/server/password-reset/repository";
  * The active data implementations. Server-side only: use them in route files
  * and server actions, never in client components.
  *
- * DATA_SOURCE = 'mock' (default) | 'real'
- *
- * TODO(backend): when a real implementation exists (src/server/<domain>/),
- * import it here and pick it when source === 'real', per repository, e.g.
- *   export const habitRepo: HabitRepository = source === "real" ? realHabitRepo : mockHabitRepo;
+ * DATA_SOURCE = 'mock' (default) | 'real'. 'real' uses the database-backed
+ * repos in src/server/<domain>/; 'mock' uses the in-memory fixtures in ./mock.
  */
 const source = process.env.DATA_SOURCE ?? "mock";
-
-if (source === "real") {
-  console.warn("[data] DATA_SOURCE=real: habits, activity and password reset still use mocks (not built yet).");
-}
 
 export const homeRepo: HomeRepository = source === "real" ? realHomeRepo : mockHomeRepo;
 export const trainingRepo: TrainingRepository = source === "real" ? realTrainingRepo : mockTrainingRepo;
