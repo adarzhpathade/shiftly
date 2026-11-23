@@ -31,8 +31,8 @@ export const realLeaderboardRepo: LeaderboardRepository = {
   async get(userId: string, scope: LeaderboardScope, period: LeaderboardPeriod): Promise<Leaderboard> {
     const db = await getDb();
 
-    // 1. Look up the viewer
-    let viewer = await db.user.findUnique({
+    // 1. Look up the viewer (an unknown id gets an empty board, never someone else's)
+    const viewer = await db.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -40,18 +40,6 @@ export const realLeaderboardRepo: LeaderboardRepository = {
         teamId: true,
       },
     });
-
-    // Fallback for mock IDs like "u-me" in dev/test suites
-    if (!viewer) {
-      viewer = await db.user.findFirst({
-        where: { role: Role.EMPLOYEE },
-        select: {
-          id: true,
-          role: true,
-          teamId: true,
-        },
-      });
-    }
 
     if (!viewer) {
       return {
@@ -63,7 +51,7 @@ export const realLeaderboardRepo: LeaderboardRepository = {
     }
 
     // 2. Select candidates according to scope
-    // scope team: only users in viewer's team
+    // scope team: only employees in viewer's team (managers and admins are not ranked)
     // scope company: all users with role EMPLOYEE (managers and admins are not ranked)
     let users: Array<{
       id: string;
@@ -80,7 +68,7 @@ export const realLeaderboardRepo: LeaderboardRepository = {
     if (scope === "team") {
       if (viewer.teamId) {
         users = await db.user.findMany({
-          where: { teamId: viewer.teamId },
+          where: { teamId: viewer.teamId, role: Role.EMPLOYEE },
           select: {
             id: true,
             name: true,

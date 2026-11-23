@@ -16,7 +16,7 @@ Save training for real: attempts, answers, stars, XP and level unlocks. Then mak
 
 ## Build
 1. **Seed:** call `seedScenarios(prisma)` from `prisma/seed/scenarios/index.ts` inside `prisma/seed.ts` (after categories). The seed must stay re-runnable (upserts). Run `pnpm db:seed` against the dev database and check the 16 scenarios exist.
-2. **One small migration (allowed only here):** add `finishedAt DateTime?` to `Attempt` so an unfinished attempt can be told apart (`pnpm db:migrate --name attempt-finished-at`). Nothing else in the schema.
+2. **One small migration (allowed only here):** add `finishedAt DateTime?` to `Attempt` so an unfinished attempt can be told apart (`pnpm db:migrate --name attempt-finished-at`). Nothing else in the schema. Then update your M1 counts so unfinished attempts don't count: in `src/server/progress/award.ts` (`checkBadges`) and `src/server/progress/stats.ts` (`getUserStats`) every `attempt.count` / `attempt.findMany` gets `finishedAt: { not: null }` in its `where`.
 3. `src/server/training/repository.ts`: `export const realTrainingRepo: TrainingRepository` (`import "server-only"`):
    - `listCategories(userId)`: categories with the user's progress (levels done, stars) like the mock.
    - `getLevelPath(userId, categoryKey)`: levels in order with best stars and locked/unlocked/boss state, using the mock's unlock rule (level N+1 opens when level N has ≥1 star; boss after the guided levels).
@@ -30,7 +30,7 @@ Save training for real: attempts, answers, stars, XP and level unlocks. Then mak
 6. `src/server/training/README.md`: how scoring, stars, the best-score XP rule and unlocks work.
 
 ## Allowed to touch
-`src/server/training/repository.ts`, `scoring*.ts`, `README.md` (leave the existing `actions.ts`, `types.ts`, `actions.test.ts` unless a type import is needed), `src/server/home/repository.ts`, `prisma/seed.ts` (the scenario call only), the `finishedAt` migration, the training + home lines in `src/data/index.ts`.
+`src/server/training/repository.ts`, `scoring*.ts`, `README.md` (leave the existing `actions.ts`, `types.ts`, `actions.test.ts` unless a type import is needed), `src/server/home/repository.ts`, the `finishedAt` filters in `src/server/progress/award.ts` and `stats.ts`, `prisma/seed.ts` (the scenario call only), the `finishedAt` migration, the training + home lines in `src/data/index.ts`.
 
 ## Never
 `git commit/push/reset/checkout`, print or edit `.env`, other schema changes, touch Khushi's folders (`src/server/habits/**`, `src/server/leaderboard/**`) or any UI.
