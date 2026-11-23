@@ -349,6 +349,7 @@ export function hasWindowEnded(window: HabitWindow, currentHour: number): boolea
  * - Consecutive usual days the behaviour was seen, counting back from the most recent usual day.
  * - Non-usual days never break a streak.
  * - Today counts only if it was done; a usual today that is not done yet does not break it until window passes/midnight.
+ * - If a past usual day was missed before today, currentStreak is 0 (broken) even if done today.
  */
 function computeStreaks(
   datesWithCounts: Map<string, number>,
@@ -358,31 +359,47 @@ function computeStreaks(
 ): { currentStreak: number; bestStreak: number } {
   const isTodayUsual = usualDays.includes(isoWeekday(today));
 
-  // Determine starting date for backwards streak count
-  let startCheckDate: string;
-  let currentStreak = 0;
-
-  if (isTodayUsual && doneToday) {
-    currentStreak = 1;
-    startCheckDate = addDays(today, -1);
-  } else {
-    // If today is not usual or not done, count backwards from yesterday
-    startCheckDate = addDays(today, -1);
+  // Find most recent usual day before today
+  let mostRecentPastUsualDate: string | null = null;
+  let d = addDays(today, -1);
+  for (let i = 0; i < 365; i++) {
+    if (usualDays.includes(isoWeekday(d))) {
+      mostRecentPastUsualDate = d;
+      break;
+    }
+    d = addDays(d, -1);
   }
 
-  // Walk backwards over the past 365 days of usual days to count currentStreak
-  let checkDate = startCheckDate;
-  for (let i = 0; i < 365; i++) {
-    const weekday = isoWeekday(checkDate);
-    if (usualDays.includes(weekday)) {
-      const hit = (datesWithCounts.get(checkDate) ?? 0) > 0;
-      if (hit) {
-        currentStreak += 1;
-      } else {
-        break; // Streak ends at the first missed usual day
+  const pastUsualMissed =
+    mostRecentPastUsualDate !== null && (datesWithCounts.get(mostRecentPastUsualDate) ?? 0) === 0;
+
+  let currentStreak = 0;
+
+  if (pastUsualMissed) {
+    // If a past usual day was missed before today, current streak is 0 (broken) even if done today
+    currentStreak = 0;
+  } else {
+    let pastStreak = 0;
+    if (mostRecentPastUsualDate !== null) {
+      let checkDate = mostRecentPastUsualDate;
+      for (let i = 0; i < 365; i++) {
+        if (usualDays.includes(isoWeekday(checkDate))) {
+          const hit = (datesWithCounts.get(checkDate) ?? 0) > 0;
+          if (hit) {
+            pastStreak += 1;
+          } else {
+            break;
+          }
+        }
+        checkDate = addDays(checkDate, -1);
       }
     }
-    checkDate = addDays(checkDate, -1);
+
+    if (isTodayUsual && doneToday) {
+      currentStreak = 1 + pastStreak;
+    } else {
+      currentStreak = pastStreak;
+    }
   }
 
   // Compute bestStreak across all 84 heatmap days

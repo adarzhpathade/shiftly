@@ -160,6 +160,32 @@ describe("analyzer", () => {
     expect(habit?.currentStreak).toBe(0);
   });
 
+  it("4b. streak is 0 if a past usual day was missed even if the behaviour happened today", () => {
+    // Usual days include Monday, Tuesday, Wednesday (each hit >= 2 times in 28 days).
+    // Today is Wed 2026-11-25.
+    // Tuesday 2026-11-24 was missed!
+    // Behaviour happened today on Wednesday (doneToday = true).
+    const events: RawActivityEvent[] = [
+      { type: "daily_open", createdAt: "2026-11-25T03:00:00.000Z" }, // Wed 25 (TODAY - done!)
+      // Tue 2026-11-24 was a usual day and was MISSED!
+      { type: "daily_open", createdAt: "2026-11-23T03:00:00.000Z" }, // Mon 23 hit
+      { type: "daily_open", createdAt: "2026-11-18T03:00:00.000Z" }, // Wed 18 hit
+      { type: "daily_open", createdAt: "2026-11-17T03:00:00.000Z" }, // Tue 17 hit
+      { type: "daily_open", createdAt: "2026-11-16T03:00:00.000Z" }, // Mon 16 hit
+      { type: "daily_open", createdAt: "2026-11-10T03:00:00.000Z" }, // Tue 10 hit
+    ];
+
+    const habits = detectHabits(events, MOCK_CATEGORIES, baseNow);
+    const habit = habits.find((h) => h.key === "clocks-in");
+    expect(habit).toBeDefined();
+    expect(habit?.doneToday).toBe(true);
+    expect(habit?.status).toBe("slipping");
+    // Even though done today, streak must be 0 because a past usual day was missed
+    expect(habit?.currentStreak).toBe(0);
+    // bestStreak preserves past runs
+    expect(habit?.bestStreak).toBeGreaterThanOrEqual(1);
+  });
+
   it("5. slipping after today's time window, but streak preserved until midnight", () => {
     // Morning window is 05:00 to 12:00.
     // Window has ended at 14:00 IST (baseNow is 14:00 IST / 08:30 UTC).

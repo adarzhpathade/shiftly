@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { HabitRepository } from "@/data/repositories";
-import { HabitStageName, type Prisma, type PrismaClient } from "@/generated/prisma/client";
+import { HabitStageName, Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { HABIT_HEATMAP_DAYS, HABIT_STAGE_XP, isoWeekKey } from "@/lib/habits";
 import { todayISO } from "@/lib/time";
 import type {
@@ -90,6 +90,7 @@ async function loadUserData(
     db.attempt.findMany({
       where: {
         userId,
+        completedAt: { gte: cutoffDate },
       },
       select: {
         stars: true,
@@ -179,8 +180,15 @@ async function awardNewStageXp(
               refId: `${h.key}:${st}`,
             });
           });
-        } catch {
-          // Ignore unique constraint violation if concurrently inserted
+        } catch (error: unknown) {
+          if (
+            (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") ||
+            (error as { code?: string })?.code === "P2002"
+          ) {
+            // Only ignore unique-constraint error (already awarded); re-throw anything else
+            continue;
+          }
+          throw error;
         }
       }
     }
