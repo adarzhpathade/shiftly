@@ -71,7 +71,7 @@ export function RegisterScreen({
       </RiseHeadline>
       <Rise>
         <p className="mt-2 text-center text-[15px] font-semibold text-ink-soft">
-          It takes a minute. Then pick your buddy and first habits.
+          It takes a minute. Then pick your buddy.
         </p>
       </Rise>
 

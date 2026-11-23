@@ -3,6 +3,7 @@ import "server-only";
 import { habitRepo, gamificationRepo } from "@/data";
 import type { HomeRepository } from "@/data/repositories";
 import { levelForXp, progressToNextLevel } from "@/lib/gamification";
+import { toHomeHabits } from "@/lib/habits";
 import { todayISO } from "@/lib/time";
 import type { HomeData, ScenarioSummary, UserSummary } from "@/lib/types";
 import {
@@ -69,8 +70,8 @@ export const realHomeRepo: HomeRepository = {
       },
     });
 
-    const [todaysHabits, quests] = await Promise.all([
-      habitRepo.listToday(userId),
+    const [overview, quests] = await Promise.all([
+      habitRepo.getOverview(userId),
       gamificationRepo.listQuests(userId),
     ]);
 
@@ -87,7 +88,7 @@ export const realHomeRepo: HomeRepository = {
       },
       continueTraining,
       categories,
-      todaysHabits,
+      habits: toHomeHabits(overview),
       quests,
     };
   },

@@ -40,8 +40,9 @@ export const proxy = auth((req) => {
     }
   }
 
-  // Public auth & onboarding landing routes: /welcome, /login, /register
-  const isAuthOrWelcomeRoute = pathname === "/welcome" || pathname === "/login" || pathname === "/register";
+  // Public auth & onboarding landing routes: /welcome, /login, /register, /forgot-password
+  const isAuthOrWelcomeRoute =
+    pathname === "/welcome" || pathname === "/login" || pathname === "/register" || pathname === "/forgot-password";
   if (isAuthOrWelcomeRoute) {
     if (INTRO_ALWAYS && pathname === "/welcome") {
       return NextResponse.next();

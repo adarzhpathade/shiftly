@@ -1,24 +1,27 @@
 import "server-only";
 
 import type {
+  ActivityRepository,
   BossRepository,
   GamificationRepository,
   HabitRepository,
   HomeRepository,
   LeaderboardRepository,
+  PasswordResetRepository,
   TrainingRepository,
 } from "./repositories";
 import {
+  mockActivityRepo,
   mockBossRepo,
   mockGamificationRepo,
   mockHabitRepo,
   mockHomeRepo,
   mockLeaderboardRepo,
+  mockPasswordResetRepo,
   mockTrainingRepo,
 } from "./mock";
 import { getAiMode } from "@/server/boss/mode";
 import { realGamificationRepo } from "@/server/gamification/repository";
-import { realHabitRepo } from "@/server/habits/repository";
 import { realLeaderboardRepo } from "@/server/leaderboard/repository";
 import { realTrainingRepo } from "@/server/training/repository";
 import { realHomeRepo } from "@/server/home/repository";
@@ -32,12 +35,11 @@ import { realHomeRepo } from "@/server/home/repository";
  * TODO(backend): when a real implementation exists (src/server/<domain>/),
  * import it here and pick it when source === 'real', per repository, e.g.
  *   export const habitRepo: HabitRepository = source === "real" ? realHabitRepo : mockHabitRepo;
- * Until then 'real' falls back to the mocks with a warning.
  */
 const source = process.env.DATA_SOURCE ?? "mock";
 
 if (source === "real") {
-  console.warn("[data] DATA_SOURCE=real but no real repositories exist yet (non-boss). Falling back to mocks.");
+  console.warn("[data] DATA_SOURCE=real: habits, activity and password reset still use mocks (not built yet).");
 }
 
 export const homeRepo: HomeRepository = source === "real" ? realHomeRepo : mockHomeRepo;
@@ -54,7 +56,19 @@ const lazyBossRepo: BossRepository = {
   finishSession: async (u, id) => (await lazyReal()).finishSession(u, id),
 };
 export const bossRepo: BossRepository = useRealBoss ? lazyBossRepo : mockBossRepo;
-export const habitRepo: HabitRepository = source === "real" ? realHabitRepo : mockHabitRepo;
+
+/**
+ * Auto-habits (docs/contract-auto-habits.md). No real implementations exist yet, so BOTH sources
+ * use the mocks for these three until the owners finish:
+ *   habitRepo          TODO(Khushi): src/server/habits/ (detection from ActivityEvent)
+ *   activityRepo       TODO(Mayur):  src/server/activity/
+ *   passwordResetRepo  TODO(Mayur):  src/server/auth/ (reset codes + Gmail SMTP)
+ * When one is ready: `source === "real" ? realXRepo : mockXRepo`. getCoachNote belongs to Mayur
+ * (AI + cache) but is part of habitRepo, so he plugs it into Khushi's repo.
+ */
+export const habitRepo: HabitRepository = mockHabitRepo;
+export const activityRepo: ActivityRepository = mockActivityRepo;
+export const passwordResetRepo: PasswordResetRepository = mockPasswordResetRepo;
 export const gamificationRepo: GamificationRepository = source === "real" ? realGamificationRepo : mockGamificationRepo;
 export const leaderboardRepo: LeaderboardRepository = source === "real" ? realLeaderboardRepo : mockLeaderboardRepo;
 

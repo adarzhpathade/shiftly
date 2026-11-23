@@ -32,9 +32,26 @@ enum RoleplayStatus {
   FALLBACK
 }
 
+/// DEPRECATED: only used by the deprecated manual Habit model
 enum Frequency {
   DAILY
   WEEKLY
+}
+
+/// What the user did, logged automatically. Habits are detected from these rows.
+enum ActivityType {
+  TRAINING_FINISHED
+  BOSS_FINISHED
+  DAILY_OPEN
+  QUEST_COMPLETED
+  PERFECT_SCORE
+}
+
+/// Stage of a detected habit (matches HabitStage in src/lib/types.ts).
+enum HabitStageName {
+  FORMING
+  BUILDING
+  SOLID
 }
 
 enum XpSource {
@@ -72,6 +89,10 @@ model User {
   assignedAssignments Assignment[]       @relation("AssignedByUser")
   xpEvents            XpEvent[]
   pushSubscriptions   PushSubscription[]
+  activityEvents      ActivityEvent[]
+  passwordResetCodes  PasswordResetCode[]
+  coachNotes          CoachNote[]
+  habitStageAwards    HabitStageAward[]
 
   @@index([teamId])
 }
@@ -101,6 +122,7 @@ model Category {
 
   scenarios   Scenario[]
   bossPersona BossPersona?
+  activityEvents ActivityEvent[]
 }
 
 model Scenario {
@@ -238,6 +260,7 @@ model RoleplayTurn {
   @@index([sessionId])
 }
 
+/// DEPRECATED: manual habits removed; kept for live-site compatibility
 model Habit {
   id           String         @id @default(cuid())
   userId       String
@@ -258,6 +281,7 @@ model Habit {
   @@index([templateId])
 }
 
+/// DEPRECATED: manual habits removed; kept for live-site compatibility
 model HabitLog {
   id        String   @id @default(cuid())
   habitId   String
@@ -271,6 +295,7 @@ model HabitLog {
   @@index([habitId])
 }
 
+/// DEPRECATED: manual habits removed; kept for live-site compatibility
 model HabitTemplate {
   id          String   @id @default(cuid())
   title       String
@@ -366,4 +391,75 @@ model PushSubscription {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+/// One thing a user did (training, boss, clock-in, quest, perfect score). Detected habits
+/// are COMPUTED from these on read; nothing about habits is stored except HabitStageAward.
+model ActivityEvent {
+  id         String       @id @default(cuid())
+  userId     String
+  type       ActivityType
+  categoryId String?
+  stars      Int?
+  /// Small extras: { won: boolean } for boss_finished, { questId } for quest_completed.
+  meta       Json?
+  createdAt  DateTime     @default(now())
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+/// A one-time emailed reset code. Stored hashed (never the plain code).
+/// Unknown emails also get a row with userId = null and usedAt set, so the "3 requests per
+/// email per hour" limit behaves identically and never reveals whether an account exists.
+model PasswordResetCode {
+  id        String    @id @default(cuid())
+  userId    String?
+  /// Normalised (trimmed, lower-case) email the code was requested for.
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  /// Wrong guesses so far; the code is burned at 5.
+  attempts  Int       @default(0)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email, createdAt])
+}
+
+/// The weekly coach note, cached per user per ISO week (e.g. "2026-W47").
+model CoachNote {
+  id        String   @id @default(cuid())
+  userId    String
+  isoWeek   String
+  /// The 3 lines joined by a line break.
+  text      String
+  /// "ai" or "rules". A "rules" row may be replaced by an AI note on a later read the same week.
+  source    String   @default("ai")
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, isoWeek])
+}
+
+/// Records that the stage-up XP of a habit was already paid, so it is paid once per user,
+/// habit and stage even if the habit slips back and reaches the stage again.
+model HabitStageAward {
+  id        String         @id @default(cuid())
+  userId    String
+  /// Habit key: the kind, or "plays-category:<categoryKey>".
+  habitKey  String
+  stage     HabitStageName
+  xp        Int
+  awardedAt DateTime       @default(now())
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, habitKey, stage])
 }

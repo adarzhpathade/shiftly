@@ -1,3 +1,8 @@
+/**
+ * LEGACY: the manual-habit repository (create, edit, check in). It is being replaced by
+ * automatic habit detection (docs/contract-auto-habits.md, owner: Khushi) and is NOT wired
+ * into src/data/index.ts any more. It is kept for reference until the new one is done.
+ */
 import "server-only";
 
 import type {
@@ -7,12 +12,12 @@ import type {
   HabitFrequency,
   HabitInput,
   HabitTemplate,
-} from "@/lib/types";
-import type { HabitRepository } from "@/data/repositories";
+  LegacyHabitRepository,
+} from "./legacy-types";
 import { Frequency, type Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { addDays, isoWeekday, streakMilestone } from "@/lib/gamification";
 import { todayISO } from "@/lib/time";
-import { HABIT_TEMPLATES } from "@/data/mock/data";
+import { HABIT_TEMPLATES } from "./legacy-templates";
 import { awardXp, checkBadges, progressQuests, touchStreak } from "@/server/progress";
 import { computeHabitStreaks } from "./streaks";
 
@@ -48,7 +53,7 @@ async function resolveRealUserId(
 const CHECK_IN_XP = 10;
 const HEATMAP_DAYS = 84; // 12 weeks
 
-export const realHabitRepo: HabitRepository = {
+export const realHabitRepo: LegacyHabitRepository = {
   async listToday(userId: string): Promise<readonly Habit[]> {
     const db = await getDb();
     const resolvedUserId = await resolveRealUserId(db, userId);

@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { habitRepo } from "@/data";
 import { db } from "@/server/db";
 import { requireViewer } from "@/server/auth/session";
 import { unstable_update } from "@/server/auth";
@@ -11,7 +10,6 @@ import { completeOnboardingCore } from "./core";
 
 export async function completeOnboardingAction(input: {
   avatarKey: string;
-  templateIds: string[];
 }): Promise<ActionResult> {
   const viewer = await requireViewer();
 
@@ -24,15 +22,7 @@ export async function completeOnboardingAction(input: {
     };
   }
 
-  const templates = await habitRepo.listTemplates();
-
-  const result = await completeOnboardingCore(
-    db,
-    viewer.id,
-    parsed.data,
-    (habitInput) => habitRepo.create(viewer.id, habitInput),
-    templates,
-  );
+  const result = await completeOnboardingCore(db, viewer.id, parsed.data);
 
   if (!result.ok) {
     return result;

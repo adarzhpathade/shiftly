@@ -72,6 +72,18 @@ export function themeFor(event: CelebrationEvent): Theme {
         cta: "Nice!",
         spin: false,
       };
+    case "habit-stage":
+      return {
+        bg: "bg-lav",
+        colour: "lav",
+        object: "sparkle",
+        headline: "HABIT\n[UNLOCKED!]",
+        title: event.habitTitle,
+        detail: `This habit is now ${event.stage}. Keep it going.`,
+        chip: event.xpReward > 0 ? `+${event.xpReward} XP` : "New habit",
+        cta: "Nice!",
+        spin: false,
+      };
   }
 }
 

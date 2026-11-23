@@ -2,9 +2,9 @@
 
 The data contract between screens and backends.
 
-- `repositories.ts`: repository **interfaces** (pure TS). Home, Training, Boss, Habit, Gamification, Leaderboard.
+- `repositories.ts`: repository **interfaces** (pure TS). Home, Training, Boss, Habit (auto-detected), Activity, PasswordReset, Gamification, Leaderboard.
 - `mock/`: in-memory implementations with ~300-500 ms fake delay (`MOCK_DELAY_SCALE=0` disables it, used by tests). State is mutable per server process, so check-ins, answers and boss turns change what you see next. `resetMockState()` restores the seed.
-- `index.ts`: exports the active implementations (`homeRepo`, `trainingRepo`, `bossRepo`, `habitRepo`, `gamificationRepo`, `leaderboardRepo`). It imports `server-only`, so it can only be used in route files and server actions.
+- `index.ts`: exports the active implementations (`homeRepo`, `trainingRepo`, `bossRepo`, `habitRepo`, `activityRepo`, `passwordResetRepo`, `gamificationRepo`, `leaderboardRepo`). It imports `server-only`, so it can only be used in route files and server actions.
 
 ## How a screen gets data
 
@@ -14,22 +14,21 @@ Screens in `src/features/` never import `@/data`. A route file in `src/app/` doe
 // src/app/(app)/page.tsx (server component)
 import { homeRepo } from "@/data";
 import { HomeScreen } from "@/features/home/HomeScreen";
-import { checkInHabit } from "./actions";
 
 export default async function Page() {
   const home = await homeRepo.getHome(userId); // userId from the session
-  return <HomeScreen data={home} onCheckIn={checkInHabit} />;
+  return <HomeScreen data={home} myRank={null} />;
 }
 ```
 
 ## How actions work
 
-Mutations are server actions defined next to the route (`"use server"`), which call a repository and return the result. They are passed to the screen as callbacks (`onCheckIn`, `onAnswer`, ...). The screen shows loading and the returned result (and `Celebration`s built from `leveledUp`, `newBadges`, `milestone`).
+Mutations are server actions defined next to the route (`"use server"`), which call a repository and return the result. They are passed to the screen as callbacks (`onAnswer`, ...). The screen shows loading and the returned result (and `Celebration`s built from `leveledUp`, `newBadges`, `milestone`, `stageUps`).
 
 ```ts
 "use server";
-export async function checkInHabit(habitId: string, note?: string) {
-  return habitRepo.checkIn(await currentUserId(), habitId, note);
+export async function startAttemptAction(scenarioId: string) {
+  return trainingRepo.startAttempt(await currentUserId(), scenarioId);
 }
 ```
 
@@ -47,6 +46,6 @@ Note: mock placeholder scenarios (every level except Handling Complaints 1 and 3
 
 ## Contract rules worth knowing
 
-- Quests grant their XP automatically when completed. Results (`CheckInResult`, `ScenarioResult`, `BossResult`) list them in `questsCompleted`; `xpEarned` excludes that bonus (total gain = `xpEarned` + sum of quest `xpReward`).
-- `Habit.scheduledToday` says whether today is a scheduled day; `listToday` returns all active habits. Streaks count only scheduled days (`streakAfterCheckIn(..., daysOfWeek)`).
+- Quests grant their XP automatically when completed. Results (`ScenarioResult`, `BossResult`) list them in `questsCompleted`; `xpEarned` excludes that bonus (total gain = `xpEarned` + sum of quest `xpReward`).
+- Habits are detected automatically from logged activity (no create/edit/check-in). See `docs/contract-auto-habits.md` for the model, rules, activity events and the password-reset contract.
 - Boss: `startSession` returns `{ ok: false, reason: 'daily-limit', resetsAt }` after `BOSS_DAILY_LIMIT` starts a day. Replies over `MAX_REPLY_CHARS` give an error event with `fallback: false`. A `fallback: true` error sets the status to `'fallback'` and `BossSession.fallbackScenarioId` points to the guided version.

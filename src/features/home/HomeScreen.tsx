@@ -13,15 +13,9 @@ import { TodayCard } from "./TodayCard";
 export interface HomeScreenProps {
   data: HomeData;
   myRank: LeaderboardEntry | null;
-  onCheckIn: (
-    habitId: string,
-  ) => Promise<
-    | { ok: true; xpEarned: number; streak: number }
-    | { ok: false; error: string }
-  >;
 }
 
-export function HomeScreen({ data, myRank, onCheckIn }: HomeScreenProps) {
+export function HomeScreen({ data, myRank }: HomeScreenProps) {
   return (
     <main className="mx-auto w-full max-w-md overflow-x-clip px-4 pt-[18px]">
       <ThemeColor color="cream" />
@@ -47,7 +41,7 @@ export function HomeScreen({ data, myRank, onCheckIn }: HomeScreenProps) {
           <CategoryGrid categories={data.categories} />
         </Rise>
         <Rise>
-          <HabitList habits={data.todaysHabits} onCheckIn={onCheckIn} />
+          <HabitList habits={data.habits} />
         </Rise>
         <Rise>
           <LeaderboardTeaser myRank={myRank} />

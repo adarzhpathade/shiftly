@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { habitRepo } from "@/data";
 import { requireViewer } from "@/server/auth/session";
 import { getOnboardingStatus } from "@/server/onboarding/status";
 import { SetupClient } from "./setup-client";
@@ -13,20 +12,7 @@ async function SetupContent() {
   const { onboarded } = await getOnboardingStatus(viewer.id);
   if (onboarded) redirect("/");
 
-  const templates = await habitRepo.listTemplates();
-  return (
-    <SetupClient
-      name={viewer.name}
-      initialAvatarKey={viewer.avatarKey}
-      templates={templates.map((t) => ({
-        key: t.key,
-        title: t.title,
-        icon: t.icon,
-        description: t.description,
-        frequency: t.frequency,
-      }))}
-    />
-  );
+  return <SetupClient name={viewer.name} initialAvatarKey={viewer.avatarKey} />;
 }
 
 export default function SetupPage() {

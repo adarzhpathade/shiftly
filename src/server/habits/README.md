@@ -1,3 +1,5 @@
+> **LEGACY (2026-11-23):** this manual-habit backend is being replaced by automatic habit detection. It is no longer wired into `src/data/index.ts`. See `docs/contract-auto-habits.md`.
+
 # Habits Backend
 
 The Shiftly habits backend manages habit creation, editing, scheduling, daily check-ins, and streak calculation backed by PostgreSQL via Prisma.

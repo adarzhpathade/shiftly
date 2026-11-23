@@ -15,18 +15,20 @@ import type {
   BossStreamEvent,
   Category,
   CategoryKey,
-  CheckInResult,
+  ActivityEventInput,
+  ActivityRecordResult,
   Badge,
+  CoachNote,
   GuidedScenario,
-  Habit,
   HabitDetail,
-  HabitInput,
-  HabitTemplate,
+  HabitsOverview,
   HomeData,
   Leaderboard,
   LeaderboardPeriod,
   LeaderboardScope,
   LevelNode,
+  PasswordResetRequestResult,
+  PasswordResetVerifyResult,
   Quest,
   ScenarioResult,
   UserProfile,
@@ -70,16 +72,56 @@ export interface BossRepository {
   finishSession(userId: string, sessionId: string): Promise<BossResult>;
 }
 
+/**
+ * Habits are detected automatically; users never create, edit or check in habits.
+ * Flow (Habits page):
+ *   getOverview(userId)  -> everything the page shows in one call: detected habits
+ *       (on_track or slipping, never fading), the next habit to form, insights, the
+ *       weekly coach note, and `firstHabits` progress while the user has no habit yet.
+ *   getDetail(userId, habitKey) -> one habit with weekly counts and recent activity.
+ *       Also works for fading habits. Unknown key -> throws "Habit not found".
+ *   getCoachNote(userId) -> the 3-line note for the current ISO week. Generated once per
+ *       user per week (AI, with a rules-based fallback) and cached; later calls return the cache.
+ * Habits are COMPUTED from ActivityEvent rows on read: nothing to write from the screens.
+ * Rules and thresholds: docs/contract-auto-habits.md.
+ */
 export interface HabitRepository {
-  /** The user's active habits with today's state. */
-  listToday(userId: string): Promise<readonly Habit[]>;
-  listTemplates(): Promise<readonly HabitTemplate[]>;
-  create(userId: string, input: HabitInput): Promise<Habit>;
-  update(userId: string, habitId: string, patch: Partial<HabitInput>): Promise<Habit>;
-  remove(userId: string, habitId: string): Promise<void>;
-  /** Idempotent per day: a second call the same day returns xpEarned 0. */
-  checkIn(userId: string, habitId: string, note?: string): Promise<CheckInResult>;
-  getDetail(userId: string, habitId: string): Promise<HabitDetail>;
+  getOverview(userId: string): Promise<HabitsOverview>;
+  getDetail(userId: string, habitKey: string): Promise<HabitDetail>;
+  getCoachNote(userId: string): Promise<CoachNote>;
+}
+
+/**
+ * Activity flow (INTERNAL: server code only, never called from a client component):
+ *   record(userId, event) is called by
+ *     - training: finishAttempt        -> training_finished (+ perfect_score on 3 stars)
+ *     - boss:     finishSession        -> boss_finished
+ *     - progress: a quest completes    -> quest_completed
+ *     - the app shell: first open of the day (a server action fired by the layout) -> daily_open
+ *   It stores the event, re-detects the habits the event can affect, and pays the small XP
+ *   bonus once when a habit reaches a new stage (HabitStageAward). The result carries
+ *   `stageUps` so the caller can add them to the celebrations it already returns.
+ *   It must never throw into the caller's flow: log and return { recorded: false, ... }.
+ */
+export interface ActivityRepository {
+  record(userId: string, event: ActivityEventInput): Promise<ActivityRecordResult>;
+}
+
+/**
+ * Forgot-password flow (email code):
+ *   requestCode(email) -> emails a 6-digit code (Gmail SMTP). ALWAYS { ok: true } for any
+ *       well-formed email (never reveals whether an account exists), unless the email hit
+ *       the limit of 3 requests per hour ({ ok: false, reason: 'rate-limited' }, applied
+ *       the same way to unknown emails) or is malformed ('invalid').
+ *   verifyAndReset(email, code, newPassword) -> checks the code and sets the new password.
+ *       ok | invalid (wrong code, unknown email, weak password; `field` says which) |
+ *       expired (older than 15 min) | too-many-tries (5 wrong guesses burn the code) |
+ *       rate-limited. The code is stored hashed, single use. After `ok` the user logs in
+ *       normally: the screen sends them to /login.
+ */
+export interface PasswordResetRepository {
+  requestCode(email: string): Promise<PasswordResetRequestResult>;
+  verifyAndReset(email: string, code: string, newPassword: string): Promise<PasswordResetVerifyResult>;
 }
 
 export interface GamificationRepository {

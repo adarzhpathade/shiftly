@@ -3,11 +3,13 @@ import { BOSS_DAILY_LIMIT, MAX_REPLY_CHARS } from "@/lib/gamification";
 import type { BossSession, BossStreamEvent, CategoryKey } from "@/lib/types";
 import {
   ME_ID,
+  mockActivityRepo,
   mockBossRepo,
   mockGamificationRepo,
   mockHabitRepo,
   mockHomeRepo,
   mockLeaderboardRepo,
+  mockPasswordResetRepo,
   mockTrainingRepo,
   registerMockIdentity,
   resetMockState,
@@ -35,16 +37,19 @@ describe("home", () => {
     expect(home.user.name).toBeTruthy();
     expect(home.categories).toHaveLength(4);
     expect(home.quests).toHaveLength(3);
-    expect(home.todaysHabits.length).toBeGreaterThan(0);
+    expect(home.habits.items.length).toBeGreaterThan(0);
+    expect(home.habits.firstHabitsProgress).toBeNull();
+    expect(home.habits.slippingCount).toBe(1);
     expect(home.xpProgress).toBeGreaterThanOrEqual(0);
     expect(home.xpProgress).toBeLessThanOrEqual(1);
     expect(home.challenge.scenario.id).toBeTruthy();
     expect(home.continueTraining).not.toBeNull();
   });
 
-  it("returns empty habits and zero habit quest progress for a new user", async () => {
+  it("returns no habits but a forming progress value for a new user", async () => {
     const home = await mockHomeRepo.getHome("u-brand-new");
-    expect(home.todaysHabits).toEqual([]);
+    expect(home.habits.items).toEqual([]);
+    expect(home.habits.firstHabitsProgress).toBeGreaterThan(0);
     const habitQuest = home.quests.find((q) => q.type === "habit");
     expect(habitQuest?.progress).toBe(0);
   });
@@ -227,120 +232,137 @@ describe("quests grant XP on completion", () => {
     const xp1 = (await mockGamificationRepo.getProfile(ME_ID)).xp;
     expect(xp1 - xp0).toBe(result.xpEarned + bonus);
   });
+});
 
-  it("the third habit check-in completes the habit quest", async () => {
-    const first = await mockHabitRepo.checkIn(ME_ID, "h-punctuality");
-    expect(first.questsCompleted).toEqual([]);
-    const second = await mockHabitRepo.checkIn(ME_ID, "h-learning");
-    expect(second.questsCompleted).toEqual([]);
-    const created = await mockHabitRepo.create(ME_ID, { title: "X", icon: "check", frequency: "daily", daysOfWeek: [1, 2, 3, 4, 5, 6, 7], reminderTime: null });
-    const third = await mockHabitRepo.checkIn(ME_ID, created.id);
-    expect(third.questsCompleted.map((q) => q.type)).toEqual(["habit"]);
+describe("habits (detected automatically)", () => {
+  it("returns 3 visible habits in different stages, one slipping, and hides the fading one", async () => {
+    const o = await mockHabitRepo.getOverview(ME_ID);
+    expect(o.habits).toHaveLength(3);
+    expect(new Set(o.habits.map((h) => h.stage))).toEqual(new Set(["forming", "building", "solid"]));
+    expect(o.habits.filter((h) => h.status === "slipping")).toHaveLength(1);
+    expect(o.habits.some((h) => h.status === "fading")).toBe(false);
+    expect(o.fadingCount).toBe(1);
+    expect(o.firstHabits).toBeNull();
+    for (const h of o.habits) {
+      expect(h.heatmap).toHaveLength(84);
+      expect(h.consistency).toBeGreaterThanOrEqual(0);
+      expect(h.consistency).toBeLessThanOrEqual(1);
+      expect(h.usualDays.every((d) => d >= 1 && d <= 7)).toBe(true);
+    }
+  });
+
+  it("includes insights, one next-habit suggestion and a 3 line coach note", async () => {
+    const o = await mockHabitRepo.getOverview(ME_ID);
+    expect(o.insights.bestTimeOfDay).not.toBeNull();
+    expect(o.insights.skillLink?.liftPercent).toBe(12);
+    expect(o.nextHabit?.categoryKey).toBe("difficult-customers");
+    expect(o.nextHabit?.progress).toBeCloseTo(1 / 3);
+    expect(o.coachNote.lines).toHaveLength(3);
+    expect(o.coachNote.isoWeek).toMatch(/^\d{4}-W\d{2}$/);
+  });
+
+  it("caches the coach note per user per week", async () => {
+    const a = await mockHabitRepo.getCoachNote(ME_ID);
+    const b = await mockHabitRepo.getCoachNote(ME_ID);
+    expect(b).toBe(a);
+    expect((await mockHabitRepo.getOverview(ME_ID)).coachNote).toBe(a);
+  });
+
+  it("gives a new user no habits but forming progress and a rules coach note", async () => {
+    const o = await mockHabitRepo.getOverview("u-brand-new");
+    expect(o.habits).toEqual([]);
+    expect(o.firstHabits?.progress).toBeGreaterThan(0);
+    expect(o.firstHabits?.progress).toBeLessThanOrEqual(1);
+    expect(o.nextHabit).toBeNull();
+    expect(o.insights).toEqual({ bestTimeOfDay: null, mostSkippedWeekday: null, skillLink: null, streakAtRisk: null });
+    expect(o.coachNote.source).toBe("rules");
+  });
+
+  it("returns habit detail, including for a fading habit, and throws for unknown keys", async () => {
+    const detail = await mockHabitRepo.getDetail(ME_ID, "clocks-in");
+    expect(detail.weeklyCounts.length).toBeGreaterThanOrEqual(12);
+    expect(detail.nextStage).toBeNull();
+    const slipping = await mockHabitRepo.getDetail(ME_ID, "trains");
+    expect(slipping.statusNote).toBeTruthy();
+    const fading = await mockHabitRepo.getDetail(ME_ID, "boss-fights");
+    expect(fading.status).toBe("fading");
+    await expect(mockHabitRepo.getDetail(ME_ID, "nope")).rejects.toThrow("Habit not found");
+    await expect(mockHabitRepo.getDetail("u-brand-new", "clocks-in")).rejects.toThrow();
   });
 });
 
-describe("habits", () => {
-  it("flags whether a habit is scheduled today", async () => {
-    const all = [1, 2, 3, 4, 5, 6, 7];
-    const never = await mockHabitRepo.create(ME_ID, { title: "N", icon: "x", frequency: "weekly", daysOfWeek: [], reminderTime: null });
-    const daily = await mockHabitRepo.create(ME_ID, { title: "D", icon: "x", frequency: "daily", daysOfWeek: all, reminderTime: null });
-    expect(never.scheduledToday).toBe(false);
-    expect(daily.scheduledToday).toBe(true);
-  });
-
-  it("lists habits and templates", async () => {
-    const habits = await mockHabitRepo.listToday(ME_ID);
-    expect(habits.length).toBeGreaterThanOrEqual(3);
-    expect((await mockHabitRepo.listTemplates()).length).toBe(6);
-  });
-
-  it("checkIn extends the streak, grants XP and hits the 7 day milestone", async () => {
-    const before = (await mockHabitRepo.listToday(ME_ID)).find((h) => h.id === "h-punctuality")!;
-    expect(before.doneToday).toBe(false);
-    expect(before.currentStreak).toBe(6);
-    const result = await mockHabitRepo.checkIn(ME_ID, "h-punctuality", "Early again");
-    expect(result.streak).toBe(7);
-    expect(result.habit.doneToday).toBe(true);
-    expect(result.xpEarned).toBeGreaterThan(0);
-    expect(result.milestone).toBe(7);
-    expect(result.newBadges.map((b) => b.key)).toContain("seven-day-streak");
-    const detail = await mockHabitRepo.getDetail(ME_ID, "h-punctuality");
-    expect(detail.currentStreak).toBe(7);
-    expect(detail.notes[0]?.text).toBe("Early again");
-  });
-
-  it("does not double count a second check-in on the same day", async () => {
-    await mockHabitRepo.checkIn(ME_ID, "h-punctuality");
-    const again = await mockHabitRepo.checkIn(ME_ID, "h-punctuality");
-    expect(again.xpEarned).toBe(0);
-    expect(again.streak).toBe(7);
-    expect(again.newBadges).toEqual([]);
-  });
-
-  it("creates, updates and removes", async () => {
-    const created = await mockHabitRepo.create(ME_ID, {
-      title: "Greet every customer",
-      icon: "smile",
-      frequency: "daily",
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      reminderTime: "10:00",
+describe("activity", () => {
+  it("records events, and only the first daily_open per day", async () => {
+    const first = await mockActivityRepo.record(ME_ID, { type: "daily_open" });
+    expect(first).toEqual({ recorded: true, stageUps: [], xpEarned: 0 });
+    const second = await mockActivityRepo.record(ME_ID, { type: "daily_open" });
+    expect(second.recorded).toBe(false);
+    const training = await mockActivityRepo.record(ME_ID, {
+      type: "training_finished",
+      categoryKey: "handling-complaints",
+      stars: 3,
     });
-    expect(created.currentStreak).toBe(0);
-    const updated = await mockHabitRepo.update(ME_ID, created.id, { title: "Greet warmly" });
-    expect(updated.title).toBe("Greet warmly");
-    await mockHabitRepo.remove(ME_ID, created.id);
-    await expect(mockHabitRepo.getDetail(ME_ID, created.id)).rejects.toThrow();
+    expect(training.recorded).toBe(true);
   });
 
-  it("returns a 12 week heatmap and completion rate", async () => {
-    const detail = await mockHabitRepo.getDetail(ME_ID, "h-learning");
-    expect(detail.heatmap).toHaveLength(84);
-    expect(detail.completionRate).toBeGreaterThan(0);
-    expect(detail.completionRate).toBeLessThanOrEqual(1);
+  it("clocking in advances the Clock in today quest", async () => {
+    await mockActivityRepo.record(ME_ID, { type: "daily_open" });
+    const quests = await mockGamificationRepo.listQuests(ME_ID);
+    expect(quests.find((q) => q.type === "habit")?.completed).toBe(true);
+  });
+});
+
+describe("password reset (mock)", () => {
+  it("always answers ok for a valid email, known or not", async () => {
+    await expect(mockPasswordResetRepo.requestCode("someone@example.com")).resolves.toEqual({ ok: true });
+    await expect(mockPasswordResetRepo.requestCode("nobody-at-all@example.com")).resolves.toEqual({ ok: true });
   });
 
-  it("new user starts with no habits", async () => {
-    const habits = await mockHabitRepo.listToday("u-brand-new");
-    expect(habits).toEqual([]);
+  it("rejects a malformed email", async () => {
+    const r = await mockPasswordResetRepo.requestCode("not-an-email");
+    expect(r).toMatchObject({ ok: false, reason: "invalid", field: "email" });
   });
 
-  it("creating Punctuality twice for a new user yields one habit", async () => {
-    const userId = "u-brand-new";
-    const h1 = await mockHabitRepo.create(userId, {
-      title: "Punctuality",
-      icon: "clock",
-      frequency: "daily",
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      reminderTime: null,
+  it("rate limits the 4th request in an hour", async () => {
+    for (let i = 0; i < 3; i++) await mockPasswordResetRepo.requestCode("rate@example.com");
+    const r = await mockPasswordResetRepo.requestCode("rate@example.com");
+    expect(r).toMatchObject({ ok: false, reason: "rate-limited" });
+  });
+
+  it("resets with code 123456 and a good password", async () => {
+    await expect(mockPasswordResetRepo.verifyAndReset("a@example.com", "123456", "newpassword1")).resolves.toEqual({ ok: true });
+  });
+
+  it("rejects a wrong code, a weak password, and burns the code after 5 wrong tries", async () => {
+    const weak = await mockPasswordResetRepo.verifyAndReset("b@example.com", "123456", "short");
+    expect(weak).toMatchObject({ ok: false, reason: "invalid", field: "newPassword" });
+    const wrong = await mockPasswordResetRepo.verifyAndReset("b@example.com", "000000", "newpassword1");
+    expect(wrong).toMatchObject({ ok: false, reason: "invalid", field: "code", attemptsLeft: 4 });
+    for (let i = 0; i < 3; i++) await mockPasswordResetRepo.verifyAndReset("b@example.com", "000000", "newpassword1");
+    const burned = await mockPasswordResetRepo.verifyAndReset("b@example.com", "000000", "newpassword1");
+    expect(burned).toEqual({ ok: false, reason: "too-many-tries" });
+    // Even the right code no longer works until a new code is requested.
+    await expect(mockPasswordResetRepo.verifyAndReset("b@example.com", "123456", "newpassword1")).resolves.toEqual({
+      ok: false,
+      reason: "too-many-tries",
     });
-    const h2 = await mockHabitRepo.create(userId, {
-      title: "  punctuality  ",
-      icon: "clock",
-      frequency: "daily",
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      reminderTime: "09:00",
-    });
-    expect(h1.id).toBe(h2.id);
-    const habits = await mockHabitRepo.listToday(userId);
-    expect(habits).toHaveLength(1);
-    expect(habits[0]?.title).toBe("Punctuality");
+    await mockPasswordResetRepo.requestCode("b@example.com");
+    await expect(mockPasswordResetRepo.verifyAndReset("b@example.com", "123456", "newpassword1")).resolves.toEqual({ ok: true });
   });
 
-  it("demo user still has the 3 defaults and creating Punctuality for them does not add a 4th", async () => {
-    const before = await mockHabitRepo.listToday(ME_ID);
-    expect(before).toHaveLength(3);
-
-    const created = await mockHabitRepo.create(ME_ID, {
-      title: "  punctuality  ",
-      icon: "clock",
-      frequency: "daily",
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      reminderTime: null,
+  it("reaches the expired, too-many-tries and rate-limited branches with magic emails", async () => {
+    await expect(mockPasswordResetRepo.verifyAndReset("expired@example.com", "123456", "newpassword1")).resolves.toEqual({
+      ok: false,
+      reason: "expired",
     });
-    expect(created.id).toBe("h-punctuality");
-
-    const after = await mockHabitRepo.listToday(ME_ID);
-    expect(after).toHaveLength(3);
+    await expect(mockPasswordResetRepo.verifyAndReset("locked@example.com", "123456", "newpassword1")).resolves.toEqual({
+      ok: false,
+      reason: "too-many-tries",
+    });
+    await expect(mockPasswordResetRepo.verifyAndReset("limited@example.com", "123456", "newpassword1")).resolves.toMatchObject({
+      ok: false,
+      reason: "rate-limited",
+    });
   });
 });
 
@@ -359,10 +381,10 @@ describe("gamification and leaderboard", () => {
     expect(badges.some((b) => b.earnedAt !== null)).toBe(true);
   });
 
-  it("lists quests and updates progress after a check-in", async () => {
-    await mockHabitRepo.checkIn(ME_ID, "h-punctuality");
+  it("lists the 3 daily quests", async () => {
     const quests = await mockGamificationRepo.listQuests(ME_ID);
-    expect(quests.find((q) => q.type === "habit")?.progress).toBe(2);
+    expect(quests).toHaveLength(3);
+    expect(quests.find((q) => q.type === "habit")?.label).toBe("Clock in today");
   });
 
   it("ranks the company and the team", async () => {
@@ -377,7 +399,9 @@ describe("gamification and leaderboard", () => {
 
   it("moves up the leaderboard after earning XP", async () => {
     const before = (await mockLeaderboardRepo.get(ME_ID, "team", "all")).me;
-    await mockHabitRepo.checkIn(ME_ID, "h-punctuality");
+    const start = await mockTrainingRepo.startAttempt(ME_ID, "sc-hc-1");
+    await mockTrainingRepo.answerStep(ME_ID, start.attemptId, start.firstStepId, "sc-hc-1-s1-c1");
+    await mockTrainingRepo.finishAttempt(ME_ID, start.attemptId);
     const after = (await mockLeaderboardRepo.get(ME_ID, "team", "all")).me;
     expect(after.xp).toBeGreaterThan(before.xp);
   });

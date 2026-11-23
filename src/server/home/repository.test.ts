@@ -22,7 +22,7 @@ vi.mock("@/server/training/repository", () => ({
 }));
 vi.mock("@/data", () => ({
   habitRepo: {
-    listToday: vi.fn(),
+    getOverview: vi.fn(),
   },
   gamificationRepo: {
     listQuests: vi.fn(),
@@ -83,7 +83,14 @@ describe("realHomeRepo", () => {
     vi.mocked(realTrainingRepo.getLevelPath).mockResolvedValue(mockNodes);
     vi.mocked(realTrainingRepo.getGuidedScenario).mockResolvedValue(mockChallenge);
     vi.mocked(db.attempt.findFirst).mockResolvedValue(null); // challenge not done today
-    vi.mocked(habitRepo.listToday).mockResolvedValue([]);
+    vi.mocked(habitRepo.getOverview).mockResolvedValue({
+      habits: [],
+      fadingCount: 0,
+      nextHabit: null,
+      insights: { bestTimeOfDay: null, mostSkippedWeekday: null, skillLink: null, streakAtRisk: null },
+      coachNote: { isoWeek: "2026-W47", lines: ["a", "b", "c"], source: "rules", generatedAt: "2026-11-23T00:00:00.000Z" },
+      firstHabits: { progress: 0.33, occurrences: 1, needed: 3, hint: "Keep going" },
+    });
     vi.mocked(gamificationRepo.listQuests).mockResolvedValue([]);
 
     const home = await realHomeRepo.getHome("u-1");

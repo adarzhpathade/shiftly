@@ -11,8 +11,9 @@ import type {
 import type { GamificationRepository, HomeRepository, LeaderboardRepository } from "../repositories";
 import { BADGE_DEFS, PEOPLE } from "./data";
 import { delay } from "./delay";
-import { CHALLENGE_BONUS_XP, CHALLENGE_SCENARIO_ID, ME_ID, SCENARIOS, state, resolveUser, identityFor } from "./state";
+import { CHALLENGE_BONUS_XP, CHALLENGE_SCENARIO_ID, SCENARIOS, state, resolveUser, identityFor } from "./state";
 import { buildCategories, buildLevelPath, challengeCompletedToday, summaryOf } from "./training";
+import { toHomeHabits } from "@/lib/habits";
 import { mockHabitRepo } from "./habits";
 
 function meSummary(userId?: string): UserSummary {
@@ -41,20 +42,8 @@ export const mockHomeRepo: HomeRepository = {
     }
 
     const challenge = summaryOf(CHALLENGE_SCENARIO_ID);
-    const uid = resolveUser(userId);
-    const todaysHabits = await mockHabitRepo.listToday(uid);
-    const habitsDoneToday = todaysHabits.filter((h) => h.doneToday).length;
-    const quests = state.quests.map((q) => {
-      if (q.type === "habit") {
-        const questProgress = uid === ME_ID ? q.progress : Math.min(q.target, habitsDoneToday);
-        return {
-          ...q,
-          progress: questProgress,
-          completed: questProgress >= q.target,
-        };
-      }
-      return q;
-    });
+    const habits = toHomeHabits(await mockHabitRepo.getOverview(resolveUser(userId)));
+    const quests = state.quests;
 
     return {
       user: meSummary(userId),
@@ -69,7 +58,7 @@ export const mockHomeRepo: HomeRepository = {
       },
       continueTraining,
       categories,
-      todaysHabits,
+      habits,
       quests,
     };
   },
@@ -105,25 +94,9 @@ export const mockGamificationRepo: GamificationRepository = {
     return allBadges();
   },
 
-  async listQuests(userId?: string) {
+  async listQuests() {
     await delay();
-    const uid = resolveUser(userId);
-    if (uid === ME_ID) {
-      return state.quests;
-    }
-    const todaysHabits = await mockHabitRepo.listToday(uid);
-    const habitsDoneToday = todaysHabits.filter((h) => h.doneToday).length;
-    return state.quests.map((q) => {
-      if (q.type === "habit") {
-        const questProgress = Math.min(q.target, habitsDoneToday);
-        return {
-          ...q,
-          progress: questProgress,
-          completed: questProgress >= q.target,
-        };
-      }
-      return q;
-    });
+    return state.quests;
   },
 };
 

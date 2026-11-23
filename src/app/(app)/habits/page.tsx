@@ -3,12 +3,11 @@ import { Suspense } from "react";
 import { habitRepo } from "@/data";
 import { HabitsScreen } from "@/features/habits";
 import { requireViewer } from "@/server/auth/session";
-import { checkInAction } from "@/server/habits-ui/actions";
 
 async function HabitsContent() {
   const viewer = await requireViewer();
-  const habits = await habitRepo.listToday(viewer.id);
-  return <HabitsScreen habits={habits} onCheckIn={checkInAction} />;
+  const overview = await habitRepo.getOverview(viewer.id);
+  return <HabitsScreen overview={overview} />;
 }
 
 export default function HabitsPage() {

@@ -4,7 +4,6 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/generated/prisma/client";
 import { createEmployee } from "../auth/core";
 import { completeOnboardingCore } from "./core";
-import type { HabitInput } from "@/lib/types";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -60,20 +59,11 @@ async function runOnboardingDbChecks() {
     }
     console.log("PASS: initial user verified with avatarKey buddy-1 and onboardedAt null");
 
-    // 2. Run completeOnboardingCore with stub createHabit callback
-    const createdHabits: HabitInput[] = [];
-    const stubCreateHabit = async (habit: HabitInput) => {
-      createdHabits.push(habit);
-    };
-
+    // 2. Run completeOnboardingCore
     const firstResult = await completeOnboardingCore(
       prisma,
       createdUserId,
-      {
-        avatarKey: "buddy-4",
-        templateIds: ["punctuality", "communication"],
-      },
-      stubCreateHabit,
+      { avatarKey: "buddy-4" },
     );
 
     if (!firstResult.ok) {
@@ -96,33 +86,15 @@ async function runOnboardingDbChecks() {
     }
     console.log("PASS: user updated with avatarKey buddy-4 and non-null onboardedAt");
 
-    // Assert createHabit callback was called N times (2 times)
-    if (createdHabits.length !== 2) {
-      console.error(`FAIL: expected 2 habit calls, received ${createdHabits.length}`);
-      process.exitCode = 1;
-      return;
-    }
-    console.log("PASS: createHabit callback was called exactly 2 times for 2 starter templates");
-
     // 3. Second call: assert idempotent no-op
     const secondResult = await completeOnboardingCore(
       prisma,
       createdUserId,
-      {
-        avatarKey: "buddy-6",
-        templateIds: ["task-completion", "teamwork"],
-      },
-      stubCreateHabit,
+      { avatarKey: "buddy-6" },
     );
 
     if (!secondResult.ok) {
       console.error(`FAIL: completeOnboardingCore failed on second call: ${secondResult.error}`);
-      process.exitCode = 1;
-      return;
-    }
-
-    if (createdHabits.length !== 2) {
-      console.error(`FAIL: second call created habits when it should be a no-op (calls: ${createdHabits.length})`);
       process.exitCode = 1;
       return;
     }
@@ -137,7 +109,7 @@ async function runOnboardingDbChecks() {
       process.exitCode = 1;
       return;
     }
-    console.log("PASS: second call was an idempotent no-op (no new habits created, avatarKey preserved)");
+    console.log("PASS: second call was an idempotent no-op (avatarKey preserved)");
   } catch (err) {
     console.error("FAIL: Exception during onboarding db checks", err instanceof Error ? err.message : err);
     process.exitCode = 1;

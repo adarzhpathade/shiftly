@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { homeRepo, leaderboardRepo } from "@/data";
 import { HomeScreen } from "@/features/home";
 import { requireViewer } from "@/server/auth/session";
-import { checkInHabitAction } from "@/server/home/actions";
 import { getOnboardingStatus } from "@/server/onboarding/status";
 import type { LeaderboardEntry } from "@/lib/types";
 
@@ -26,11 +25,7 @@ async function HomeContent() {
   }
 
   return (
-    <HomeScreen
-      data={homeData}
-      myRank={myRank}
-      onCheckIn={checkInHabitAction}
-    />
+    <HomeScreen data={homeData} myRank={myRank} />
   );
 }
 

@@ -6,6 +6,7 @@ import { signIn, signOut } from "./index";
 import { db } from "@/server/db";
 import { createEmployee } from "./core";
 import { loginSchema, toFieldErrors } from "./validation";
+import type { RegistrationTeam } from "@/lib/types";
 import type { ActionResult } from "./types";
 
 export async function loginAction(
@@ -87,7 +88,8 @@ export async function logoutAction(): Promise<void> {
   await signOut({ redirectTo: "/login" });
 }
 
-export async function listTeamsForRegistration(): Promise<{ id: string; name: string }[]> {
+/** TODO(Mayur): add memberCount (count of users per team) for the register ID card; see docs/contract-auto-habits.md. */
+export async function listTeamsForRegistration(): Promise<RegistrationTeam[]> {
   const teams = await db.team.findMany({
     select: {
       id: true,

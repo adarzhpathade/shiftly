@@ -5,12 +5,13 @@
 import { addDays, levelForXp, streakAfterCheckIn, toISODate } from "@/lib/gamification";
 import type { Stars } from "@/lib/gamification";
 import type {
+  ActivityEventInput,
   Badge,
   BossMessage,
   BossStatus,
   BossResult,
   CategoryKey,
-  HabitFrequency,
+  CoachNote,
   Quest,
   QuestType,
   ScenarioResult,
@@ -40,20 +41,12 @@ export function resolveUser(userId?: string): string {
 }
 
 
-export interface HabitRecord {
-  id: string;
+/** One logged activity event (mock ActivityRepository). */
+export interface ActivityRecord {
   userId: string;
-  title: string;
-  icon: string;
-  frequency: HabitFrequency;
-  daysOfWeek: readonly number[];
-  reminderTime: string | null;
-  currentStreak: number;
-  bestStreak: number;
-  lastCheckIn: string | null;
-  /** date -> note ("" when none) */
-  logs: Map<string, string>;
-  isActive?: boolean;
+  event: ActivityEventInput;
+  /** ISO timestamp. */
+  at: string;
 }
 
 export interface AttemptRecord {
@@ -97,7 +90,14 @@ export interface MockState {
   stars: Record<string, Stars>;
   attempts: Map<string, AttemptRecord>;
   bossSessions: Map<string, BossRecord>;
-  habits: HabitRecord[];
+  /** Events logged through the mock ActivityRepository. */
+  activity: ActivityRecord[];
+  /** `${userId}:${isoWeek}` -> cached weekly coach note. */
+  coachNotes: Map<string, CoachNote>;
+  /** Mock password reset: normalised email -> timestamps (ms) of code requests. */
+  resetRequests: Map<string, number[]>;
+  /** Mock password reset: normalised email -> wrong guesses on the current code. */
+  resetAttempts: Map<string, number>;
   badges: Map<string, string>;
   quests: Quest[];
   counters: { scenariosCompleted: number; perfectScores: number; habitCheckIns: number; bossWins: number };
@@ -114,51 +114,6 @@ export function today(): string {
 
 export function starKey(categoryKey: CategoryKey, level: number): string {
   return `${categoryKey}:${level}`;
-}
-
-function hash(text: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
-  return h >>> 0;
-}
-
-function seedHabit(
-  userId: string,
-  id: string,
-  title: string,
-  icon: string,
-  frequency: HabitFrequency,
-  daysOfWeek: readonly number[],
-  reminderTime: string | null,
-  streak: number,
-  streakEndsDaysAgo: number,
-  bestStreak: number,
-  notes: Record<number, string> = {},
-): HabitRecord {
-  const now = today();
-  const logs = new Map<string, string>();
-  const end = addDays(now, -streakEndsDaysAgo);
-  // The current streak: consecutive days ending at `end`.
-  for (let i = 0; i < streak; i++) logs.set(addDays(end, -i), notes[i] ?? "");
-  // Older history with a gap day before the streak, so the heatmap looks natural.
-  for (let i = streak + 1; i < 84; i++) {
-    const date = addDays(end, -i);
-    if (hash(`${id}:${date}`) % 100 < 65) logs.set(date, "");
-  }
-  return {
-    id,
-    userId,
-    title,
-    icon,
-    frequency,
-    daysOfWeek,
-    reminderTime,
-    currentStreak: streak,
-    bestStreak,
-    lastCheckIn: streak > 0 ? end : null,
-    logs,
-    isActive: true,
-  };
 }
 
 export function createInitialState(): MockState {
@@ -189,19 +144,14 @@ export function createInitialState(): MockState {
     stars,
     attempts: new Map(),
     bossSessions: new Map(),
-    habits: [
-      seedHabit(ME_ID, "h-punctuality", "Punctuality", "clock", "daily", [1, 2, 3, 4, 5, 6, 7], "09:00", 6, 1, 9, {
-        2: "Reached 10 minutes early and prepped my queue.",
-      }),
-      seedHabit(ME_ID, "h-learning", "Daily Learning", "book", "daily", [1, 2, 3, 4, 5, 6, 7], "18:30", 3, 0, 7, {
-        0: "Read about the HEARD apology method.",
-      }),
-      seedHabit(ME_ID, "h-followup", "Customer Follow-up", "phone", "weekly", [1, 3, 5], "16:00", 0, 3, 4),
-    ],
+    activity: [],
+    coachNotes: new Map(),
+    resetRequests: new Map(),
+    resetAttempts: new Map(),
     badges,
     quests: [
       { id: "q-scenario", type: "scenario", label: "Finish 1 scenario", target: 1, progress: 0, completed: false, xpReward: 30 },
-      { id: "q-habits", type: "habit", label: "Check in 3 habits", target: 3, progress: 1, completed: false, xpReward: 20 },
+      { id: "q-habits", type: "habit", label: "Clock in today", target: 1, progress: 0, completed: false, xpReward: 10 },
       { id: "q-stars", type: "stars", label: "Score 2 stars or more", target: 1, progress: 0, completed: false, xpReward: 25 },
     ],
     counters: { scenariosCompleted: 5, perfectScores: 1, habitCheckIns: 41, bossWins: 1 },

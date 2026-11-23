@@ -1,21 +1,15 @@
 import type { PrismaClient } from "@/generated/prisma/client";
-import type { HabitInput, HabitTemplate } from "@/lib/types";
-import { HABIT_TEMPLATES } from "@/data/mock/data";
 import type { ActionResult } from "../auth/types";
 import type { CompleteOnboardingInput } from "./validation";
 
-export type CreateHabitFn = (input: HabitInput) => Promise<unknown>;
-
 /**
- * Saves the buddy + onboardedAt and creates the starter habits through `createHabit`.
- * Idempotent: a user who is already onboarded is left untouched.
+ * Saves the buddy + onboardedAt. Habits are no longer chosen: they are discovered from
+ * what the user does. Idempotent: a user who is already onboarded is left untouched.
  */
 export async function completeOnboardingCore(
   prisma: PrismaClient,
   userId: string,
   input: CompleteOnboardingInput,
-  createHabit: CreateHabitFn,
-  templates: readonly HabitTemplate[] = HABIT_TEMPLATES,
 ): Promise<ActionResult> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -31,21 +25,6 @@ export async function completeOnboardingCore(
     return { ok: true };
   }
 
-  // Verify all templateIds exist
-  const selectedTemplates: HabitTemplate[] = [];
-  for (const id of input.templateIds) {
-    const tpl = templates.find((t) => t.key === id);
-    if (!tpl) {
-      return {
-        ok: false,
-        error: `Template not found: ${id}`,
-        fieldErrors: { templateIds: `Template "${id}" not found` },
-      };
-    }
-    selectedTemplates.push(tpl);
-  }
-
-  // Update user with avatarKey and onboardedAt = now
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -53,17 +32,6 @@ export async function completeOnboardingCore(
       onboardedAt: new Date(),
     },
   });
-
-  // Create each starter habit
-  for (const tpl of selectedTemplates) {
-    await createHabit({
-      title: tpl.title,
-      icon: tpl.icon,
-      frequency: tpl.frequency,
-      daysOfWeek: [...tpl.daysOfWeek],
-      reminderTime: null,
-    });
-  }
 
   return { ok: true };
 }
