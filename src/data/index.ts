@@ -17,6 +17,7 @@ import {
   mockTrainingRepo,
 } from "./mock";
 import { getAiMode } from "@/server/boss/mode";
+import { realLeaderboardRepo } from "@/server/leaderboard/repository";
 
 /**
  * The active data implementations. Server-side only: use them in route files
@@ -51,6 +52,6 @@ const lazyBossRepo: BossRepository = {
 export const bossRepo: BossRepository = useRealBoss ? lazyBossRepo : mockBossRepo;
 export const habitRepo: HabitRepository = mockHabitRepo;
 export const gamificationRepo: GamificationRepository = mockGamificationRepo;
-export const leaderboardRepo: LeaderboardRepository = mockLeaderboardRepo;
+export const leaderboardRepo: LeaderboardRepository = source === "real" ? realLeaderboardRepo : mockLeaderboardRepo;
 
 export type * from "./repositories";
