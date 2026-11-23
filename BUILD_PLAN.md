@@ -55,9 +55,9 @@ Friend's tasks are run by her from her own laptop with the same agy briefs (in `
 ### Backend (implements the F2 contract)
 | ID | Task | Executor | Owner | Status |
 |---|---|---|---|---|
-| B1 | Scenario engine: attempts, step answers, scoring, stars, best-score XP rule (+ Home) | agy (run by Mayur, `tasks/mayur/02-training-home.md`) | **Mayur** | in progress |
+| B1 | Scenario engine: attempts, step answers, scoring, stars, best-score XP rule (+ Home) | agy (run by Mayur, `tasks/mayur/02-training-home.md`) | **Mayur** | done (PR #4, real repo wired) |
 | B2 | Gamification: shared progress engine (XP, levels, badges, quests) + profile (`tasks/mayur/01-progress-gamification.md`) | agy (run by Mayur) | **Mayur** | done (PR #2, real repo wired) |
-| B3 | **Habits**: create / edit / delete, check-in, streak calculation | agy (run by Khushi) | **Khushi** | in progress |
+| B3 | **Habits**: create / edit / delete, check-in, streak calculation | agy (run by Khushi) | **Khushi** | done (PR #3, real repo wired) |
 | B4 | **Leaderboard**: weekly / all-time XP, Team / Company, "your rank" | agy (run by Khushi) | **Khushi** | done (PR #1, real repo wired) |
 | B5 | **Scenario content**: 16 guided scenarios (4 categories × 4) + 4 boss personas + seed script | agy worker (reassigned by Adarsh) | agy worker | done (wired into seed later) |
 | B6 | Web push: habit reminders, streak-at-risk, new assignment | agy under Sonnet | Adarsh | todo |

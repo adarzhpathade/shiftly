@@ -26,7 +26,10 @@ vi.mock("@/server/db", () => ({
     },
     $transaction: vi.fn((fn) =>
       fn({
-        attempt: { update: vi.fn().mockResolvedValue({}) },
+        attempt: {
+          update: vi.fn().mockResolvedValue({}),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+        },
       }),
     ),
   },
@@ -217,6 +220,19 @@ describe("realTrainingRepo", () => {
       expect(result.maxScore).toBe(25);
       expect(result.xpEarned).toBe(100);
       expect(result.nextScenarioId).toBe("sc-hc-2");
+    });
+
+    it("refuses to finish an attempt twice, so XP is never paid twice", async () => {
+      vi.mocked(db.attempt.findUnique).mockResolvedValue({
+        id: "att-1",
+        userId: "u-1",
+        scenarioId: "sc-hc-1",
+        finishedAt: new Date(),
+        answers: [],
+        scenario: { steps: [] },
+      } as never);
+
+      await expect(realTrainingRepo.finishAttempt("u-1", "att-1")).rejects.toThrow("already finished");
     });
   });
 });

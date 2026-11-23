@@ -338,6 +338,10 @@ export const realTrainingRepo: TrainingRepository = {
       throw new Error(`Attempt not found: ${attemptId}`);
     }
 
+    if (attempt.finishedAt) {
+      throw new Error("Attempt is already finished");
+    }
+
     const scenario = attempt.scenario;
 
     if (attempt.answers.length === 0) {
@@ -398,8 +402,9 @@ export const realTrainingRepo: TrainingRepository = {
     }
 
     const { awardResult, questsCompleted, newBadges } = await db.$transaction(async (tx) => {
-      await tx.attempt.update({
-        where: { id: attemptId },
+      // Only an unfinished attempt can be finished: a second finish (double tap, retry) pays nothing.
+      const finished = await tx.attempt.updateMany({
+        where: { id: attemptId, finishedAt: null },
         data: {
           score,
           stars,
@@ -407,6 +412,9 @@ export const realTrainingRepo: TrainingRepository = {
           finishedAt: new Date(),
         },
       });
+      if (finished.count === 0) {
+        throw new Error("Attempt is already finished");
+      }
 
       const awardResult = await awardXp(tx, userId, {
         source: XpSource.SCENARIO,

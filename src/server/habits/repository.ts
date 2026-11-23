@@ -9,7 +9,7 @@ import type {
   HabitTemplate,
 } from "@/lib/types";
 import type { HabitRepository } from "@/data/repositories";
-import { Frequency, Role, type Prisma, type PrismaClient } from "@/generated/prisma/client";
+import { Frequency, type Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { addDays, isoWeekday, streakMilestone } from "@/lib/gamification";
 import { todayISO } from "@/lib/time";
 import { HABIT_TEMPLATES } from "@/data/mock/data";
@@ -30,8 +30,8 @@ async function getDb() {
 }
 
 /**
- * Resolves userId, falling back to a demo employee if userId is a mock ID (e.g. "u-me")
- * or unregistered in test environments.
+ * Checks that the user exists. An unknown id is an error: it must never fall back to
+ * another user's account.
  */
 async function resolveRealUserId(
   db: PrismaClient | Prisma.TransactionClient,
@@ -41,13 +41,8 @@ async function resolveRealUserId(
     where: { id: userId },
     select: { id: true },
   });
-  if (user) return user.id;
-
-  const fallback = await db.user.findFirst({
-    where: { role: Role.EMPLOYEE },
-    select: { id: true },
-  });
-  return fallback?.id ?? userId;
+  if (!user) throw new Error(`User not found: ${userId}`);
+  return user.id;
 }
 
 const CHECK_IN_XP = 10;
