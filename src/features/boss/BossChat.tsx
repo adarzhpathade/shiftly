@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChatBubble, MoodMeter, Sticker, cn } from "@/components/ui";
+import { ChatBubble, MoodMeter, Sticker, TypingBubble, cn } from "@/components/ui";
 import type { BossSession, BossStatus, BossStreamEvent } from "@/lib/types";
 import { averageScore, chipTone, reactionFor, turnTip, type ChipTone } from "./helpers";
 import type { BossSendFn } from "./types";
@@ -24,20 +24,6 @@ const CHIP_TONE: Record<ChipTone, string> = {
 
 export function toChatMessages(session: BossSession): ChatMessage[] {
   return session.messages.map((m, i) => ({ id: i, role: m.role, text: m.text }));
-}
-
-function Typing() {
-  return (
-    <ChatBubble aria-label="Customer is typing" role="status" className="flex w-fit items-center gap-1.5 px-4 py-4">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="size-2 rounded-full bg-ink/50 motion-safe:animate-bounce"
-          style={{ animationDelay: `${i * 140}ms` }}
-        />
-      ))}
-    </ChatBubble>
-  );
 }
 
 export function BossChat({
@@ -217,7 +203,7 @@ export function BossChat({
           ))}
           {phase === "typing" && (
             <li>
-              <Typing />
+              <TypingBubble />
             </li>
           )}
         </ul>

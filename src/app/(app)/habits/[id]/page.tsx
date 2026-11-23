@@ -1,3 +1,4 @@
+import HabitDetailLoading from "./loading";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { habitRepo } from "@/data";
@@ -24,7 +25,7 @@ async function DetailContent({ params }: PageProps) {
 
 export default function HabitDetailPage({ params }: PageProps) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<HabitDetailLoading />}>
       <DetailContent params={params} />
     </Suspense>
   );

@@ -36,6 +36,7 @@ import {
   type SurfaceTone,
   type TabKey,
 } from "@/components/ui";
+import { LoadersDemo } from "./LoadersDemo";
 import { PhoneFrame } from "./phone-frame";
 
 export const metadata = { title: "UI kit gallery" };
@@ -577,6 +578,13 @@ export default function GalleryPage() {
             />
           </div>
         </Grid>
+      </Section>
+
+      <Section
+        title="[Loaders]"
+        sub="ShiftLoader (The Shift Change), Button loading, Shimmer skeletons, typing bubble, scene and call loaders."
+      >
+        <LoadersDemo />
       </Section>
 
       <Section title="[Phone] column" sub="360px frames: the real target width.">

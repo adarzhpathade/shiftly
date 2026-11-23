@@ -1,3 +1,4 @@
+import { ShiftLoading } from "@/components/ui";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { trainingRepo } from "@/data";
@@ -53,7 +54,7 @@ async function BossContent({ params }: BossPageProps) {
 
 export default function BossPage({ params }: BossPageProps) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<ShiftLoading />}>
       <BossContent params={params} />
     </Suspense>
   );

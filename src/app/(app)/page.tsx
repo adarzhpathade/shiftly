@@ -1,3 +1,4 @@
+import HomeLoading from "./loading";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { homeRepo, leaderboardRepo } from "@/data";
@@ -35,7 +36,7 @@ async function HomeContent() {
 
 export default function HomePage() {
   return (
-    <Suspense fallback={<main className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<HomeLoading />}>
       <HomeContent />
     </Suspense>
   );

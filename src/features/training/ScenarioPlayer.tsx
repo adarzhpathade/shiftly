@@ -7,6 +7,7 @@ import {
   Avatar,
   ChatBubble,
   ChoiceCard,
+  ContextLoader,
   Sticker,
   ThemeColor,
   cn,
@@ -278,15 +279,12 @@ export function ScenarioPlayer({
               <div
                 aria-busy="true"
                 aria-label={phase === "loading" ? "Loading scenario" : "Scoring your answers"}
-                className="mt-6 flex flex-col gap-3 motion-safe:animate-pulse"
+                className="mt-6"
               >
-                <div className="h-16 w-4/5 rounded-[6px_22px_22px_22px] bg-paper/70" />
-                <div className="mt-4 h-14 rounded-[18px] bg-paper/60" />
-                <div className="h-14 rounded-[18px] bg-paper/60" />
-                <div className="h-14 rounded-[18px] bg-paper/60" />
-                {phase === "finishing" && (
-                  <p className="text-center text-sm font-bold">Scoring your answers…</p>
-                )}
+                <ContextLoader
+                  variant="scene"
+                  label={phase === "loading" ? "Setting the scene…" : "Scoring your answers…"}
+                />
               </div>
             ) : phase === "error" ? (
               <div role="alert" className="mt-6 rounded-card bg-paper p-5 text-center">

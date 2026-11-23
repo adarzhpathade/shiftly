@@ -83,8 +83,8 @@ export function BuddySheet({ open, onClose, name, current, onSave, onSaved }: Bu
         </ShakeText>
       )}
       <div className="mt-6 flex flex-col gap-2">
-        <Button variant="ink" size="lg" fullWidth onClick={save} disabled={pending}>
-          {pending ? "Saving..." : "Save buddy"}
+        <Button variant="ink" size="lg" fullWidth onClick={save} loading={pending}>
+          Save buddy
         </Button>
         <button
           type="button"

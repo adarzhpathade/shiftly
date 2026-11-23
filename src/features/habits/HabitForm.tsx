@@ -243,8 +243,8 @@ export function HabitForm({ mode, templates = [], initial, action, backHref }: H
               )}
 
               <div className="flex flex-col gap-2">
-                <Button type="submit" variant="ink" size="lg" fullWidth disabled={pending}>
-                  {pending ? "Saving..." : mode === "create" ? "Create habit" : "Save changes"}
+                <Button type="submit" variant="ink" size="lg" fullWidth loading={pending}>
+                  {mode === "create" ? "Create habit" : "Save changes"}
                 </Button>
                 <Link
                   href={backHref}

@@ -1,3 +1,4 @@
+import { ShiftLoading } from "@/components/ui";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { trainingRepo } from "@/data";
@@ -71,7 +72,7 @@ async function ScenarioContent({ params }: ScenarioPageProps) {
 
 export default function ScenarioPage({ params }: ScenarioPageProps) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<ShiftLoading />}>
       <ScenarioContent params={params} />
     </Suspense>
   );

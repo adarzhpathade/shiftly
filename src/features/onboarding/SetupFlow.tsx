@@ -238,9 +238,10 @@ function HabitsStep({
           variant="ink"
           size="lg"
           fullWidth
-          disabled={selected.length < MIN || pending}
+          disabled={selected.length < MIN}
+          loading={pending}
         >
-          {pending ? "Setting up..." : "Let's go"}
+          Let&apos;s go
         </Button>
         <button
           type="button"

@@ -197,10 +197,10 @@ export function RegisterScreen({
             variant="ink"
             size="lg"
             fullWidth
-            disabled={pending}
+            loading={pending}
             className="mt-2"
           >
-            {pending ? "Creating account..." : "Create account"}
+            Create account
           </Button>
         </Rise>
       </form>

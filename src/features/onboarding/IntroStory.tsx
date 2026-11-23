@@ -333,6 +333,7 @@ export function IntroStory({ onFinish, pending = false }: IntroStoryProps) {
                 size="lg"
                 fullWidth
                 disabled={pending}
+                loading={pending && last}
                 onClick={() => (last ? onFinish() : go(index + 1))}
               >
                 {last ? "Get started" : "Next"}

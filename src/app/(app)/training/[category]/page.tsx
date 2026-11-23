@@ -1,3 +1,4 @@
+import TrainingLoading from "../loading";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { trainingRepo } from "@/data";
@@ -31,7 +32,7 @@ async function CategoryContent({ params }: CategoryPageProps) {
 
 export default function CategoryPage({ params }: CategoryPageProps) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<TrainingLoading />}>
       <CategoryContent params={params} />
     </Suspense>
   );

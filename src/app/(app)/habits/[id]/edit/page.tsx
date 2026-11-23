@@ -1,3 +1,4 @@
+import HabitDetailLoading from "../loading";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { habitRepo } from "@/data";
@@ -37,7 +38,7 @@ async function EditContent({ params }: PageProps) {
 
 export default function EditHabitPage({ params }: PageProps) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<HabitDetailLoading />}>
       <EditContent params={params} />
     </Suspense>
   );

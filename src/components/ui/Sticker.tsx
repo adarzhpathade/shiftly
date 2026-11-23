@@ -1,5 +1,5 @@
 import { useId, type CSSProperties } from "react";
-import { STICKER_VIEWBOX, stickerBody, type StickerPose } from "@/assets/stickers";
+import { STICKER_VIEWBOX, stickerBody, type BuddyAccessory, type StickerPose } from "@/assets/stickers";
 import { renderSvgInner } from "@/assets/svg-art";
 import { cn } from "./cn";
 
@@ -7,6 +7,8 @@ export type { StickerPose };
 
 export type StickerProps = {
   pose: StickerPose;
+  /** Optional extra (cap, glasses, bow, crown) so a loader can show the user's own buddy. */
+  accessory?: BuddyAccessory;
   /** Rendered width in px; height follows the 120:130 aspect ratio. */
   size?: number;
   /** Accessible label. Omit for purely decorative stickers. */
@@ -16,7 +18,7 @@ export type StickerProps = {
 };
 
 /** The loose hand-drawn sticker buddy with a white sticker edge. */
-export function Sticker({ pose, size = 96, label, className, style }: StickerProps) {
+export function Sticker({ pose, accessory = "none", size = 96, label, className, style }: StickerProps) {
   const scope = useId();
   return (
     <svg
@@ -30,7 +32,7 @@ export function Sticker({ pose, size = 96, label, className, style }: StickerPro
       aria-hidden={label ? undefined : true}
       focusable="false"
       dangerouslySetInnerHTML={{
-        __html: renderSvgInner(stickerBody(pose), scope),
+        __html: renderSvgInner(stickerBody(pose, accessory), scope),
       }}
     />
   );

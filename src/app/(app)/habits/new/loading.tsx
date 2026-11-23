@@ -1,18 +1,14 @@
-export default function HabitsLoading() {
+import { Shimmer } from "@/components/ui";
+
+export default function HabitFormLoading() {
   return (
-    <div
-      aria-busy="true"
-      aria-label="Loading habits"
-      className="animate-pulse px-gutter pt-8"
-    >
-      <div className="h-3 w-24 rounded-pill bg-ink/10" />
-      <div className="mt-3 h-16 w-64 rounded-xl bg-ink/10" />
-      <div className="mt-5 h-28 w-full rounded-card bg-ink/10" />
-      <div className="mt-5 flex flex-col gap-2">
-        <div className="h-[68px] w-full rounded-[18px] bg-ink/10" />
-        <div className="h-[68px] w-full rounded-[18px] bg-ink/10" />
-        <div className="h-[68px] w-full rounded-[18px] bg-ink/10" />
-      </div>
+    <div role="status" aria-busy="true" className="px-gutter pt-8">
+      <span className="sr-only">Loading</span>
+      <Shimmer tone="lime" className="h-3 w-24 rounded-pill" />
+      <Shimmer tone="lime" className="mt-3 h-16 w-64 rounded-xl" />
+      <Shimmer tone="paper" peek="think" className="mt-5 h-14 w-full rounded-[18px]" />
+      <Shimmer tone="paper" className="mt-3 h-28 w-full rounded-card" />
+      <Shimmer tone="lime" className="mt-5 h-14 w-full rounded-pill" />
     </div>
   );
 }

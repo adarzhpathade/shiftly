@@ -107,10 +107,10 @@ export function LoginScreen({
             variant="ink"
             size="lg"
             fullWidth
-            disabled={pending}
+            loading={pending}
             className="mt-2"
           >
-            {pending ? "Logging in..." : "Log in"}
+            Log in
           </Button>
         </Rise>
       </form>

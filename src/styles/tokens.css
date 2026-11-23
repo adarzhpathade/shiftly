@@ -39,3 +39,75 @@
     }
   }
 }
+
+/* Loader motion (shimmer skeletons, bouncing dots, ringing headset). Transform and opacity only. */
+@theme {
+  --animate-shimmer: shimmer 1.7s ease-in-out infinite;
+  --animate-dot: dot 0.95s ease-in-out infinite;
+  --animate-dot-fade: dot-fade 1.2s ease-in-out infinite;
+  --animate-ring: ring 1.3s ease-in-out infinite;
+  --animate-ring-wave: ring-wave 1.6s ease-out infinite;
+  --animate-tumble: tumble 3.2s ease-in-out infinite;
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes dot {
+    0%,
+    75%,
+    100% {
+      transform: translateY(0);
+    }
+    35% {
+      transform: translateY(-6px);
+    }
+  }
+  @keyframes dot-fade {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes ring {
+    0%,
+    55%,
+    100% {
+      transform: rotate(0deg);
+    }
+    10%,
+    30% {
+      transform: rotate(-14deg);
+    }
+    20%,
+    40% {
+      transform: rotate(14deg);
+    }
+  }
+  @keyframes ring-wave {
+    0% {
+      transform: scale(0.55);
+      opacity: 0.55;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+  @keyframes tumble {
+    0%,
+    100% {
+      transform: rotate(-12deg) translateY(0);
+    }
+    50% {
+      transform: rotate(12deg) translateY(-6px);
+    }
+  }
+}

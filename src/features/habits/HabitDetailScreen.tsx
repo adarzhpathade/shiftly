@@ -199,8 +199,8 @@ export function HabitDetailScreen({ habit, onDelete }: HabitDetailScreenProps) {
                 </ShakeText>
               )}
               <div className="mt-5 flex flex-col gap-2">
-                <Button variant="ink" size="lg" fullWidth onClick={confirmDelete} disabled={deleting} className="bg-red text-paper">
-                  {deleting ? "Deleting..." : "Yes, delete"}
+                <Button variant="ink" size="lg" fullWidth onClick={confirmDelete} loading={deleting} className="bg-red text-paper">
+                  Yes, delete
                 </Button>
                 <button type="button" onClick={() => setConfirming(false)} disabled={deleting} className={cn(sheetBtn, "bg-paper")}>
                   Keep it

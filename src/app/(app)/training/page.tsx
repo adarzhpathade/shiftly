@@ -1,3 +1,4 @@
+import TrainingLoading from "./loading";
 import { Suspense } from "react";
 import { trainingRepo } from "@/data";
 import { CategoryList } from "@/features/training";
@@ -11,7 +12,7 @@ async function TrainingContent() {
 
 export default function TrainingPage() {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<TrainingLoading />}>
       <TrainingContent />
     </Suspense>
   );

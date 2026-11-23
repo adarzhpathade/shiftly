@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { ThemeColor, cn } from "@/components/ui";
+import { ContextLoader, ThemeColor, cn } from "@/components/ui";
 import { TONE_BG } from "@/features/training/tones";
 import type { BossResult, BossSession, BossStatus } from "@/lib/types";
 import { BossChat, type ChatMessage } from "./BossChat";
@@ -129,15 +129,8 @@ export function BossExperience({
               />
             )}
             {phase.kind === "finishing" && (
-              <div
-                aria-busy="true"
-                aria-label="Scoring your call"
-                className="mt-10 flex flex-col gap-3 motion-safe:animate-pulse"
-              >
-                <div className="mx-auto h-10 w-2/3 rounded-pill bg-paper/70" />
-                <div className="h-28 rounded-card bg-paper/60" />
-                <div className="h-40 rounded-card bg-paper/60" />
-                <p className="text-center text-sm font-bold">Scoring your call…</p>
+              <div aria-busy="true" aria-label="Scoring your call" className="mt-10">
+                <ContextLoader variant="scene" label="Scoring your call…" />
               </div>
             )}
             {phase.kind === "result" && (

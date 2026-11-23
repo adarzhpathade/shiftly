@@ -1,3 +1,4 @@
+import HabitFormLoading from "./loading";
 import { Suspense } from "react";
 import { habitRepo } from "@/data";
 import { HabitForm } from "@/features/habits";
@@ -19,7 +20,7 @@ async function NewHabitContent() {
 
 export default function NewHabitPage() {
   return (
-    <Suspense fallback={<div aria-busy="true" className="min-h-dvh bg-cream" />}>
+    <Suspense fallback={<HabitFormLoading />}>
       <NewHabitContent />
     </Suspense>
   );

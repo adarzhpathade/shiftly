@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
-import { MoodMeter, Sticker, cn } from "@/components/ui";
+import { Button, ContextLoader, MoodMeter, Sticker, cn } from "@/components/ui";
 import type { BossGate, BossIntroPersona } from "./types";
 
 const BTN =
@@ -112,14 +112,10 @@ export function BossIntro({
               {error}
             </p>
           )}
-          <button
-            type="button"
-            onClick={onStart}
-            disabled={starting}
-            className={cn(BTN, "bg-ink text-cream disabled:opacity-60")}
-          >
-            {starting ? "Connecting…" : "Start call"}
-          </button>
+          {starting && <ContextLoader variant="call" />}
+          <Button size="lg" fullWidth onClick={onStart} loading={starting}>
+            Start call
+          </Button>
         </>
       )}
 
