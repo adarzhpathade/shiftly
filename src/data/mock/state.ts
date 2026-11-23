@@ -100,7 +100,7 @@ export interface MockState {
   habits: HabitRecord[];
   badges: Map<string, string>;
   quests: Quest[];
-  counters: { scenariosCompleted: number; perfectScores: number; habitCheckIns: number };
+  counters: { scenariosCompleted: number; perfectScores: number; habitCheckIns: number; bossWins: number };
   scoreHistory: { date: string; score: number }[];
   challengeDoneOn: string | null;
   /** boss sessions started per date */
@@ -204,7 +204,7 @@ export function createInitialState(): MockState {
       { id: "q-habits", type: "habit", label: "Check in 3 habits", target: 3, progress: 1, completed: false, xpReward: 20 },
       { id: "q-stars", type: "stars", label: "Score 2 stars or more", target: 1, progress: 0, completed: false, xpReward: 25 },
     ],
-    counters: { scenariosCompleted: 5, perfectScores: 1, habitCheckIns: 41 },
+    counters: { scenariosCompleted: 5, perfectScores: 1, habitCheckIns: 41, bossWins: 1 },
     scoreHistory: [
       { date: addDays(now, -12), score: 55 },
       { date: addDays(now, -10), score: 70 },

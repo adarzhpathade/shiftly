@@ -25,6 +25,7 @@ export interface UserStats {
   readonly scenariosCompleted: number;
   readonly perfectScores: number;
   readonly habitCheckIns: number;
+  readonly bossWins?: number;
   /** Average scenario score, 0 to 100. */
   readonly averageScore: number;
   readonly scoreHistory: readonly { readonly date: string; readonly score: number }[];
