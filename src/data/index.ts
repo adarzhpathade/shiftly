@@ -25,6 +25,7 @@ import { realGamificationRepo } from "@/server/gamification/repository";
 import { realLeaderboardRepo } from "@/server/leaderboard/repository";
 import { realTrainingRepo } from "@/server/training/repository";
 import { realHomeRepo } from "@/server/home/repository";
+import { realPasswordResetRepo } from "@/server/password-reset/repository";
 
 /**
  * The active data implementations. Server-side only: use them in route files
@@ -68,7 +69,8 @@ export const bossRepo: BossRepository = useRealBoss ? lazyBossRepo : mockBossRep
  */
 export const habitRepo: HabitRepository = mockHabitRepo;
 export const activityRepo: ActivityRepository = mockActivityRepo;
-export const passwordResetRepo: PasswordResetRepository = mockPasswordResetRepo;
+export const passwordResetRepo: PasswordResetRepository =
+  source === "real" ? realPasswordResetRepo : mockPasswordResetRepo;
 export const gamificationRepo: GamificationRepository = source === "real" ? realGamificationRepo : mockGamificationRepo;
 export const leaderboardRepo: LeaderboardRepository = source === "real" ? realLeaderboardRepo : mockLeaderboardRepo;
 
