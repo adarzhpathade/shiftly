@@ -208,11 +208,11 @@ export async function checkBadges(
   });
 
   const [scenariosCompleted, perfectScores, bossWins, attempts, wonSessions] = await Promise.all([
-    tx.attempt.count({ where: { userId } }),
-    tx.attempt.count({ where: { userId, stars: 3 } }),
+    tx.attempt.count({ where: { userId, finishedAt: { not: null } } }),
+    tx.attempt.count({ where: { userId, stars: 3, finishedAt: { not: null } } }),
     tx.roleplaySession.count({ where: { userId, status: RoleplayStatus.WON } }),
     tx.attempt.findMany({
-      where: { userId },
+      where: { userId, finishedAt: { not: null } },
       select: {
         scenarioId: true,
         stars: true,

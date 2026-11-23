@@ -158,6 +158,7 @@ model Attempt {
   stars       Int
   xpEarned    Int
   completedAt DateTime        @default(now())
+  finishedAt  DateTime?
 
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   scenario    Scenario        @relation(fields: [scenarioId], references: [id], onDelete: Cascade)

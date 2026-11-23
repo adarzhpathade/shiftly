@@ -19,6 +19,8 @@ import {
 import { getAiMode } from "@/server/boss/mode";
 import { realGamificationRepo } from "@/server/gamification/repository";
 import { realLeaderboardRepo } from "@/server/leaderboard/repository";
+import { realTrainingRepo } from "@/server/training/repository";
+import { realHomeRepo } from "@/server/home/repository";
 
 /**
  * The active data implementations. Server-side only: use them in route files
@@ -37,8 +39,8 @@ if (source === "real") {
   console.warn("[data] DATA_SOURCE=real but no real repositories exist yet (non-boss). Falling back to mocks.");
 }
 
-export const homeRepo: HomeRepository = mockHomeRepo;
-export const trainingRepo: TrainingRepository = mockTrainingRepo;
+export const homeRepo: HomeRepository = source === "real" ? realHomeRepo : mockHomeRepo;
+export const trainingRepo: TrainingRepository = source === "real" ? realTrainingRepo : mockTrainingRepo;
 /** The real boss repo needs the DB, so it is imported lazily: importing "@/data" never requires DATABASE_URL. */
 const useRealBoss = source === "real" || getAiMode() === "real";
 const lazyReal = () => import("@/server/boss/repo").then((m) => m.realBossRepo);

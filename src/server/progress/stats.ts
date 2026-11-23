@@ -52,12 +52,12 @@ export async function getUserStats(
 ): Promise<UserStats> {
   const [scenariosCompleted, perfectScores, habitCheckIns, bossWins, attempts, wonSessions] =
     await Promise.all([
-      db.attempt.count({ where: { userId } }),
-      db.attempt.count({ where: { userId, stars: 3 } }),
+      db.attempt.count({ where: { userId, finishedAt: { not: null } } }),
+      db.attempt.count({ where: { userId, stars: 3, finishedAt: { not: null } } }),
       db.habitLog.count({ where: { habit: { userId } } }),
       db.roleplaySession.count({ where: { userId, status: RoleplayStatus.WON } }),
       db.attempt.findMany({
-        where: { userId },
+        where: { userId, finishedAt: { not: null } },
         select: {
           score: true,
           stars: true,

@@ -1,7 +1,4 @@
 import "dotenv/config";
-import fs from "node:fs";
-import path from "node:path";
-import { pathToFileURL } from "node:url";
 import ws from "ws";
 import { neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
@@ -11,6 +8,7 @@ import {
   Role,
   XpSource,
 } from "../src/generated/prisma/client";
+import { seedScenarios } from "./seed/scenarios/index";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -82,6 +80,9 @@ async function main() {
       create: cat,
     });
   }
+
+  // 1b. Seed 16 guided scenarios and 4 boss personas
+  await seedScenarios(prisma);
 
   // 2. Teams (Create teams first with null managerId to avoid circular dependency)
   const teamsData = [
@@ -622,29 +623,10 @@ async function main() {
     });
   }
 
-  // 9. Guarded dynamic import for scenarios seed hook
-  const scenariosSeedPath = path.resolve(process.cwd(), "prisma/seed/scenarios/index.ts");
-  if (fs.existsSync(scenariosSeedPath)) {
-    console.log("Found scenarios seed script, executing...");
-    try {
-      const scenariosModule = await import(pathToFileURL(scenariosSeedPath).href);
-      if (typeof scenariosModule.seedScenarios === "function") {
-        await scenariosModule.seedScenarios(prisma);
-        console.log("Scenarios seed script executed successfully.");
-      } else {
-        console.warn("prisma/seed/scenarios/index.ts found but seedScenarios is not a function.");
-      }
-    } catch (err) {
-      console.error("Error executing scenarios seed script:", err);
-      throw err;
-    }
-  } else {
-    console.log("No custom scenarios seed script found (prisma/seed/scenarios/index.ts). Skipping.");
-  }
-
-  // 10. Log counts at the end of the seed (no secrets)
-  const [catCount, teamCount, userCount, tplCount, badgeCount, xpCount] = await Promise.all([
+  // 9. Log counts at the end of the seed (no secrets)
+  const [catCount, scenarioCount, teamCount, userCount, tplCount, badgeCount, xpCount] = await Promise.all([
     prisma.category.count(),
+    prisma.scenario.count(),
     prisma.team.count(),
     prisma.user.count(),
     prisma.habitTemplate.count(),
@@ -655,6 +637,7 @@ async function main() {
   console.log("-----------------------------------------");
   console.log("Shiftly seed completed successfully!");
   console.log(`- Categories:      ${catCount}`);
+  console.log(`- Scenarios:       ${scenarioCount}`);
   console.log(`- Teams:           ${teamCount}`);
   console.log(`- Users:           ${userCount}`);
   console.log(`- Habit Templates: ${tplCount}`);
