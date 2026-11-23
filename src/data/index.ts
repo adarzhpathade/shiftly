@@ -25,6 +25,7 @@ import { realGamificationRepo } from "@/server/gamification/repository";
 import { realLeaderboardRepo } from "@/server/leaderboard/repository";
 import { realTrainingRepo } from "@/server/training/repository";
 import { realHomeRepo } from "@/server/home/repository";
+import { realHabitRepo } from "@/server/habits/repository";
 
 /**
  * The active data implementations. Server-side only: use them in route files
@@ -66,7 +67,7 @@ export const bossRepo: BossRepository = useRealBoss ? lazyBossRepo : mockBossRep
  * When one is ready: `source === "real" ? realXRepo : mockXRepo`. getCoachNote belongs to Mayur
  * (AI + cache) but is part of habitRepo, so he plugs it into Khushi's repo.
  */
-export const habitRepo: HabitRepository = mockHabitRepo;
+export const habitRepo: HabitRepository = source === "real" ? realHabitRepo : mockHabitRepo;
 export const activityRepo: ActivityRepository = mockActivityRepo;
 export const passwordResetRepo: PasswordResetRepository = mockPasswordResetRepo;
 export const gamificationRepo: GamificationRepository = source === "real" ? realGamificationRepo : mockGamificationRepo;

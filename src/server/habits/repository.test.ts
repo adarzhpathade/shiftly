@@ -1,91 +1,146 @@
-import { describe, expect, it, vi, beforeAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+import { addDays } from "@/lib/gamification";
+import { todayISO } from "@/lib/time";
 import { realHabitRepo } from "./repository";
 
+async function getDb() {
+  if (!process.env.DATABASE_URL) {
+    try {
+      const dotenv = await import("dotenv");
+      dotenv.config();
+    } catch {}
+  }
+  const { db } = await import("@/server/db");
+  return db;
+}
+
 describe("realHabitRepo integration", () => {
+  const testUserId = `test-user-habits-${Date.now()}`;
+  let categoryId: string | null = null;
+
   beforeAll(async () => {
-    // Ensure .env is loaded if DATABASE_URL is not present in process.env
-    if (!process.env.DATABASE_URL) {
-      try {
-        const dotenv = await import("dotenv");
-        dotenv.config();
-      } catch {}
+    const db = await getDb();
+
+    // 1. Get or find a team
+    let team = await db.team.findFirst();
+    if (!team) {
+      team = await db.team.create({
+        data: { name: "Test Team" },
+      });
+    }
+
+    // 2. Create temporary user
+    await db.user.create({
+      data: {
+        id: testUserId,
+        email: `${testUserId}@example.com`,
+        name: "Test Habit User",
+        passwordHash: "hash123456",
+        role: "EMPLOYEE",
+        avatarKey: "fox",
+        teamId: team.id,
+      },
+    });
+
+    // 3. Find a category for activity events
+    const category = await db.category.findFirst();
+    if (category) {
+      categoryId = category.id;
     }
   });
 
-  it("lists templates from the database", async () => {
-    const templates = await realHabitRepo.listTemplates();
-    expect(templates.length).toBeGreaterThanOrEqual(6);
-    expect(templates.some((t) => t.key === "punctuality")).toBe(true);
+  afterAll(async () => {
+    const db = await getDb();
+    // Clean up temporary user and related data
+    try {
+      await db.habitStageAward.deleteMany({ where: { userId: testUserId } });
+      await db.coachNote.deleteMany({ where: { userId: testUserId } });
+      await db.activityEvent.deleteMany({ where: { userId: testUserId } });
+      await db.xpEvent.deleteMany({ where: { userId: testUserId } });
+      await db.user.delete({ where: { id: testUserId } });
+    } catch {
+      // Ignore cleanup error if already removed
+    }
   });
 
-  it("creates, checks in (idempotent), details, updates and removes a habit for a seeded employee", async () => {
-    const employeeId = "user-emp-aarohi";
-    const uniqueTitle = `Test Habit ${Date.now()}`;
-
-    // 1. Create habit
-    const created = await realHabitRepo.create(employeeId, {
-      title: uniqueTitle,
-      icon: "clock",
-      frequency: "daily",
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      reminderTime: "09:00",
-    });
-
-    expect(created.id).toBeDefined();
-    expect(created.title).toBe(uniqueTitle);
-    expect(created.currentStreak).toBe(0);
-    expect(created.doneToday).toBe(false);
-
-    // 2. Check in first time today -> awards 10 XP
-    const firstCheckIn = await realHabitRepo.checkIn(employeeId, created.id, "Morning checkin");
-    expect(firstCheckIn.xpEarned).toBe(10);
-    expect(firstCheckIn.streak).toBeGreaterThanOrEqual(1);
-    expect(firstCheckIn.habit.doneToday).toBe(true);
-
-    // 3. Check in second time today -> idempotent: awards 0 XP
-    const secondCheckIn = await realHabitRepo.checkIn(employeeId, created.id, "Second checkin");
-    expect(secondCheckIn.xpEarned).toBe(0);
-    expect(secondCheckIn.streak).toBe(firstCheckIn.streak);
-    expect(secondCheckIn.habit.doneToday).toBe(true);
-
-    // 4. Get habit detail
-    const detail = await realHabitRepo.getDetail(employeeId, created.id);
-    expect(detail.id).toBe(created.id);
-    expect(detail.heatmap.length).toBe(84);
-    expect(detail.notes.some((n) => n.text === "Morning checkin")).toBe(true);
-
-    // 5. Update habit
-    const updated = await realHabitRepo.update(employeeId, created.id, {
-      title: `${uniqueTitle} Updated`,
-    });
-    expect(updated.title).toBe(`${uniqueTitle} Updated`);
-
-    // 6. Remove habit
-    await realHabitRepo.remove(employeeId, created.id);
-
-    // 7. Verify removed
-    const list = await realHabitRepo.listToday(employeeId);
-    expect(list.some((h) => h.id === created.id)).toBe(false);
+  it("throws error when user is unknown (never falls back to another user)", async () => {
+    const unknownId = "user-unknown-does-not-exist";
+    await expect(realHabitRepo.getOverview(unknownId)).rejects.toThrow(/User not found/);
+    await expect(realHabitRepo.getDetail(unknownId, "trains")).rejects.toThrow(/User not found/);
+    await expect(realHabitRepo.getCoachNote(unknownId)).rejects.toThrow(/User not found/);
   });
 
-  it("throws not found when operating on a non-existent habit", async () => {
-    await expect(
-      realHabitRepo.update("user-emp-aarohi", "non-existent-habit-id", { title: "New" }),
-    ).rejects.toThrow(/not found/i);
+  it("returns new-user overview when user has no activity events yet", async () => {
+    const overview = await realHabitRepo.getOverview(testUserId);
+    expect(overview.habits).toEqual([]);
+    expect(overview.fadingCount).toBe(0);
+    expect(overview.firstHabits).not.toBeNull();
+    expect(overview.firstHabits?.progress).toBe(0);
+    expect(overview.coachNote.lines.length).toBe(3);
+  });
 
-    await expect(
-      realHabitRepo.remove("user-emp-aarohi", "non-existent-habit-id"),
-    ).rejects.toThrow(/not found/i);
+  it("detects habits, awards stage-up XP once, and computes details after inserting sample activity", async () => {
+    const db = await getDb();
+    const today = todayISO(new Date());
 
-    await expect(
-      realHabitRepo.checkIn("user-emp-aarohi", "non-existent-habit-id"),
-    ).rejects.toThrow(/not found/i);
+    // Insert 3 training_finished events on distinct days within the last 14 days
+    const dates = [today, addDays(today, -2), addDays(today, -4)];
+    for (const d of dates) {
+      await db.activityEvent.create({
+        data: {
+          userId: testUserId,
+          type: "TRAINING_FINISHED",
+          categoryId,
+          stars: 3,
+          createdAt: new Date(`${d}T09:00:00.000Z`),
+        },
+      });
+    }
 
-    await expect(
-      realHabitRepo.getDetail("user-emp-aarohi", "non-existent-habit-id"),
-    ).rejects.toThrow(/not found/i);
+    // 1. getOverview should now detect the habit
+    const overview = await realHabitRepo.getOverview(testUserId);
+    expect(overview.habits.length).toBeGreaterThanOrEqual(1);
+
+    const trainsHabit = overview.habits.find((h) => h.key === "trains");
+    expect(trainsHabit).toBeDefined();
+    expect(trainsHabit?.stage).toBe("forming");
+    expect(trainsHabit?.status).toBeDefined();
+    expect(overview.firstHabits).toBeNull(); // Once habit is detected, firstHabits is null
+
+    // 2. Stage-up XP should have been awarded in HabitStageAward
+    const awards = await db.habitStageAward.findMany({
+      where: { userId: testUserId, habitKey: "trains" },
+    });
+    expect(awards.length).toBe(1);
+    expect(awards[0]?.stage).toBe("FORMING");
+    expect(awards[0]?.xp).toBe(5);
+
+    // 3. Re-running getOverview should be idempotent (not award duplicate XP)
+    await realHabitRepo.getOverview(testUserId);
+    const awardsAfter = await db.habitStageAward.findMany({
+      where: { userId: testUserId, habitKey: "trains" },
+    });
+    expect(awardsAfter.length).toBe(1);
+
+    // 4. getDetail should return full habit detail
+    const detail = await realHabitRepo.getDetail(testUserId, "trains");
+    expect(detail.key).toBe("trains");
+    expect(detail.weeklyCounts.length).toBeGreaterThanOrEqual(1);
+    expect(detail.recent.length).toBe(3);
+    expect(detail.recent[0]?.label).toContain("training");
+
+    // 5. getDetail for unknown habit throws "Habit not found"
+    await expect(realHabitRepo.getDetail(testUserId, "unknown-habit-key")).rejects.toThrow(
+      /Habit not found/,
+    );
+
+    // 6. getCoachNote returns cached note for the current ISO week
+    const note = await realHabitRepo.getCoachNote(testUserId);
+    expect(note.lines.length).toBe(3);
+    expect(note.source).toBe("rules");
+    expect(note.isoWeek).toMatch(/^\d{4}-W\d{2}$/);
   });
 });

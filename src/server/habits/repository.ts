@@ -1,25 +1,24 @@
-/**
- * LEGACY: the manual-habit repository (create, edit, check in). It is being replaced by
- * automatic habit detection (docs/contract-auto-habits.md, owner: Khushi) and is NOT wired
- * into src/data/index.ts any more. It is kept for reference until the new one is done.
- */
 import "server-only";
 
-import type {
-  CheckInResult,
-  Habit,
-  HabitDetail,
-  HabitFrequency,
-  HabitInput,
-  HabitTemplate,
-  LegacyHabitRepository,
-} from "./legacy-types";
-import { Frequency, type Prisma, type PrismaClient } from "@/generated/prisma/client";
-import { addDays, isoWeekday, streakMilestone } from "@/lib/gamification";
+import type { HabitRepository } from "@/data/repositories";
+import { HabitStageName, type Prisma, type PrismaClient } from "@/generated/prisma/client";
+import { HABIT_HEATMAP_DAYS, HABIT_STAGE_XP, isoWeekKey } from "@/lib/habits";
 import { todayISO } from "@/lib/time";
-import { HABIT_TEMPLATES } from "./legacy-templates";
-import { awardXp, checkBadges, progressQuests, touchStreak } from "@/server/progress";
-import { computeHabitStreaks } from "./streaks";
+import type {
+  CategoryKey,
+  CoachNote,
+  HabitDetail,
+  HabitsOverview,
+  HabitStage,
+} from "@/lib/types";
+import { awardXp } from "@/server/progress";
+import {
+  analyzeHabits,
+  buildHabitDetail,
+  detectHabits,
+  type CategoryInfo,
+  type RawActivityEvent,
+} from "./analyzer";
 
 async function getDb() {
   if (!process.env.DATABASE_URL) {
@@ -34,379 +33,267 @@ async function getDb() {
   return db;
 }
 
-/**
- * Checks that the user exists. An unknown id is an error: it must never fall back to
- * another user's account.
- */
-async function resolveRealUserId(
+const STAGE_NAME_MAP: Record<HabitStage, HabitStageName> = {
+  forming: HabitStageName.FORMING,
+  building: HabitStageName.BUILDING,
+  solid: HabitStageName.SOLID,
+};
+
+async function verifyUserExists(
   db: PrismaClient | Prisma.TransactionClient,
   userId: string,
-): Promise<string> {
+): Promise<void> {
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { id: true },
   });
-  if (!user) throw new Error(`User not found: ${userId}`);
-  return user.id;
+  if (!user) {
+    throw new Error(`User not found: ${userId}`);
+  }
 }
 
-const CHECK_IN_XP = 10;
-const HEATMAP_DAYS = 84; // 12 weeks
+/**
+ * Loads activity events and categories for the user to pass to the pure analyzer.
+ */
+async function loadUserData(
+  db: PrismaClient,
+  userId: string,
+) {
+  // 140 days covers the 84-day heatmap plus 56-day retention window
+  const cutoffDate = new Date(Date.now() - (HABIT_HEATMAP_DAYS + 56) * 24 * 60 * 60 * 1000);
 
-export const realHabitRepo: LegacyHabitRepository = {
-  async listToday(userId: string): Promise<readonly Habit[]> {
-    const db = await getDb();
-    const resolvedUserId = await resolveRealUserId(db, userId);
-
-    const habits = await db.habit.findMany({
+  const [categories, events, attempts] = await Promise.all([
+    db.category.findMany({
+      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        objectKey: true,
+      },
+    }),
+    db.activityEvent.findMany({
       where: {
-        userId: resolvedUserId,
-        isActive: true,
+        userId,
+        createdAt: { gte: cutoffDate },
       },
-      include: {
-        logs: {
-          select: { date: true },
-          orderBy: { date: "asc" },
-        },
+      select: {
+        id: true,
+        type: true,
+        categoryId: true,
+        stars: true,
+        meta: true,
+        createdAt: true,
       },
-      orderBy: {
-        createdAt: "asc",
+      orderBy: { createdAt: "desc" },
+    }),
+    db.attempt.findMany({
+      where: {
+        userId,
       },
-    });
-
-    const todayStr = todayISO();
-    const todayWeekday = isoWeekday(todayStr);
-
-    return habits.map((habit) => {
-      const logDates = habit.logs.map((l) => l.date.toISOString().slice(0, 10));
-      const { currentStreak, bestStreak } = computeHabitStreaks(logDates, habit.daysOfWeek, todayStr);
-      const doneToday = logDates.includes(todayStr);
-      const scheduledToday = habit.frequency === "DAILY" || habit.daysOfWeek.includes(todayWeekday);
-
-      return {
-        id: habit.id,
-        title: habit.title,
-        icon: habit.icon,
-        frequency: (habit.frequency === "WEEKLY" ? "weekly" : "daily") as HabitFrequency,
-        daysOfWeek: habit.daysOfWeek,
-        reminderTime: habit.reminderTime,
-        currentStreak,
-        bestStreak,
-        doneToday,
-        scheduledToday,
-      };
-    });
-  },
-
-  async listTemplates(): Promise<readonly HabitTemplate[]> {
-    const db = await getDb();
-    const templates = await db.habitTemplate.findMany({
-      orderBy: { createdAt: "asc" },
-    });
-
-    return templates.map((t) => {
-      const cleanKey = t.id.replace(/^tpl-/, "");
-      const def = HABIT_TEMPLATES.find(
-        (m) => m.key === cleanKey || m.title.toLowerCase() === t.title.toLowerCase(),
-      );
-
-      return {
-        key: cleanKey,
-        title: t.title,
-        icon: t.icon,
-        description: t.description,
-        frequency: def?.frequency ?? "daily",
-        daysOfWeek: def?.daysOfWeek ?? [1, 2, 3, 4, 5, 6, 7],
-      };
-    });
-  },
-
-  async create(userId: string, input: HabitInput): Promise<Habit> {
-    const db = await getDb();
-    const resolvedUserId = await resolveRealUserId(db, userId);
-
-    const habit = await db.habit.create({
-      data: {
-        userId: resolvedUserId,
-        title: input.title.trim(),
-        icon: input.icon,
-        frequency: input.frequency === "weekly" ? Frequency.WEEKLY : Frequency.DAILY,
-        daysOfWeek: [...input.daysOfWeek],
-        reminderTime: input.reminderTime ?? null,
-        isActive: true,
+      select: {
+        stars: true,
+        scenario: { select: { categoryId: true } },
       },
-    });
+    }),
+  ]);
 
-    const todayStr = todayISO();
-    const scheduledToday =
-      input.frequency === "daily" || habit.daysOfWeek.includes(isoWeekday(todayStr));
+  const categorySlugById = new Map<string, CategoryKey>(
+    categories.map((c) => [c.id, c.slug as CategoryKey]),
+  );
 
+  const categoryStarsMap = new Map<string, number>();
+  for (const a of attempts) {
+    const catId = a.scenario.categoryId;
+    categoryStarsMap.set(catId, (categoryStarsMap.get(catId) ?? 0) + a.stars);
+  }
+
+  const categoryInfos: CategoryInfo[] = categories.map((cat) => {
+    const stars = categoryStarsMap.get(cat.id) ?? 0;
     return {
-      id: habit.id,
-      title: habit.title,
-      icon: habit.icon,
-      frequency: input.frequency,
-      daysOfWeek: [...habit.daysOfWeek],
-      reminderTime: habit.reminderTime,
-      currentStreak: 0,
-      bestStreak: 0,
-      doneToday: false,
-      scheduledToday,
+      key: cat.slug as CategoryKey,
+      name: cat.name,
+      stars,
+      mastery: Math.min(1, stars / 15),
+      objectKey: cat.objectKey,
     };
-  },
+  });
 
-  async update(userId: string, habitId: string, patch: Partial<HabitInput>): Promise<Habit> {
-    const db = await getDb();
-    const resolvedUserId = await resolveRealUserId(db, userId);
+  const rawEvents: RawActivityEvent[] = events.map((ev) => ({
+    id: ev.id,
+    type: ev.type.toLowerCase(),
+    categoryKey: ev.categoryId ? categorySlugById.get(ev.categoryId) ?? null : null,
+    stars: ev.stars,
+    createdAt: ev.createdAt,
+    meta: ev.meta,
+  }));
 
-    const existing = await db.habit.findFirst({
-      where: { id: habitId, userId: resolvedUserId },
-      include: {
-        logs: {
-          select: { date: true },
-          orderBy: { date: "asc" },
-        },
-      },
-    });
+  return { categoryInfos, rawEvents };
+}
 
-    if (!existing) {
-      throw new Error(`Habit not found: ${habitId}`);
+/**
+ * Checks and awards stage-up XP for newly reached habit stages.
+ * Guaranteed idempotent by HabitStageAward unique constraint (userId, habitKey, stage).
+ */
+async function awardNewStageXp(
+  db: PrismaClient,
+  userId: string,
+  overview: HabitsOverview,
+): Promise<void> {
+  const existingAwards = await db.habitStageAward.findMany({
+    where: { userId },
+    select: { habitKey: true, stage: true },
+  });
+
+  const awardedSet = new Set(existingAwards.map((a) => `${a.habitKey}:${a.stage}`));
+
+  for (const h of overview.habits) {
+    const stagesToAward: HabitStage[] = [];
+    if (h.stage === "forming") {
+      stagesToAward.push("forming");
+    } else if (h.stage === "building") {
+      stagesToAward.push("forming", "building");
+    } else if (h.stage === "solid") {
+      stagesToAward.push("forming", "building", "solid");
     }
 
-    const data: Prisma.HabitUpdateInput = {};
-    if (patch.title !== undefined) data.title = patch.title.trim();
-    if (patch.icon !== undefined) data.icon = patch.icon;
-    if (patch.frequency !== undefined) {
-      data.frequency = patch.frequency === "weekly" ? Frequency.WEEKLY : Frequency.DAILY;
-    }
-    if (patch.daysOfWeek !== undefined) data.daysOfWeek = [...patch.daysOfWeek];
-    if (patch.reminderTime !== undefined) data.reminderTime = patch.reminderTime;
+    for (const st of stagesToAward) {
+      const stageName = STAGE_NAME_MAP[st];
+      const awardKey = `${h.key}:${stageName}`;
 
-    const updated = await db.habit.update({
-      where: { id: habitId },
-      data,
-      include: {
-        logs: {
-          select: { date: true },
-          orderBy: { date: "asc" },
-        },
-      },
-    });
-
-    const todayStr = todayISO();
-    const logDates = updated.logs.map((l) => l.date.toISOString().slice(0, 10));
-    const { currentStreak, bestStreak } = computeHabitStreaks(logDates, updated.daysOfWeek, todayStr);
-    const doneToday = logDates.includes(todayStr);
-    const scheduledToday =
-      updated.frequency === "DAILY" || updated.daysOfWeek.includes(isoWeekday(todayStr));
-
-    return {
-      id: updated.id,
-      title: updated.title,
-      icon: updated.icon,
-      frequency: (updated.frequency === "WEEKLY" ? "weekly" : "daily") as HabitFrequency,
-      daysOfWeek: updated.daysOfWeek,
-      reminderTime: updated.reminderTime,
-      currentStreak,
-      bestStreak,
-      doneToday,
-      scheduledToday,
-    };
-  },
-
-  async remove(userId: string, habitId: string): Promise<void> {
-    const db = await getDb();
-    const resolvedUserId = await resolveRealUserId(db, userId);
-
-    const existing = await db.habit.findFirst({
-      where: { id: habitId, userId: resolvedUserId },
-      select: { id: true },
-    });
-
-    if (!existing) {
-      throw new Error(`Habit not found: ${habitId}`);
-    }
-
-    await db.habit.delete({
-      where: { id: habitId },
-    });
-  },
-
-  async checkIn(userId: string, habitId: string, note?: string): Promise<CheckInResult> {
-    const db = await getDb();
-    const resolvedUserId = await resolveRealUserId(db, userId);
-    const todayStr = todayISO();
-    const todayDate = new Date(`${todayStr}T00:00:00.000Z`);
-
-    return await db.$transaction(async (tx) => {
-      // 1. Verify habit exists and belongs to user
-      const habit = await tx.habit.findFirst({
-        where: { id: habitId, userId: resolvedUserId },
-        include: {
-          logs: {
-            select: { date: true, note: true },
-            orderBy: { date: "asc" },
-          },
-        },
-      });
-
-      if (!habit) {
-        throw new Error(`Habit not found: ${habitId}`);
+      if (!awardedSet.has(awardKey)) {
+        awardedSet.add(awardKey);
+        try {
+          await db.$transaction(async (tx) => {
+            await tx.habitStageAward.create({
+              data: {
+                userId,
+                habitKey: h.key,
+                stage: stageName,
+                xp: HABIT_STAGE_XP[st],
+              },
+            });
+            await awardXp(tx, userId, {
+              source: "HABIT",
+              amount: HABIT_STAGE_XP[st],
+              refId: `${h.key}:${st}`,
+            });
+          });
+        } catch {
+          // Ignore unique constraint violation if concurrently inserted
+        }
       }
+    }
+  }
+}
 
-      const existingLogs = habit.logs.map((l) => l.date.toISOString().slice(0, 10));
-      const alreadyDone = existingLogs.includes(todayStr);
+export const realHabitRepo: HabitRepository = {
+  async getOverview(userId: string): Promise<HabitsOverview> {
+    const db = await getDb();
+    await verifyUserExists(db, userId);
 
-      // If already checked in today, return current state without double-counting
-      if (alreadyDone) {
-        const { currentStreak, bestStreak } = computeHabitStreaks(
-          existingLogs,
-          habit.daysOfWeek,
-          todayStr,
-        );
-        const scheduledToday =
-          habit.frequency === "DAILY" || habit.daysOfWeek.includes(isoWeekday(todayStr));
-        const habitViewModel: Habit = {
-          id: habit.id,
-          title: habit.title,
-          icon: habit.icon,
-          frequency: (habit.frequency === "WEEKLY" ? "weekly" : "daily") as HabitFrequency,
-          daysOfWeek: habit.daysOfWeek,
-          reminderTime: habit.reminderTime,
-          currentStreak,
-          bestStreak,
-          doneToday: true,
-          scheduledToday,
-        };
+    const now = new Date();
+    const coachNote = await realHabitRepo.getCoachNote(userId);
+    const { categoryInfos, rawEvents } = await loadUserData(db, userId);
 
-        return {
-          habit: habitViewModel,
-          xpEarned: 0,
-          streak: currentStreak,
-          newBadges: [],
-          questsCompleted: [],
-        };
-      }
+    const overview = analyzeHabits(rawEvents, categoryInfos, now, coachNote);
 
-      // 2. Create HabitLog
-      await tx.habitLog.create({
-        data: {
-          habitId: habit.id,
-          date: todayDate,
-          note: note?.trim() || null,
-        },
-      });
+    // Award stage-up XP if any new stage was reached
+    await awardNewStageXp(db, userId, overview);
 
-      // 3. Compute habit's new streaks
-      const updatedLogs = [...existingLogs, todayStr];
-      const { currentStreak, bestStreak } = computeHabitStreaks(
-        updatedLogs,
-        habit.daysOfWeek,
-        todayStr,
-      );
-
-      // 4. Call shared helpers from src/server/progress/
-      const awardResult = await awardXp(tx, resolvedUserId, {
-        source: "HABIT",
-        amount: CHECK_IN_XP,
-        refId: habitId,
-      });
-
-      await touchStreak(tx, resolvedUserId);
-      const questsCompleted = await progressQuests(tx, resolvedUserId, "habit", 1);
-      const newBadges = await checkBadges(tx, resolvedUserId);
-
-      const milestone = streakMilestone(currentStreak);
-      const scheduledToday =
-        habit.frequency === "DAILY" || habit.daysOfWeek.includes(isoWeekday(todayStr));
-
-      const habitViewModel: Habit = {
-        id: habit.id,
-        title: habit.title,
-        icon: habit.icon,
-        frequency: (habit.frequency === "WEEKLY" ? "weekly" : "daily") as HabitFrequency,
-        daysOfWeek: habit.daysOfWeek,
-        reminderTime: habit.reminderTime,
-        currentStreak,
-        bestStreak,
-        doneToday: true,
-        scheduledToday,
-      };
-
-      return {
-        habit: habitViewModel,
-        xpEarned: CHECK_IN_XP,
-        streak: currentStreak,
-        ...(milestone ? { milestone } : {}),
-        ...(awardResult.leveledUp ? { leveledUp: awardResult.leveledUp } : {}),
-        newBadges,
-        questsCompleted,
-      };
-    });
+    return overview;
   },
 
-  async getDetail(userId: string, habitId: string): Promise<HabitDetail> {
+  async getDetail(userId: string, habitKey: string): Promise<HabitDetail> {
     const db = await getDb();
-    const resolvedUserId = await resolveRealUserId(db, userId);
+    await verifyUserExists(db, userId);
 
-    const habit = await db.habit.findFirst({
-      where: { id: habitId, userId: resolvedUserId },
-      include: {
-        logs: {
-          select: { date: true, note: true },
-          orderBy: { date: "desc" },
-        },
-      },
-    });
+    const now = new Date();
+    const { categoryInfos, rawEvents } = await loadUserData(db, userId);
+
+    const detected = detectHabits(rawEvents, categoryInfos, now);
+    const habit = detected.find((h) => h.key === habitKey);
 
     if (!habit) {
-      throw new Error(`Habit not found: ${habitId}`);
+      throw new Error(`Habit not found: ${habitKey}`);
     }
 
-    const todayStr = todayISO();
-    const logDates = habit.logs.map((l) => l.date.toISOString().slice(0, 10));
-    const logDatesSet = new Set(logDates);
+    return buildHabitDetail(habit, rawEvents);
+  },
 
-    const { currentStreak, bestStreak } = computeHabitStreaks(logDates, habit.daysOfWeek, todayStr);
-    const doneToday = logDatesSet.has(todayStr);
-    const scheduledToday =
-      habit.frequency === "DAILY" || habit.daysOfWeek.includes(isoWeekday(todayStr));
+  async getCoachNote(userId: string): Promise<CoachNote> {
+    const db = await getDb();
+    await verifyUserExists(db, userId);
 
-    const heatmap: { date: string; done: boolean }[] = [];
-    let scheduled = 0;
-    let done = 0;
+    const now = new Date();
+    const isoWeek = isoWeekKey(todayISO(now));
 
-    for (let i = HEATMAP_DAYS - 1; i >= 0; i--) {
-      const date = addDays(todayStr, -i);
-      const isDone = logDatesSet.has(date);
-      heatmap.push({ date, done: isDone });
-      if (habit.frequency === "DAILY" || habit.daysOfWeek.includes(isoWeekday(date)) || isDone) {
-        scheduled += 1;
-        if (isDone) done += 1;
+    // 1. Check cache in database
+    const cached = await db.coachNote.findUnique({
+      where: {
+        userId_isoWeek: { userId, isoWeek },
+      },
+    });
+
+    if (cached) {
+      const rawLines = cached.text.split("\n");
+      const lines: [string, string, string] = [
+        rawLines[0] ?? "",
+        rawLines[1] ?? "",
+        rawLines[2] ?? "",
+      ];
+      return {
+        isoWeek: cached.isoWeek,
+        lines,
+        source: cached.source as "ai" | "rules",
+        generatedAt: cached.createdAt.toISOString(),
+      };
+    }
+
+    // 2. Fallback rules note (TODO(Mayur): delegate to @/server/coach when built)
+    const fallbackLines: [string, string, string] = [
+      "Welcome to Shiftly. Your habits show up on their own.",
+      "Finish a scenario on 3 different days and your first habit appears.",
+      "Short and often beats long and rare. Five minutes counts.",
+    ];
+
+    try {
+      const created = await db.coachNote.create({
+        data: {
+          userId,
+          isoWeek,
+          text: fallbackLines.join("\n"),
+          source: "rules",
+        },
+      });
+
+      return {
+        isoWeek: created.isoWeek,
+        lines: fallbackLines,
+        source: "rules",
+        generatedAt: created.createdAt.toISOString(),
+      };
+    } catch {
+      // If inserted concurrently, re-read
+      const existing = await db.coachNote.findUnique({
+        where: { userId_isoWeek: { userId, isoWeek } },
+      });
+      if (existing) {
+        const rawLines = existing.text.split("\n");
+        return {
+          isoWeek: existing.isoWeek,
+          lines: [rawLines[0] ?? "", rawLines[1] ?? "", rawLines[2] ?? ""],
+          source: existing.source as "ai" | "rules",
+          generatedAt: existing.createdAt.toISOString(),
+        };
       }
+
+      return {
+        isoWeek,
+        lines: fallbackLines,
+        source: "rules",
+        generatedAt: now.toISOString(),
+      };
     }
-
-    const notes = habit.logs
-      .filter((l) => l.note && l.note.trim().length > 0)
-      .map((l) => ({
-        date: l.date.toISOString().slice(0, 10),
-        text: l.note!.trim(),
-      }));
-
-    return {
-      id: habit.id,
-      title: habit.title,
-      icon: habit.icon,
-      frequency: (habit.frequency === "WEEKLY" ? "weekly" : "daily") as HabitFrequency,
-      daysOfWeek: habit.daysOfWeek,
-      reminderTime: habit.reminderTime,
-      currentStreak,
-      bestStreak,
-      doneToday,
-      scheduledToday,
-      heatmap,
-      completionRate: scheduled === 0 ? 0 : done / scheduled,
-      notes,
-    };
   },
 };
