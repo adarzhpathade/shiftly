@@ -35,7 +35,7 @@ export async function resetPasswordAction(
   if (!EMAIL_RE.test(clean)) {
     return { ok: false, reason: "invalid", field: "email", message: "Enter a valid email address." };
   }
-  if (!new RegExp(`^\d{${RESET_CODE_LENGTH}}$`).test(code.trim())) {
+  if (!new RegExp(String.raw`^\d{${RESET_CODE_LENGTH}}$`).test(code.trim())) {
     return { ok: false, reason: "invalid", field: "code", message: `The code is ${RESET_CODE_LENGTH} digits.` };
   }
   if (newPassword.length < RESET_MIN_PASSWORD_LENGTH) {
