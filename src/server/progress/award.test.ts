@@ -120,6 +120,9 @@ describe("award", () => {
         xpEvent: {
           create: vi.fn().mockResolvedValue({}),
         },
+        activityEvent: {
+          create: vi.fn().mockResolvedValue({}),
+        },
       } as unknown as Prisma.TransactionClient;
 
       const result = await awardXp(tx, "u-1", {
@@ -151,6 +154,9 @@ describe("award", () => {
           update: vi.fn().mockResolvedValue({}),
         },
         xpEvent: {
+          create: vi.fn().mockResolvedValue({}),
+        },
+        activityEvent: {
           create: vi.fn().mockResolvedValue({}),
         },
       } as unknown as Prisma.TransactionClient;
@@ -211,6 +217,9 @@ describe("award", () => {
           update: vi.fn().mockResolvedValue({}),
         },
         xpEvent: {
+          create: vi.fn().mockResolvedValue({}),
+        },
+        activityEvent: {
           create: vi.fn().mockResolvedValue({}),
         },
       } as unknown as Prisma.TransactionClient;

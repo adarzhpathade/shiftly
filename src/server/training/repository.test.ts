@@ -30,6 +30,15 @@ vi.mock("@/server/db", () => ({
           update: vi.fn().mockResolvedValue({}),
           updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
+        user: {
+          findUnique: vi.fn().mockResolvedValue({ id: "u-1" }),
+        },
+        category: {
+          findUnique: vi.fn().mockResolvedValue({ id: "cat-1" }),
+        },
+        activityEvent: {
+          create: vi.fn().mockResolvedValue({ id: "ae-1" }),
+        },
       }),
     ),
   },

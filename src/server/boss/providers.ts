@@ -78,7 +78,10 @@ export async function callChat(opts: CallChatOptions): Promise<CallChatResult | 
 }
 
 /** Call Groq with the gpt-oss reasoning model (single combined customer+judge call). */
-export async function callGroq(messages: ChatMessage[]): Promise<CallChatResult | CallChatError> {
+export async function callGroq(
+  messages: ChatMessage[],
+  opts?: { timeoutMs?: number; json?: boolean },
+): Promise<CallChatResult | CallChatError> {
   const baseUrl = process.env.GROQ_BASE_URL ?? "https://api.groq.com/openai/v1";
   const apiKey = process.env.GROQ_API_KEY ?? "";
   const model = process.env.GROQ_MODEL ?? "openai/gpt-oss-120b";
@@ -88,8 +91,8 @@ export async function callGroq(messages: ChatMessage[]): Promise<CallChatResult 
     apiKey,
     model,
     messages,
-    json: true,
-    timeoutMs: 20000,
+    json: opts?.json ?? true,
+    timeoutMs: opts?.timeoutMs ?? 20000,
     extra: {
       reasoning_effort: "low",
       max_completion_tokens: 1500,
@@ -99,7 +102,10 @@ export async function callGroq(messages: ChatMessage[]): Promise<CallChatResult 
 }
 
 /** Call OpenRouter customer model (plain text). */
-export async function callOpenRouterCustomer(messages: ChatMessage[]): Promise<CallChatResult | CallChatError> {
+export async function callOpenRouterCustomer(
+  messages: ChatMessage[],
+  opts?: { timeoutMs?: number; json?: boolean },
+): Promise<CallChatResult | CallChatError> {
   const baseUrl = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
   const apiKey = process.env.OPENROUTER_API_KEY ?? "";
   const model = process.env.AI_CUSTOMER_MODEL ?? "baidu/ernie-5.5-flash-preview:free";
@@ -109,8 +115,8 @@ export async function callOpenRouterCustomer(messages: ChatMessage[]): Promise<C
     apiKey,
     model,
     messages,
-    json: false,
-    timeoutMs: 20000,
+    json: opts?.json ?? false,
+    timeoutMs: opts?.timeoutMs ?? 20000,
     extra: { max_tokens: 300 },
   });
 }
