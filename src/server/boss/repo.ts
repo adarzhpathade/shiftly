@@ -10,6 +10,7 @@ import { judgeReply } from "@/data/mock/boss";
 import { getAiMode } from "./mode";
 import { runTurn } from "./engine";
 import { RoleplayStatus, XpSource } from "@/generated/prisma/client";
+import { awardXp, checkBadges, touchStreak } from "@/server/progress";
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -491,22 +492,6 @@ export const realBossRepo: BossRepository = {
     const xpEarned =
       replayXp(previousBestStars, stars, session.persona.xpReward) + (stars === 0 ? 10 : 0);
 
-    // Write XpEvent
-    await db.xpEvent.create({
-      data: {
-        userId,
-        source: XpSource.BOSS,
-        amount: xpEarned,
-        refId: sessionId,
-      },
-    });
-
-    // Increment User xp (User model has xp field)
-    await db.user.update({
-      where: { id: userId },
-      data: { xp: { increment: xpEarned } },
-    });
-
     // Find weakest turn
     let weakestTurn: (typeof session.turns)[number] | null = null;
     for (const t of session.turns) {
@@ -525,10 +510,22 @@ export const realBossRepo: BossRepository = {
       }
     }
 
-    // Persist stars/xpEarned/endedAt
-    await db.roleplaySession.update({
-      where: { id: sessionId },
-      data: { stars, xpEarned, endedAt: new Date() },
+    const { awardResult, newBadges } = await db.$transaction(async (tx) => {
+      const awardResult = await awardXp(tx, userId, {
+        source: XpSource.BOSS,
+        amount: xpEarned,
+        refId: sessionId,
+      });
+
+      await tx.roleplaySession.update({
+        where: { id: sessionId },
+        data: { stars, xpEarned, endedAt: new Date() },
+      });
+
+      await touchStreak(tx, userId);
+      const newBadges = await checkBadges(tx, userId);
+
+      return { awardResult, newBadges };
     });
 
     return {
@@ -544,7 +541,8 @@ export const realBossRepo: BossRepository = {
             betterReply: mockData?.betterReply ?? "Try using more empathy and offering a concrete solution.",
           }
         : null,
-      newBadges: [],
+      ...(awardResult.leveledUp ? { leveledUp: awardResult.leveledUp } : {}),
+      newBadges,
       questsCompleted: [],
     };
   },
